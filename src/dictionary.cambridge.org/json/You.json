@@ -1,0 +1,104 @@
+[
+  {
+    "name": "you",
+    "pos": "pronoun",
+    "posTip": "A word used instead of a noun, which has usually already been talked about.",
+    "pronunciation": {
+      "uk": {
+        "source": [
+          {
+            "type": "audio/mpeg",
+            "src": "/zhs/media/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/uk_pron/u/uke/ukevi/ukevil_013.mp3"
+          },
+          {
+            "type": "audio/ogg",
+            "src": "/zhs/media/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/uk_pron_ogg/u/uke/ukevi/ukevil_013.ogg"
+          }
+        ],
+        "phonetic": "/juː/",
+        "class": "uk"
+      },
+      "us": {
+        "source": [
+          {
+            "type": "audio/mpeg",
+            "src": "/zhs/media/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/us_pron/u/u__/u____/u.mp3"
+          },
+          {
+            "type": "audio/ogg",
+            "src": "/zhs/media/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/us_pron_ogg/u/u__/u____/u.ogg"
+          }
+        ],
+        "phonetic": "/juː/",
+        "class": "us"
+      }
+    },
+    "dsense": [
+      {
+        "name": "you",
+        "pos": "pronoun",
+        "posTip": "A word used instead of a noun, which has usually already been talked about.",
+        "guideword": "\n            (PERSON/PEOPLE ADDRESSED)\n      ",
+        "trans_examp": [
+          {
+            "level": "A1",
+            "pos_2": "",
+            "trans_en": "used to refer to the person or people being spoken or written to",
+            "trans_cn": "你；您；你们",
+            "example": [
+              { "eg": "You look nice.", "egtrans": "你看起来不错。" },
+              { "eg": "I love you.", "egtrans": "我爱你。" },
+              {
+                "eg": "You said I could go with you.",
+                "egtrans": "你说过我可以和你一起去。"
+              },
+              {
+                "eg": "You're coming tonight, aren't you?",
+                "egtrans": "你今晚会过来，对吗?"
+              },
+              { "eg": "Are you two ready?", "egtrans": "你俩准备好了吗？" },
+              {
+                "eg": "You painted that yourself? That's great!",
+                "egtrans": "那个是你自己画的？太棒了！"
+              }
+            ]
+          }
+        ],
+        "phrase": []
+      },
+      {
+        "name": "you",
+        "pos": "pronoun",
+        "posTip": "A word used instead of a noun, which has usually already been talked about.",
+        "guideword": "\n            (PEOPLE GENERALLY)\n      ",
+        "trans_examp": [
+          {
+            "level": "A2",
+            "pos_2": "",
+            "trans_en": "people in general",
+            "trans_cn": "（泛指）你，任何人",
+            "example": [
+              {
+                "eg": "You learn to accept these things as you get older.",
+                "egtrans": "年纪大些之后，你开始学会接受这些事情。"
+              },
+              {
+                "eg": "You can't get a driving licence till you're 17 in this country.",
+                "egtrans": "在这个国家，17岁以下人士不能获得驾驶执照。"
+              },
+              {
+                "eg": "Too much alcohol is bad for you.",
+                "egtrans": "饮酒过量对身体有害。"
+              },
+              {
+                "eg": "How do you get this thing to start?",
+                "egtrans": "怎样才能让这东西启动？"
+              }
+            ]
+          }
+        ],
+        "phrase": []
+      }
+    ]
+  }
+]

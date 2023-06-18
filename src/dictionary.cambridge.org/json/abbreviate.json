@@ -1,0 +1,63 @@
+[
+  {
+    "name": "abbreviate",
+    "pos": "verb [ T usually passive ]",
+    "posTip": "A word that describes an action, condition or experience.",
+    "pronunciation": {
+      "uk": {
+        "source": [
+          {
+            "type": "audio/mpeg",
+            "src": "/zhs/media/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/uk_pron/u/uka/uka__/uka____026.mp3"
+          },
+          {
+            "type": "audio/ogg",
+            "src": "/zhs/media/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/uk_pron_ogg/u/uka/uka__/uka____026.ogg"
+          }
+        ],
+        "phonetic": "/əˈbriː.vi.eɪt/",
+        "class": "uk"
+      },
+      "us": {
+        "source": [
+          {
+            "type": "audio/mpeg",
+            "src": "/zhs/media/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/us_pron/e/eus/eus70/eus70010.mp3"
+          },
+          {
+            "type": "audio/ogg",
+            "src": "/zhs/media/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/us_pron_ogg/e/eus/eus70/eus70010.ogg"
+          }
+        ],
+        "phonetic": "/əˈbriː.vi.eɪt/",
+        "class": "us"
+      }
+    },
+    "dsense": [
+      {
+        "name": "",
+        "pos": "",
+        "guideword": "",
+        "trans_examp": [
+          {
+            "level": "",
+            "pos_2": "",
+            "trans_en": "to make a word or phrase shorter by using only the first letters of each word",
+            "trans_cn": "缩略，缩写；简称",
+            "example": [
+              {
+                "eg": "\"Daniel\" is often abbreviated to \"Dan\".",
+                "egtrans": "Daniel常简称为Dan。"
+              },
+              {
+                "eg": "\"Chief Executive Officer\" is abbreviated as \"CEO\".",
+                "egtrans": "Chief Executive Officer（首席执行官）缩写为CEO。"
+              }
+            ]
+          }
+        ],
+        "phrase": []
+      }
+    ]
+  }
+]
