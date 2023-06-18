@@ -7,6 +7,7 @@ import localforage from 'localforage'
 
 import {
   Switch,
+  Headset
 } from '@element-plus/icons-vue'
 
 const emit = defineEmits(["desc"]);
@@ -137,7 +138,7 @@ function openExample() {
             </div>
           </template>
           <!-- {{ currentModule }} -->
-          <div>
+          <div @click.self="toggoleCihui" class="citiao_inner">
             <div
               class="citiao"
               v-for="(m, lv1) in currentModule.value"
@@ -154,6 +155,9 @@ function openExample() {
                     class="citiao_pron_item"
                   >
                     <div class="citiao_pron_item_fayin">
+                      <el-icon>
+                        <Headset />
+                      </el-icon>
                       <div @click.stop="getFayin(uk)">
                         {{ uk }}: {{ so.phonetic }}
                       </div>
@@ -267,15 +271,8 @@ function openExample() {
                       <div class="citiao_trans_ex_num" :class="showBottomColor">
                         {{ lv1 + 1 + "." + (lv2 + 1) + "." + (lv3 + 1) }}.&nbsp;
                       </div>
-                      <div
-                        class="citiao_trans_ex_name"
-                        :class="showBottomColor"
-                        v-if="dsense.name && trans.name !== dsense.name"
-                        :title="dsense.guideword"
-                      >
-                        {{ trans.name }}
-                      </div>
-                      <div
+                      <template
+                        class="citiao_trans_desclist"
                         v-for="(block, lv4) in trans.dsense_body_def_block_kk"
                       >
                         <div
@@ -307,6 +304,15 @@ function openExample() {
                         </div>
 
                         <div
+                          v-if="dsense.guideword"
+                          class="citiao_trans_guide"
+                          :class="showBottomColor"
+                          :title="'指导：' + dsense.guideword"
+                        >
+                          [简]]{{ dsense.guideword }}
+                        </div>
+
+                        <div
                           style="overflow: hidden"
                           class="citiao_exam"
                           :class="examClass"
@@ -325,7 +331,7 @@ function openExample() {
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </template>
                     </div>
                   </div>
                 </div>
@@ -354,7 +360,8 @@ function openExample() {
 .box-card {
   height: 100%;
   :deep(.el-card__body) {
-    height: calc(100% - 55px - 2em);
+    height: calc(100% - 55px);
+    padding: 0;
     overflow: auto;
     &::-webkit-scrollbar {
       /*隐藏滚轮*/
@@ -398,6 +405,10 @@ function openExample() {
     margin-top: 1em;
   }
 
+  &_inner {
+    height: 100%;
+    padding: 20px;
+  }
   &_header {
     background: #35a3c9;
     color: #fff;
@@ -426,8 +437,16 @@ function openExample() {
   &_pron {
     &_item {
       display: inline-block;
+      cursor: pointer;
       & + & {
         margin-left: 1em;
+      }
+      &_fayin {
+        display: inline-flex;
+        align-items: center;
+        .el-icon {
+          font-weight: 900;
+        }
       }
     }
   }
@@ -444,6 +463,9 @@ function openExample() {
     }
   }
   &_trans {
+    &_ex_h {
+    }
+    &_ex_name,
     &_ex_num,
     &_desc,
     &_guide {
