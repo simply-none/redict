@@ -5,6 +5,10 @@ import cidian from "./词典简单.json";
 import { ElNotification, ElButton } from "element-plus";
 import localforage from 'localforage'
 
+import {
+  Switch,
+} from '@element-plus/icons-vue'
+
 const emit = defineEmits(["desc"]);
 
 const patx = "../../dictionary.cambridge.org/json/";
@@ -119,7 +123,8 @@ function openExample() {
           <template #header>
             <div class="card-header">
               <span class="card-header-name">{{ currentModule.name }}</span>
-              <ElButton
+              <div>
+                <ElButton
                 type="warning"
                 plain
                 class="card-header-setting"
@@ -127,6 +132,8 @@ function openExample() {
               >
                 {{ (examClass ? "展示" : "隐藏") + "示例" }}
               </ElButton>
+              <el-button type="warning" plain :icon="Switch" circle @click="toggoleCihui"/>
+              </div>
             </div>
           </template>
           <!-- {{ currentModule }} -->
