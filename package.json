@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "dexie": "^3.2.4",
     "element-plus": "^2.3.6",
     "localforage": "^1.10.0",
     "path-browserify": "^1.0.1",

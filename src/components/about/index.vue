@@ -7,6 +7,15 @@ import localforage from "localforage";
 
 import { Switch, Headset } from "@element-plus/icons-vue";
 
+import { createDB } from './database'
+
+const db = createDB('test' + 1)
+
+db.db.friend.add({
+  name: Date.now(),
+  age: 23
+})
+
 const emit = defineEmits(["desc"]);
 
 const patx = "../../dictionary.cambridge.org/json/**.json";
