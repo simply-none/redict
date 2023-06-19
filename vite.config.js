@@ -9,6 +9,16 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
+  
+  build: {
+    rollupOptions: {
+      // output: {
+      //   manualChunks: (id) => {
+      //     console.log(id, 'id')
+      //   }
+      // }
+    }
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
