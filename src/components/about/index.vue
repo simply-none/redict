@@ -12,9 +12,13 @@ import {
 
 const emit = defineEmits(["desc"]);
 
-const patx = "../../dictionary.cambridge.org/json/";
+const patx = "../../dictionary.cambridge.org/json/**.json";
 
-// const modules = import.meta.glob("../../dictionary.cambridge.org/json/**.json");
+const paty = "../../wordreference.com/json/**.json";
+
+const modules = import.meta.glob("../../dictionary.cambridge.org/json/**.json");
+
+console.log(modules)
 
 let modulesG = ref()
 
@@ -31,7 +35,8 @@ localforage.getItem('moduleDefault', (err, value) => {
     console.log('cached')
   } else {
     modulesG = import.meta.globEager(
-      "../../dictionary.cambridge.org/json/**.json"
+      "../../wordreference.com/json/**.json"
+      // "../../dictionary.cambridge.org/json/**.json"
     );
     Object.keys(modulesG).forEach((p) => {
       const filename = p.replace(/^.*[\\\/]/, "").replace(/\.json$/, "");
@@ -237,7 +242,8 @@ function openExample() {
                         [简]]{{ dsense.guideword }}
                       </div>
                     </div>
-
+                    <div>
+                    </div>
                     <div
                       style="overflow: hidden"
                       class="citiao_exam"
