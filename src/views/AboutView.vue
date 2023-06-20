@@ -22,21 +22,46 @@
     </template>
 
     <pre>
-      {{ a }}
+      {{ data }}
     </pre>
   </el-upload>
 </template>
-<script lang="ts" setup>
-import { ref } from "vue";
-import type { UploadInstance } from "element-plus";
+<script setup>
+import { ref, onMounted } from "vue";
 import localforage from "localforage";
 
-const uploadRef = ref<UploadInstance>();
+import { createDB } from './database'
+
+import { useDeviceInfo } from './useDeviceInfo'
+
+let data = ref()
+
+const { getDeviceInfo } = useDeviceInfo()
+
+onMounted(async () => {
+  console.log(getDeviceInfo(), 'getDeviceInfo')
+  data.value = (await getDeviceInfo()).deviceType
+})
+
+
+const db = createDB('test')
+
+
+
+db.db.friend.add({
+  name: Date.now(),
+  age: 23
+})
+
+const uploadRef = ref();
 
 let a = ref();
 
 const submitUpload = () => {
-  uploadRef.value!.submit();
+  // uploadRef.value!.submit();
+  if (uploadRef.value) {
+    uploadRef.value.submit()
+  }
 };
 
 function beforeUpload(uploadfile, uploadfiles) {

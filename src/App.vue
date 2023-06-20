@@ -10,7 +10,7 @@ function desc (info) {
 </script>
 
 <template>
-  <RouterView @desc="desc"/>
+  <RouterView/>
 </template>
 
 <style scoped>
