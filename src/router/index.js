@@ -4,7 +4,7 @@ import HomeView from '../components/about/index.vue'
 export const routes = [
   {
     path: '/',
-    redirect: '/test'
+    redirect: '/home'
   },
   {
     path: '/home',

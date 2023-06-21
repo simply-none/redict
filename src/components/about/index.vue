@@ -1,11 +1,17 @@
 <script setup>
-import { reactive, ref, computed, watch } from "vue";
+import { reactive, ref, computed, watch, onMounted } from "vue";
 import packagepath from "../../../package.json";
 import cidian from "./词典简单.json";
 import { ElNotification, ElButton } from "element-plus";
-import localforage from "localforage";
 
 import { Switch, Headset } from "@element-plus/icons-vue";
+
+import defaultDict from "./defaultDict.json?raw";
+import useDB from "./useDB";
+
+const { words, db, createTable } = useDB("dict-database");
+
+onMounted(async () => {});
 
 const emit = defineEmits(["desc"]);
 
@@ -13,98 +19,82 @@ const patx = "../../dictionary.cambridge.org/json/**.json";
 
 const paty = "../../wordreference.com/json/**.json";
 
-const modules = import.meta.glob("../../dictionary.cambridge.org/json/**.json");
-
 let moduleDefault = ref([]);
 
 let moduleRandom = ref(Math.floor(Math.random() * 1000000000));
 
 let moduleLength = computed(() => moduleDefault.value.length);
-
-Object.keys(modules).forEach((p) => {
-  const filename = p.replace(/^.*[\\\/]/, "").replace(/\.json$/, "");
-  modules[p]().then((val) => {
-    moduleDefault.value.push({
-      name: filename || "空的filename",
-      value: val.default || [],
-    });
-  });
-});
-
-localforage
-  .setItem("moduleDefault", JSON.stringify(moduleDefault.value))
-  .then(function (value) {
-    console.log("cache...");
-    toggoleCihui();
-  })
-  .catch(function (err) {
-    // 当出错时，此处代码运行
-    console.log(err);
-  });
-
-toggoleCihui();
-
-console.log(modules);
-
 let modulesG = ref();
-
-// let getModuleLocal = ref()
-
-// localforage.getItem('moduleDefault', (err, value) => {
-//   getModuleLocal = JSON.parse(value)
-
-//   if (Object.prototype.toString.call(getModuleLocal) === '[object Array]' && getModuleLocal.length > 0) {
-//     moduleDefault.value = getModuleLocal
-//     toggoleCihui()
-//     console.log('cached')
-//   } else {
-//     modulesG = import.meta.globEager(
-//       "../../wordreference.com/json/**.json"
-//       // "../../dictionary.cambridge.org/json/**.json"
-//     );
-//     Object.keys(modulesG).forEach((p) => {
-//       const filename = p.replace(/^.*[\\\/]/, "").replace(/\.json$/, "");
-//       moduleDefault.value.push({
-//         name: filename || "空的filename",
-//         value: modulesG[p].default || [],
-//       });
-//     });
-
-//     localforage.setItem('moduleDefault', JSON.stringify(moduleDefault.value)).then(function(value) {
-//       console.log('cache...');
-//       toggoleCihui()
-//     }).catch(function(err) {
-//         // 当出错时，此处代码运行
-//         console.log(err);
-//     });
-//   }
-// })
 
 let currentModule = ref({
   name: "",
   value: [],
 });
+const pageDate = reactive({ info: {}, dependencies: {}, devDependencies: {} });
 
-function toggoleCihui() {
+let fayinList = reactive({});
+let examClass = ref("");
+let showBottomColor = computed(() =>
+  examClass.value ? "" : "showBottomColor"
+);
+
+let citiaoInnerRef = ref();
+
+db.open()
+  .then(() => {
+    db.close();
+    db.version(db.verno + 1).stores({
+      words: "++id, name, value",
+    });
+  })
+  .then(() => {
+    db.open();
+    Object.entries(JSON.parse(defaultDict)).forEach((word) => {
+      // console.log(word, 'word')
+      db.words.add({
+        name: word[0],
+        value: word[1],
+      });
+      moduleDefault.value.push({
+        name: word[0],
+        value: word[1] || [],
+      });
+      toggoleCihui();
+    });
+  });
+
+function toggoleCihui(e) {
   const random = Math.floor(Math.random() * 1000000000);
-  moduleRandom.value =
+  let value =
     random > moduleLength.value
       ? random % moduleLength.value
       : Math.floor(random);
+
+  let cannedClickContainerWidth = citiaoInnerRef.value?.clientWidth;
+  if (e) {
+    // createTable(Date.now().toString());
+
+    const currentClickPositionX = e.clientX;
+    console.log(currentClickPositionX, cannedClickContainerWidth);
+    if (currentClickPositionX < cannedClickContainerWidth / 2) {
+      console.log("点击的左边");
+    } else {
+      console.log("点击的右边");
+    }
+    moduleRandom.value = value;
+    return true;
+  }
+  moduleRandom.value = value;
 }
 
 watch(moduleRandom, (n, o) => {
-  console.log(new Date());
   const index =
     moduleRandom.value > n
       ? moduleRandom.value % n
       : Math.floor(moduleRandom.value);
   currentModule.value = moduleDefault.value[index];
-  console.log(currentModule.value);
   emit("desc", currentModule.value);
 });
-
-const pageDate = reactive({ info: {}, dependencies: {}, devDependencies: {} });
 
 pageDate.info = {
   name: packagepath.name,
@@ -112,8 +102,6 @@ pageDate.info = {
 };
 pageDate.dependencies = packagepath.dependencies;
 pageDate.devDependencies = packagepath.devDependencies;
-
-let fayinList = reactive({});
 
 function getFayin(uk) {
   const refuk = fayinList[uk];
@@ -132,18 +120,13 @@ function getFayin(uk) {
   }, 1000);
 }
 
-let examClass = ref("");
-let showBottomColor = computed(() =>
-  examClass.value ? "" : "showBottomColor"
-);
-
 function openExample() {
   examClass.value = !examClass.value ? "showExample" : "";
 }
 </script>
 
 <template>
-  <el-row :gutter="30" class="enter-y" @click.self="toggoleCihui()">
+  <el-row :gutter="30" class="enter-y" @click="">
     <el-col class="enter-left">
       <el-card class="box-card">
         <template #header>
@@ -169,7 +152,7 @@ function openExample() {
           </div>
         </template>
         <!-- {{ currentModule }} -->
-        <div @click.self="toggoleCihui" class="citiao_inner">
+        <div @click="toggoleCihui" class="citiao_inner" ref="citiaoInnerRef">
           <div
             class="citiao"
             v-for="(m, lv1) in currentModule.value"
@@ -372,11 +355,13 @@ function openExample() {
 .enter-y {
   width: 100%;
   height: 100%;
+  margin: 0 !important;
 }
 .enter-left {
   width: 50%;
   max-width: 760px;
   height: 100%;
+  padding: 0 !important;
   // margin: 1em !important;
 }
 
