@@ -5,7 +5,12 @@ import Dexie from "dexie";
 export default function useDB(database) {
   const db = reactive(new Dexie(database));
 
-  let verno = ref(0)
+
+  let verno = ref(Date.now())
+  db.version(verno.value).stores({
+    words: '++id, name, value'
+  });
+
 
   function createTable(tablename, keyString = "++id, name, value") {
     db.close();
@@ -24,8 +29,8 @@ export default function useDB(database) {
   }
 
   return {
+    words: db.words,
     test: db.test,
     createTable,
-    db,
   };
 }

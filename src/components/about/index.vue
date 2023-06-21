@@ -39,29 +39,22 @@ let showBottomColor = computed(() =>
 );
 
 let citiaoInnerRef = ref();
-
-db.open()
-  .then(() => {
-    db.close();
-    db.version(db.verno + 1).stores({
-      words: "++id, name, value",
-    });
-  })
-  .then(() => {
-    db.open();
-    Object.entries(JSON.parse(defaultDict)).forEach((word) => {
-      // console.log(word, 'word')
-      db.words.add({
-        name: word[0],
-        value: word[1],
-      });
-      moduleDefault.value.push({
-        name: word[0],
-        value: word[1] || [],
-      });
-      toggoleCihui();
-    });
+Object.entries(JSON.parse(defaultDict)).forEach((word, index) => {
+  // console.log(word, 'word')
+  words.add({
+    name: word[0],
+    value: word[1],
   });
+  moduleDefault.value.push({
+    name: word[0] || '单词未找到',
+    value: word[1] || [],
+  });
+  if (index === defaultDict.length - 1) {
+    toggoleCihui();
+    console.log('进来')
+  }
+  console.log('进来')
+});
 
 function toggoleCihui(e) {
   const random = Math.floor(Math.random() * 1000000000);
@@ -93,7 +86,8 @@ watch(moduleRandom, (n, o) => {
       ? moduleRandom.value % n
       : Math.floor(moduleRandom.value);
   currentModule.value = moduleDefault.value[index];
-  emit("desc", currentModule.value);
+
+  console.log(currentModule.value, 'v')
 });
 
 pageDate.info = {
@@ -126,7 +120,7 @@ function openExample() {
 </script>
 
 <template>
-  <el-row :gutter="30" class="enter-y" @click="">
+  <el-row :gutter="30" class="enter-y">
     <el-col class="enter-left">
       <el-card class="box-card">
         <template #header>
