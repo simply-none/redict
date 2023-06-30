@@ -1,4 +1,5 @@
 <template>
+<div @click="createT">
   <el-upload
     ref="uploadRef"
     :on-change="beforeUpload"
@@ -25,10 +26,16 @@
       {{ data }}
     </pre>
   </el-upload>
+  </div>
+  <el-input v-model="schema"/>
+
 </template>
 <script setup>
 import { ref, onMounted } from "vue";
 import localforage from "localforage";
+import axios from 'axios'
+
+import lock from '../../package-lock.json'
 
 import { createDB } from './database'
 
@@ -36,22 +43,36 @@ import { useDeviceInfo } from './useDeviceInfo'
 
 let data = ref()
 
+let schema = ref('')
+
 const { getDeviceInfo } = useDeviceInfo()
 
 onMounted(async () => {
   console.log(getDeviceInfo(), 'getDeviceInfo')
+  axios.get('https://element.eleme.cn/versions.json').then(res => {
+    console.log(res)
+  }).catch(err => console.log(err))
   data.value = (await getDeviceInfo()).deviceType
 })
 
 
-const db = createDB('test')
+let { db,  addTable } = createDB('test' + Date.now())
 
+function createT () {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(JSON.stringify(lock));
+  }
+  alert('复制成功', )
+  // addTable('test' + Date.now(), schema.value)
+  // console.log(db.test1688135539713, 'db')
+  // db.test1688135539713.put({
+  //   jou: 'jou' + Date.now(),
+  //   co: 'jo' + Date.now()
+  // }).then(res => {
+  //   console.log(res)
+  // }).catch(err => console.log(err))
 
-
-db.db.friend.add({
-  name: Date.now(),
-  age: 23
-})
+}
 
 const uploadRef = ref();
 

@@ -3,7 +3,7 @@ import { ref, reactive, computed, watch } from "vue";
 import Dexie from "dexie";
 
 export default function useDB(database) {
-  const db = reactive(new Dexie(database));
+  const db = new Dexie(database);
 
 
   let verno = ref(Date.now())
