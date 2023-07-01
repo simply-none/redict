@@ -1,9 +1,5 @@
 <template>
-  <el-button type="primary" style="margin-left: 16px" @click="drawer = true">
-    open
-  </el-button>
-
-  <el-drawer v-model="drawer" title="设置" size="100%">
+  <el-drawer v-model="drawer" title="设置" size="100%" :before-close="handleClose">
     <div class="demo-collapse">
       <el-collapse accordion>
         <el-collapse-item name="1">
@@ -14,59 +10,34 @@
           </template>
           <j-device/>
         </el-collapse-item>
-        <el-collapse-item title="Feedback" name="2">
-          <div>
-            Operation feedback: enable the users to clearly perceive their
-            operations by style updates and interactive effects;
-          </div>
-          <div>
-            Visual feedback: reflect current state by updating or rearranging
-            elements of the page.
-          </div>
+        <el-collapse-item name="2">
+          <template #title>
+            数据上传<el-icon class="header-icon" title="仅支持json数据">
+              <info-filled />
+            </el-icon>
+          </template>
+          <UploadBook/>
         </el-collapse-item>
-        <el-collapse-item title="Efficiency" name="3">
-          <div>
-            Simplify the process: keep operating process simple and intuitive;
-          </div>
-          <div>
-            Definite and clear: enunciate your intentions clearly so that the
-            users can quickly understand and make decisions;
-          </div>
-          <div>
-            Easy to identify: the interface should be straightforward, which
-            helps the users to identify and frees them from memorizing and
-            recalling.
-          </div>
-        </el-collapse-item>
-        <el-collapse-item title="Controllability" name="4">
-          <div>
-            Decision making: giving advices about operations is acceptable, but
-            do not make decisions for the users;
-          </div>
-          <div>
-            Controlled consequences: users should be granted the freedom to
-            operate, including canceling, aborting or terminating current
-            operation.
-          </div>
+        <el-collapse-item name="3">
+          <template #title>
+            选择课本<el-icon class="header-icon" title="仅支持json数据">
+              <info-filled />
+            </el-icon>
+          </template>
+          <SelectBook/>
         </el-collapse-item>
       </el-collapse>
     </div>
   </el-drawer>
-
-  <el-descriptions title="路由" :column="1" border>
-    <el-descriptions-item  v-for="route in routes" :key="route.path" label="route.name" label-align="right" align="center"
-      ><router-link :to="route.path"><div>{{ route.path }}</div></router-link></el-descriptions-item
-    >
-  </el-descriptions>
-
-  
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, computed } from "vue";
+import { reactive, ref, onMounted, computed, toRaw } from "vue";
 import { ElMessageBox, ElDescriptions, ElDescriptionsItem } from "element-plus";
 import {RouterLink} from 'vue-router'
 import JDevice from './Device.vue'
+import UploadBook from './uploadBook.vue'
+import SelectBook from './selectBook.vue'
 import { routes } from '../router/index'
 import {
   InfoFilled,
@@ -77,10 +48,35 @@ import {
   User,
 } from "@element-plus/icons-vue";
 
-const drawer = ref(false);
 
-const allRoute = ref(routes)
 
+import { useBookStore } from "../stores/books";
+import { storeToRefs } from "pinia";
+
+let props = defineProps({
+  visible: {
+    type: Boolean
+  }
+})
+
+let drawer = computed({
+  get () {
+    return props.visible
+  },
+  set () {}
+})
+
+let emit = defineEmits(['handleDrawer'])
+
+function handleClose () {
+  emit('handleDrawer', false)
+}
+
+let useBook = useBookStore()
+let { currentBook, dbInstance } = storeToRefs(useBook);
+// let { getTable } = useBook
+
+let bookItem = ref()
 </script>
 
 <style scoped>
@@ -100,5 +96,12 @@ const allRoute = ref(routes)
 }
 .my-content {
   background: var(--el-color-danger-light-9);
+}
+
+.getDataTest {
+  width: 100%;
+  height: 100px;
+  border: 1px solid red;
+
 }
 </style>

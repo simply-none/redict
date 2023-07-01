@@ -1,5 +1,5 @@
 <template>
-<div @click="createT">
+<div>
   <el-upload
     ref="uploadRef"
     :on-change="beforeUpload"
@@ -27,11 +27,14 @@
     </pre>
   </el-upload>
   </div>
-  <el-input v-model="schema"/>
+  schema: <el-input v-model="schema"/>
+  tablename: <el-input v-model="tablename"/>
+  <el-button @click="handleT">操作，添加表</el-button>
+  <el-button @click="editT">修改表结构</el-button>
 
 </template>
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref,reactive, onMounted } from "vue";
 import localforage from "localforage";
 import axios from 'axios'
 
@@ -44,34 +47,37 @@ import { useDeviceInfo } from './useDeviceInfo'
 let data = ref()
 
 let schema = ref('')
+let tablename = ref('')
+
+let DBObj = reactive({})
 
 const { getDeviceInfo } = useDeviceInfo()
 
 onMounted(async () => {
   console.log(getDeviceInfo(), 'getDeviceInfo')
-  axios.get('https://element.eleme.cn/versions.json').then(res => {
-    console.log(res)
-  }).catch(err => console.log(err))
   data.value = (await getDeviceInfo()).deviceType
+  DBObj = await createDB('test')
+
 })
 
 
-let { db,  addTable } = createDB('test' + Date.now())
+async function editT() {
+  
+  let t = tablename.value
+  // 必须等待表建完之后，才能handleT
+  await DBObj.addTable(t, schema.value)
 
-function createT () {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(JSON.stringify(lock));
-  }
-  alert('复制成功', )
-  // addTable('test' + Date.now(), schema.value)
-  // console.log(db.test1688135539713, 'db')
-  // db.test1688135539713.put({
-  //   jou: 'jou' + Date.now(),
-  //   co: 'jo' + Date.now()
-  // }).then(res => {
-  //   console.log(res)
-  // }).catch(err => console.log(err))
+  handleT()
+}
 
+
+function handleT () {
+  let t = tablename.value
+  let table = DBObj.getTable(t)
+  console.log(table)
+  table && table.put({
+    name: Date.now() + 'n'
+  })
 }
 
 const uploadRef = ref();
@@ -112,3 +118,4 @@ function beforeUpload(uploadfile, uploadfiles) {
   return true;
 }
 </script>
+../hooks/database
