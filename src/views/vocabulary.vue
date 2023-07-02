@@ -216,7 +216,7 @@ import { useDatabaseTable } from "../hooks/useDatabaseTable";
 import { useTodayStudyWords } from "../hooks/useTodayStudyWords";
 import { useStudyWords } from "../hooks/useStudyWords";
 
-const fullscreenLoading = ref(true);
+const fullscreenLoading = ref(false);
 
 let centerDialogVisible = ref(false);
 
@@ -280,7 +280,7 @@ function isSetRequiredData() {
     position: "bottom-right",
   });
   // 未设置打开弹出
-  drawer.value = true;
+  // drawer.value = true;
   return false;
 }
 
