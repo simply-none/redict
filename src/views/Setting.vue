@@ -1,14 +1,22 @@
 <template>
   <el-drawer v-model="drawer" title="设置" size="100%" :before-close="handleClose">
     <div class="demo-collapse">
-      <el-collapse accordion>
-        <el-collapse-item name="1">
+      <el-collapse v-model="activeCollapse" @change="setSymbol">
+        <el-collapse-item name="3">
           <template #title>
-            设备信息<el-icon class="header-icon">
+            基础设置<el-icon class="header-icon" title="仅支持json数据">
               <info-filled />
             </el-icon>
           </template>
-          <j-device/>
+          <SelectBook :validate="validateSymbol" :alreadySetBasic="alreadySetBasic" @alreadySetBasicHandle="alreadySetBasicHandle"/>
+        </el-collapse-item>
+        <el-collapse-item name="1">
+          <template #title>
+            设备信息<el-icon class="header-icon">
+              <info-filled name="1"/>
+            </el-icon>
+          </template>
+          <j-device :isCurrent="currentCollapse === '1'"/>
         </el-collapse-item>
         <el-collapse-item name="2">
           <template #title>
@@ -17,14 +25,6 @@
             </el-icon>
           </template>
           <UploadBook/>
-        </el-collapse-item>
-        <el-collapse-item name="3">
-          <template #title>
-            选择课本<el-icon class="header-icon" title="仅支持json数据">
-              <info-filled />
-            </el-icon>
-          </template>
-          <SelectBook/>
         </el-collapse-item>
       </el-collapse>
     </div>
@@ -53,6 +53,12 @@ import {
 import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
 
+let activeCollapse = ref(['2', '3'])
+let currentCollapse = ref()
+
+let alreadySetBasic = ref(false)
+let validateSymbol = ref(Date.now())
+
 let props = defineProps({
   visible: {
     type: Boolean
@@ -66,9 +72,23 @@ let drawer = computed({
   set () {}
 })
 
+function alreadySetBasicHandle (val) {
+  alreadySetBasic.value = val
+  emit('handleDrawer', false)
+}
+
+function setSymbol (val) {
+  console.log(val, typeof val)
+  currentCollapse.value = val
+}
+
 let emit = defineEmits(['handleDrawer'])
 
-function handleClose () {
+function handleClose (done) {
+  validateSymbol.value = Date.now()
+  if (!alreadySetBasic.value) {
+    return false
+  }
   emit('handleDrawer', false)
 }
 

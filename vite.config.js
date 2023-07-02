@@ -9,15 +9,19 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
-  
+  esbuild: {
+    drop: ['debugger'],
+    pure: ['console.log', 'console.info']
+  },
   build: {
+    reportCompressedSize: true,
     rollupOptions: {
       // output: {
       //   manualChunks: (id) => {
       //     console.log(id, 'id')
       //   }
       // }
-    }
+    },
   },
   resolve: {
     alias: {

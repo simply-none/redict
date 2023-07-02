@@ -61,6 +61,7 @@ async function createDB(databaseName, initTableStore) {
 
   function getTable (table) {
     let tables = Object.keys(schema)
+    console.log(tables, '所有table')
     if (!tables.includes(table)) {
       return false
     }
@@ -70,10 +71,14 @@ async function createDB(databaseName, initTableStore) {
   async function addTable(tableName, tableSchema) {
     verno.value = verno.value + 1;
    await db.close();
+
+
     schema[tableName] = tableSchema;
 
     db.version(verno.value).stores(schema);
-    db.open()
+
+    await db.open();
+    // db.open()
   }
 
   return {

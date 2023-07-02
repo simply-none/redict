@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, computed } from "vue";
+import { reactive, ref, onMounted, computed,watch } from "vue";
 import { ElDescriptions, ElDescriptionsItem } from 'element-plus'
 import { useDeviceInfo } from "./useDeviceInfo";
 
@@ -31,16 +31,15 @@ import {
   User,
 } from "@element-plus/icons-vue";
 
-let device = ref({});
+let props = defineProps({
+  isCurrent: {
+    type: Boolean,
+    default: () => false
+  }
+})
 
 const { getDeviceInfo } = useDeviceInfo();
-
-
-onMounted(async () => {
-  device.value = (await getDeviceInfo());
-});
-
-
+let device = ref({});
 const size = ref("");
 const iconStyle = computed(() => {
   const marginMap = {
@@ -52,6 +51,20 @@ const iconStyle = computed(() => {
     marginRight: marginMap[size.value] || marginMap.default,
   };
 });
+
+console.log(props.isCurrent, 'is')
+watch(() => props.isCurrent, async (n, o) => {
+  console.log(n, o)
+  let isDevice = Object.keys(device.value)
+  if (isDevice.length > 0) {
+    return false
+  }
+  if (!n) {
+    return false
+  }
+  device.value = (await getDeviceInfo());
+})
+
 </script>
 
 <style scoped>
