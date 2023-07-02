@@ -245,9 +245,9 @@ let reviewMode = ref(false);
 onMounted(async () => {
   console.log("主体mounted");
   let isSetRequired = isSetRequiredData();
-  if (!isSetRequired) {
-    return false;
-  }
+  // if (!isSetRequired) {
+  //   return false;
+  // }
 
   await initTodayStudyWordComp();
 
@@ -268,7 +268,7 @@ ElNotification({
 // 是否设置应用运行的必要数据，这个直接卸载vocab里面，非这里
 function isSetRequiredData() {
 
-  alert(currentRange.value, 1,  currentBook.value, 2,  studyMode.value)
+  // alert(currentRange.value, 1,  currentBook.value, 2,  studyMode.value)
   if (currentRange.value && currentBook.value && studyMode.value) {
     return true;
   }
