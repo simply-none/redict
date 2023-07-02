@@ -8,18 +8,32 @@
     <template #header>
       <div class="voca-card-head">
         <span class="voca-card-name">{{ bookItem.n }}</span>
+
+        <el-button
+          :icon="Setting"
+          plain
+          type="primary"
+          circle
+          class="voca-card-handle"
+          @click="drawer = true"
+        ></el-button>
+      </div>
+    </template>
+    <div class="voca-card-body" @click="getDataTest">
+      <div class="left">
+        <!-- 音标 -->
         <template
           class="voca-phonetic-item"
           v-for="phonetic in bookItem.p"
           :key="phonetic.id"
         >
           <span
-            @click="getFayin(phonetic.t || 'default')"
+            @click.stop="getFayin(phonetic.t || 'default')"
             class="voca-phonetic-type"
             >{{ phonetic.t }}</span
           >
           <span
-            @click="getFayin(phonetic.t || 'default')"
+            @click.stop="getFayin(phonetic.t || 'default')"
             class="voca-phonetic-type"
             >{{ phonetic.p }}</span
           >
@@ -35,18 +49,7 @@
             </p>
           </audio>
         </template>
-        <el-button
-          :icon="Setting"
-          plain
-          type="primary"
-          circle
-          class="voca-card-handle"
-          @click="drawer = true"
-        ></el-button>
-      </div>
-    </template>
-    <div class="voca-card-body" @click="getDataTest">
-      <div class="left">
+
         <template v-if="showVocabularyItem.includes('t')"
           ><div class="voca-card-voca-type" v-if="bookItem?.t?.length > 0">
             <template
@@ -62,10 +65,10 @@
         >
 
         <template v-if="showVocabularyItem.includes('ps')"
-          ><div class="voca-card-voca-simple" v-if="bookItem?.ps?.length > 0">
+          ><div class="voca-card-voca-complex" v-if="bookItem?.ps?.length > 0">
             <div>简要解释：</div>
             <div
-              class="voca-card-voca-simple-item"
+              class="voca-card-voca-complex-item"
               v-for="vocatype in bookItem.ps"
               :key="vocatype.id"
             >
@@ -356,10 +359,12 @@ async function putStudiedVocabulary(data) {
 .voca {
   &-phonetic-type {
     font-size: 6px;
-    margin-left: 1em;
     display: inline-block;
     cursor: pointer;
     color: #000;
+    &:nth-child(2) {
+      margin: 0 2em 0 0;
+    }
   }
   &-card {
     height: 100%;
@@ -376,10 +381,9 @@ async function putStudiedVocabulary(data) {
       padding: 6px;
       margin: 10px 20px;
       &::-webkit-scrollbar {
-      /*隐藏滚轮*/
-      display: none;
-
-    }
+        /*隐藏滚轮*/
+        display: none;
+      }
     }
     &-name {
       font-size: 2em;
@@ -404,7 +408,7 @@ async function putStudiedVocabulary(data) {
       background: #ff9429;
       // background-color: bisque !important;
       &:hover {
-        box-shadow: 0px 0px 12px rgba(0, 0, 0, .12);
+        box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.12);
         background-color: #ffffff;
         border-color: #ff9429;
         color: #ff9429;
@@ -422,30 +426,25 @@ async function putStudiedVocabulary(data) {
     }
     &-voca-type {
       font-size: 0.8em;
-      
-      &>span {
+
+      & > span {
         &:nth-child(even) {
           font-style: italic;
           margin-right: 1em;
         }
       }
     }
-    &-voca-simple {
-      // padding: 20px 0;
-    }
+
     &-voca-complex {
-      // padding: 20px 0;
-    }
-  }
-}
-
-.left {
-  &>div {
-    
-
-    &:nth-child(even) {
-      margin-top: 1em;
-      margin-bottom: 1em;
+      margin: 12px 0;
+      & > *:first-child {
+        color: #008ea7;
+        font-weight: 600;
+        font-family: monospace;
+      }
+      &-item {
+        color: #666;
+      }
     }
   }
 }
