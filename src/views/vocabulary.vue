@@ -216,22 +216,6 @@ import { useDatabaseTable } from "../hooks/useDatabaseTable";
 import { useTodayStudyWords } from "../hooks/useTodayStudyWords";
 import { useStudyWords } from "../hooks/useStudyWords";
 
-// onMounted生命周期放顶部，不然控制台一大堆警告
-onMounted(async () => {
-  console.log("主体mounted");
-  let isSetRequired = isSetRequiredData();
-  if (!isSetRequired) {
-    return false;
-  }
-
-  await initTodayStudyWordComp();
-
-  await initStudyWordComp();
-
-  reviewMode.value = moreThanTodayPlan();
-  console.log(reviewMode.value, "是否开启");
-});
-
 const fullscreenLoading = ref(true);
 
 let centerDialogVisible = ref(false);
@@ -257,6 +241,22 @@ const drawer = ref(false);
 let bookItem = ref({});
 
 let reviewMode = ref(false);
+// onMounted生命周期放顶部，不然控制台一大堆警告
+onMounted(async () => {
+  console.log("主体mounted");
+  let isSetRequired = isSetRequiredData();
+  if (!isSetRequired) {
+    return false;
+  }
+
+  await initTodayStudyWordComp();
+
+  await initStudyWordComp();
+
+  reviewMode.value = moreThanTodayPlan();
+  console.log(reviewMode.value, "是否开启");
+});
+
 
 ElNotification({
   type: "info",
