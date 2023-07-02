@@ -99,6 +99,7 @@ export function useStudyWords() {
 
   // 展示单词卡片
   async function showVocabularyCard(update) {
+    table.value = dbInstance.value.getTable(currentBook.value);
     console.log(JSON.parse(JSON.stringify(todayStudyVocabulary.value)), todayStudyVocabulary.value.length, '今日学习单词数据')
     console.log(JSON.parse(JSON.stringify(couldStudyIndexData.value)), couldStudyIndexData.value.length, '能够学习的单词数据')
     // 这里就只对数据进行过滤，不读数据表了

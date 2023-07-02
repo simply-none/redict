@@ -245,9 +245,9 @@ let reviewMode = ref(false);
 onMounted(async () => {
   console.log("主体mounted");
   let isSetRequired = isSetRequiredData();
-  // if (!isSetRequired) {
-  //   return false;
-  // }
+  if (!isSetRequired) {
+    return false;
+  }
 
   await initTodayStudyWordComp();
 
