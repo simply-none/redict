@@ -242,7 +242,7 @@ let studyWords = ref([]);
 
 let reviewMode = ref(false);
 
-const fullscreenLoading = ref(false);
+const fullscreenLoading = ref(true);
 
 let centerDialogVisible = ref(false);
 
@@ -498,7 +498,7 @@ function isSetRequiredData() {
     position: "bottom-right",
   });
   // 未设置打开弹出
-  // drawer.value = true;
+  drawer.value = true;
   return false;
 }
 
