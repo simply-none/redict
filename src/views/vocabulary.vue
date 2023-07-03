@@ -287,7 +287,7 @@ function moreThanTodayPlan() {
   if (todayStudyVocabulary.value.length >= studyCount.value) {
     // 弹出学习提示框（完成50个）
     // startReviewMode(true)
-    setNotify('今日单词计划已完成，将开启复习模式！', success, '恭喜')
+    setNotify('今日单词计划已完成，将开启复习模式！', 'success', '恭喜')
     reviewMode.value = true;
     return true;
   }
