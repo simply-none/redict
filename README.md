@@ -1,29 +1,25 @@
-# vue-project
+# 项目简介
 
-This template should help get you started developing with Vue 3 in Vite.
+## 待做功能
 
-## Recommended IDE Setup
+### 操作
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+需求：
+- 监听用户退出网页事件，进行提示是否退出
+- 是否开启上一页，下一页查看上一个，下一个单词
+- 完成每日背诵计划后，是否弹出一个当日完成的单词列表；⛳
+- 是否开启特定区域（比如按钮、区域块）进行单词切换
+- 是否开启聚焦模式，仅展示单词及其中文含义，不展示其他内容，且使用大字模式，更直观具体
 
-## Customize configuration
+### 行为分析
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+需求：分析用户每日背诵单词的个数、每个单词背诵的次数、每日复习的单词个数与次数
 
-## Project Setup
+呈现：使用柱状图/折线图/日历热力图/日历坐标系的方式展示该用户所有日期的背诵/复习单词的行为数据，可一次只展示当周，当月每日的数据，或者是当年每月的数据，或者是所有的数据
 
-```sh
-npm install
-```
+需求：按日期显示/查找用户背诵的单词，点进去之后展现该日单词列表（图表兼富文本），导出该日单词列表数据（html带样式格式导出图片）
 
-### Compile and Hot-Reload for Development
+需求：查看单词背诵的次数（使用矩形树图）
 
-```sh
-npm run dev
-```
+需求：呈现背诵达标率（使用仪表盘）
 
-### Compile and Minify for Production
-
-```sh
-npm run build
-```

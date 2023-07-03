@@ -10,6 +10,14 @@
           </template>
           <SelectBook :validate="validateSymbol" :alreadySetBasic="alreadySetBasic" @alreadySetBasicHandle="alreadySetBasicHandle"/>
         </el-collapse-item>
+        <el-collapse-item name="5">
+          <template #title>
+            今日数据<el-icon class="header-icon">
+              <info-filled/>
+            </el-icon>
+          </template>
+          <TodayVocabulary />
+        </el-collapse-item>
         <el-collapse-item name="1">
           <template #title>
             设备信息<el-icon class="header-icon">
@@ -38,6 +46,7 @@ import {RouterLink} from 'vue-router'
 import JDevice from './Device.vue'
 import UploadBook from './uploadBook.vue'
 import SelectBook from './selectBook.vue'
+import TodayVocabulary from "./todayVocabulary.vue";
 import { routes } from '../router/index'
 import {
   InfoFilled,
@@ -53,7 +62,7 @@ import {
 import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
 
-let activeCollapse = ref(['2', '3'])
+let activeCollapse = ref(['2', '3', '5'])
 let currentCollapse = ref()
 
 let alreadySetBasic = ref(false)
