@@ -25,15 +25,11 @@ async function createDB(databaseName, initTableStore) {
       db = new Dexie(name.value);
       initTableStore && (schema[initTableStore.name] = initTableStore.schema);
       db.version(verno.value).stores(schema);
-      console.log('进来没')
     }
   })
 
-  console.log(db.name)
-
   db.open().then(() => {
     verno.value = db.verno || 1;
-    console.log(db.verno, verno.value);
 
     db.tables.forEach(function (table) {
       let tableSchema = [table.schema.primKey.src];
@@ -44,7 +40,6 @@ async function createDB(databaseName, initTableStore) {
     });
     initTableStore && (schema[initTableStore.name] = initTableStore.schema);
 
-    console.log(schema, "schema");
     // 在store之前是获取不到相关的table的，undefined
     // console.log(db.test1688135539713, 'q')
 
@@ -61,7 +56,6 @@ async function createDB(databaseName, initTableStore) {
 
   function getTable (table) {
     let tables = Object.keys(schema)
-    console.log(tables, '所有table')
     if (!tables.includes(table)) {
       return false
     }
