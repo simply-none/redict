@@ -22,33 +22,34 @@
     <div class="voca-card-body" @click="getDataTest">
       <div class="left">
         <!-- 音标 -->
-        <template
-          class="voca-phonetic-item"
-          v-for="phonetic in bookItem.p"
-          :key="phonetic.id"
-        >
-          <span
-            @click.stop="getFayin(phonetic.t || 'default')"
-            class="voca-phonetic-type"
-            >{{ phonetic.t }}</span
+        <div class="voca-card-voca-phonetic">
+          <template
+            v-for="phonetic in bookItem.p"
+            :key="phonetic.id"
           >
-          <span
-            @click.stop="getFayin(phonetic.t || 'default')"
-            class="voca-phonetic-type"
-            >{{ phonetic.p }}</span
-          >
-          <audio
-            preload="none"
-            :ref="(el) => (fayinList[phonetic.t || 'default'] = el)"
-          >
-            <source :title="phonetic.a" type="audio/mpeg" :src="phonetic.a" />
-            <!-- 如果浏览器不支持，则会呈现下面内容 -->
-            <p>
-              你的浏览器不支持HTML5音频，你可以<a href="audiofile.mp3">下载</a
-              >这个音频文件。
-            </p>
-          </audio>
-        </template>
+            <span
+              @click.stop="getFayin(phonetic.t || 'default')"
+              class="voca-card-voca-phonetic-item"
+              >{{ phonetic.t }}</span
+            >
+            <span
+              @click.stop="getFayin(phonetic.t || 'default')"
+              class="voca-card-voca-phonetic-item"
+              >{{ phonetic.p }}</span
+            >
+            <audio
+              preload="none"
+              :ref="(el) => (fayinList[phonetic.t || 'default'] = el)"
+            >
+              <source :title="phonetic.a" type="audio/mpeg" :src="phonetic.a" />
+              <!-- 如果浏览器不支持，则会呈现下面内容 -->
+              <p>
+                你的浏览器不支持HTML5音频，你可以<a href="audiofile.mp3">下载</a
+                >这个音频文件。
+              </p>
+            </audio>
+          </template>
+        </div>
 
         <template v-if="showVocabularyItem.includes('t')"
           ><div class="voca-card-voca-type" v-if="bookItem?.t?.length > 0">
@@ -87,7 +88,7 @@
               v-for="vocatype in bookItem.pd"
               :key="vocatype.id"
             >
-              <span>{{ vocatype.t }}</span
+              <span class="voca-card-voca-complex-type">{{ vocatype.t }}</span
               >:
               <div v-for="voca in vocatype.p">
                 <span>{{ voca.zh }}</span>
@@ -158,14 +159,14 @@
             <div>词语搭配：</div>
             <div
               class="voca-card-voca-complex-item"
-              v-for="vocatype in bookItem.col"
+              v-for="(vocatype, index) in bookItem.col"
               :key="vocatype.id"
             >
-              <span>{{ vocatype.t }}</span
+              <span class="voca-card-voca-complex-type">{{index + 1}}. {{ vocatype.t }}</span
               >:
-              <div v-for="voca in vocatype.subtype" :key="voca.id">
-                <div>{{ voca.t }}</div>
-                <div>{{ voca.st }}</div>
+              <div v-for="(voca, subindex) in vocatype.subtype" :key="voca.id">
+                <div class="voca-card-voca-complex-type2">{{ (index + 1) + '.' + (subindex + 1) }}. {{ voca.t }}</div>
+                <div class="voca-card-voca-complex-type3">{{ voca.st }}</div>
                 <div v-for="stl in voca.stl" :key="stl.id">
                   {{ stl }}
                 </div>
@@ -212,9 +213,7 @@ import { storeToRefs } from "pinia";
 
 import moment from "moment";
 
-
-
-  // 今日学习数据
+// 今日学习数据
 
 let useBook = useBookStore();
 
@@ -312,9 +311,8 @@ async function getCouldStudyIndexData() {
   // 查看是否是复习过去的单词模式
   console.log(studyMode.value, "复习模式");
   if (studyMode.value === "review-past") {
-    studyIndexData = await studyTalbe.value
-      .filter((word) => !studyWords.value.includes(word.id))
-      .toArray();
+    console.log(studyTalbe.value, "测试");
+    studyIndexData = toRaw(studyWords.value);
     studyIndexData = studyIndexData.map((word) => word.id);
     return studyIndexData;
   }
@@ -357,7 +355,11 @@ async function showVocabularyCard(update) {
   );
   // 这里就只对数据进行过滤，不读数据表了
   if (studyMode.value === "review-past") {
+    console.log("复习模式", studyWords.value.length);
     couldStudyIndexData.value = toRaw(studyWords.value);
+    studyTalbe.value = await getDatabaseTable("studied-voca", "++id, n, date");
+    let studyArr = await studyTalbe.value.toArray()
+    console.log(studyArr, '能够学习的单词数组')
   } else {
     if (moreThanTodayPlan()) {
       couldStudyIndexData.value = toRaw(todayStudyVocabulary.value);
@@ -369,6 +371,17 @@ async function showVocabularyCard(update) {
         (word) => !todayStudyVocabulary.value.includes(word)
       );
     }
+  }
+
+  if (couldStudyIndexData.value.length === 0) {
+    ElNotification({
+      type: "error",
+      title: "错误",
+      message: `当前模式${studyMode.value}下，没有能够学习的单词，请切换模式！`,
+      position: "bottom-right",
+    });
+    drawer.value = true;
+    return false;
   }
 
   let random = Math.floor(Math.random() * couldStudyIndexData.value.length);
@@ -499,7 +512,9 @@ watch(
       return false;
     }
     fullscreenLoading.value = false;
-    bookItem.value = n;
+    if (!Object.keys(bookItem.value).length) {
+      bookItem.value = n;
+    }
   }
 );
 
@@ -527,14 +542,12 @@ function getFayin(uk) {
 async function handleDrawer(visible) {
   drawer.value = visible;
   if (!visible) {
+    table.value = dbInstance.value.getTable(currentBook.value);
+    couldStudyIndexData.value = await getCouldStudyIndexData();
 
-  table.value = dbInstance.value.getTable(currentBook.value);
-  couldStudyIndexData.value = await getCouldStudyIndexData();
-
-
-  if (table.value) {
-    vocabularyCardInitData.value = await showVocabularyCard();
-  }
+    if (table.value) {
+      vocabularyCardInitData.value = await showVocabularyCard();
+    }
   }
 }
 
@@ -576,13 +589,16 @@ async function putStudiedVocabulary(data) {
 
 <style scoped lang="scss">
 .voca {
-  &-phonetic-type {
-    font-size: 6px;
+  &-card-voca-phonetic {
+    &-item {
+      font-size: 1em;
+      font-weight: 900;
     display: inline-block;
     cursor: pointer;
-    color: #000;
+    color: #666;
     &:nth-child(2) {
-      margin: 0 2em 0 0;
+      margin: 0 1em 0 0;
+    }
     }
   }
   &-card {
@@ -613,15 +629,12 @@ async function putStudiedVocabulary(data) {
     &-head {
       display: inline-flex;
       flex-flow: row;
-      // justify-content: space-around;
+      justify-content: space-between;
       align-items: center;
       width: 100%;
-      position: relative;
     }
     &-handle {
-      position: absolute;
       text-align: right;
-      right: 20px;
       color: #ffffff;
       border-color: #ff9429;
       background: #ff9429;
@@ -644,9 +657,10 @@ async function putStudiedVocabulary(data) {
       }
     }
     &-voca-type {
-      font-size: 0.8em;
+      font-size: 1em;
 
       & > span {
+      font-weight: 100;
         &:nth-child(even) {
           font-style: italic;
           margin-right: 1em;
@@ -660,6 +674,22 @@ async function putStudiedVocabulary(data) {
         color: #008ea7;
         font-weight: 600;
         font-family: monospace;
+      }
+      &-type {
+        display: inline-block;
+        margin: 3px 0;
+        color: #666;
+        font-weight: 600;
+      }
+      &-type2 {
+        display: block;
+        margin: 3px 0;
+        color: #808080;
+        font-weight: 600;
+      }
+      &-type3 {
+        text-decoration: underline;
+        margin: 3px 0;
       }
       &-item {
         color: #666;

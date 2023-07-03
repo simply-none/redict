@@ -41,8 +41,8 @@
       <el-input v-model="ruleForm.tableSchema" autocomplete="off" />
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" @click="localSaveData(ruleFormRef)"
-        >本地保存</el-button
+      <el-button type="primary" :loading="saveLoading" @click="localSaveData(ruleFormRef)"
+        >{{ saveField }}</el-button
       >
       <el-button @click="resetForm(ruleFormRef)">取消</el-button>
     </el-form-item>
@@ -59,6 +59,9 @@ let useBook = useBookStore();
 let { dbInstance } = storeToRefs(useBook);
 
 const ruleFormRef = ref();
+
+let saveField = ref('等待中')
+let saveLoading = ref(true)
 
 const ruleForm = reactive({
   tableName: "",
@@ -120,6 +123,8 @@ const rules = reactive({
 const localSaveData = (formEl) => {
   console.log(ruleForm, "数据");
   if (!formEl) return;
+  saveField.value = '数据处理中'
+  saveLoading.value = true
   formEl.validate(async (valid) => {
     if (!valid) {
       console.log("error submit!");
@@ -129,6 +134,9 @@ const localSaveData = (formEl) => {
       await addTable(bookTableName, ruleForm.tableSchema);
 
       putData(bookTableName, toRaw(ruleForm.tableInitData));
+      formEl.resetFields()
+      saveField.value = '等待中'
+      saveLoading.value = true
     }
   });
 };
@@ -241,6 +249,8 @@ function beforeUpload(uploadfile, uploadfiles) {
         return false;
       }
       // 处理数据
+      saveField.value = '保存'
+      saveLoading.value = false
       let schemaItems = "++id, " + Object.keys(schema).join(", ");
       if (ruleForm.type === "range") {
         initData = initData.map((word) => {
