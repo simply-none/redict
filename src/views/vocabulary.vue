@@ -263,18 +263,6 @@ const drawer = ref(false);
 
 let bookItem = ref({});
 
-watch([() => currentBook.value, () => currentRange.value], async ([nb, nr]) => {
-  couldStudyIndexData.value = await getCouldStudyIndexData();
-
-  table.value = dbInstance.value.getTable(currentBook.value);
-
-  if (table.value) {
-    vocabularyCardInitData.value = await showVocabularyCard();
-  }
-
-  console.log("来啦这列吗");
-});
-
 // onMounted生命周期放顶部，不然控制台一大堆警告
 onMounted(async () => {
   console.log("主体mounted");
@@ -535,8 +523,18 @@ function getFayin(uk) {
   }, 1000);
 }
 
-function handleDrawer(visible) {
+async function handleDrawer(visible) {
   drawer.value = visible;
+  if (!visible) {
+
+  table.value = dbInstance.value.getTable(currentBook.value);
+  couldStudyIndexData.value = await getCouldStudyIndexData();
+
+
+  if (table.value) {
+    vocabularyCardInitData.value = await showVocabularyCard();
+  }
+  }
 }
 
 async function getDataTest() {
