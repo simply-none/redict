@@ -22,6 +22,8 @@
     "@vitejs/plugin-vue": "^4.2.3",
     "axios": "^1.4.0",
     "sass": "^1.63.4",
+    "unplugin-auto-import": "^0.16.4",
+    "unplugin-vue-components": "^0.25.1",
     "vite": "^4.3.9"
   }
 }

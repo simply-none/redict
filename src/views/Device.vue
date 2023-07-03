@@ -20,7 +20,7 @@
 <script setup>
 import { reactive, ref, onMounted, computed,watch } from "vue";
 import { ElDescriptions, ElDescriptionsItem } from 'element-plus'
-import { useDeviceInfo } from "./useDeviceInfo";
+import { useDeviceInfo } from "../hooks/useDeviceInfo";
 
 import {
   InfoFilled,

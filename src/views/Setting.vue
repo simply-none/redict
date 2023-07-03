@@ -73,8 +73,11 @@ let drawer = computed({
 })
 
 function alreadySetBasicHandle (val) {
-  alreadySetBasic.value = val
-  emit('handleDrawer', false)
+  alreadySetBasic.value = val.isSetBasic
+  emit('handleDrawer', {
+    drawer: false,
+    studyModeIsChanged: val.studyModeIsChanged
+  })
 }
 
 function setSymbol (val) {
@@ -89,7 +92,9 @@ function handleClose (done) {
   if (!alreadySetBasic.value) {
     return false
   }
-  emit('handleDrawer', false)
+  emit('handleDrawer', {
+    drawer: false
+  })
 }
 
 let useBook = useBookStore()

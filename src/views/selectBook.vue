@@ -142,6 +142,9 @@ let showVocabularyList = [
   },
 ];
 
+// 学习模式是否改变，改变时，需要刷新一下数据
+let studyModeIsChanged = ref(false)
+
 const ruleForm = reactive({
   book: "",
   range: "",
@@ -155,7 +158,10 @@ watch(() => props.validate, async () => {
   await ruleFormRef.value.validate((valid, fields) => {
     if (valid) {
       console.log('验证通过!')
-      emit('alreadySetBasicHandle', true)
+      emit('alreadySetBasicHandle', {
+        isSetBasic: true,
+        studyModeIsChanged: studyModeIsChanged.value
+      })
     } else {
       console.log('error submit!', fields)
     }
@@ -218,6 +224,7 @@ function setCurrentRange(val) {
 
 function setStudyMode(val) {
   console.log(val);
+  studyModeIsChanged.value = true
   updateStudyMode(val);
 }
 
