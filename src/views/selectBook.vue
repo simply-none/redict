@@ -164,12 +164,12 @@ watch(() => props.validate, async () => {
 
 
 
-if (!studyMode.value) {
-  setStudyMode("study");
-}
-if (!studyCount.value) {
-  setStudyCount(30);
-}
+// if (!studyMode.value) {
+//   setStudyMode("study");
+// }
+// if (!studyCount.value) {
+//   setStudyCount(30);
+// }
 
 ruleForm.book = computed({
   get() {

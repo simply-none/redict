@@ -1,6 +1,6 @@
 <script setup>
 import { RouterView } from "vue-router";
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, onBeforeMount } from "vue";
 
 import { createDB } from "./hooks/database";
 
@@ -11,8 +11,10 @@ let useBook = useBookStore();
 let { updateDbInstance } = useBook;
 
 let DBObj = reactive({});
+console.info('app: setup内')
 
-onMounted(async () => {
+onBeforeMount(async () => {
+  console.info('app: onBeforeMount开始')
   let db = await createDB("test", {
     name: "basic-info",
     schema: "++id, currentBook",
@@ -20,6 +22,7 @@ onMounted(async () => {
   DBObj = reactive(db);
   console.log(DBObj);
   await updateDbInstance(DBObj);
+  console.info('app: onBeforeMount结束')
 });
 
 let infod = ref();

@@ -248,7 +248,6 @@ let centerDialogVisible = ref(false);
 let fayinList = reactive({});
 
 let {
-  isInit,
   todayStudyVocabulary,
   showVocabularyItem,
   currentBook,
@@ -257,6 +256,8 @@ let {
   studyMode,
   studyCount,
 } = storeToRefs(useBook);
+
+let { updateBasicInfo } = useBook
 // let { getTable } = useBook
 
 const drawer = ref(false);
@@ -264,9 +265,10 @@ const drawer = ref(false);
 let bookItem = ref({});
 
 // onMounted生命周期放顶部，不然控制台一大堆警告
+
+
 onMounted(async () => {
-  console.log("主体mounted");
-  let isSetRequired = isSetRequiredData();
+  let isSetRequired = await isSetRequiredData();
   if (!isSetRequired) {
     return false;
   }
@@ -276,13 +278,15 @@ onMounted(async () => {
   await initStudyWordComp();
 
   reviewMode.value = moreThanTodayPlan();
-  console.log(reviewMode.value, "是否开启");
 });
 
 // 今日是否已学习了50个单词，学习了就自动开启复习模式
 function moreThanTodayPlan() {
   if (reviewMode.value) {
     return true;
+  }
+  if (studyMode.value !== 'study') {
+    return true
   }
   if (todayStudyVocabulary.value.length >= studyCount.value) {
     // 弹出学习提示框（完成50个）
@@ -307,7 +311,8 @@ async function getCouldStudyIndexData() {
   // 查看是否是复习过去的单词模式
   console.log(studyMode.value, "复习模式");
   if (studyMode.value === "review-past") {
-    console.log(studyTalbe.value, "测试");
+    studyTalbe.value = await getDatabaseTable("studied-voca", "++id, n, date");
+    studyWords.value = await studyTalbe.value.toArray()
     studyIndexData = toRaw(studyWords.value);
     studyIndexData = studyIndexData.map((word) => word.id);
     return studyIndexData;
@@ -331,37 +336,23 @@ async function getCouldStudyIndexData() {
   // 获取过滤后的可学习/复习的单词索引
   studyIndexData = studyIndexData.map((word) => word.id);
 
-  console.log("会不会来这里，是个谜", studyIndexData.length);
-
   return studyIndexData;
 }
 
 // 展示单词卡片
 async function showVocabularyCard(update) {
   table.value = dbInstance.value.getTable(currentBook.value);
-  console.log(
-    JSON.parse(JSON.stringify(todayStudyVocabulary.value)),
-    todayStudyVocabulary.value.length,
-    "今日学习单词数据"
-  );
-  console.log(
-    JSON.parse(JSON.stringify(couldStudyIndexData.value)),
-    couldStudyIndexData.value.length,
-    "能够学习的单词数据"
-  );
   // 这里就只对数据进行过滤，不读数据表了
   if (studyMode.value === "review-past") {
-    console.log("复习模式", studyWords.value.length);
-    couldStudyIndexData.value = toRaw(studyWords.value);
+    
     studyTalbe.value = await getDatabaseTable("studied-voca", "++id, n, date");
-    let studyArr = await studyTalbe.value.toArray()
-    console.log(studyArr, '能够学习的单词数组')
+    studyWords.value = await studyTalbe.value.toArray()
+    console.log("复习模式", studyWords.value.length);
+    couldStudyIndexData.value = (toRaw(studyWords.value || [])).map(word => word.id);
   } else {
     if (moreThanTodayPlan()) {
       couldStudyIndexData.value = toRaw(todayStudyVocabulary.value);
       couldStudyIndexData.value = [...new Set(couldStudyIndexData.value)];
-
-      console.log(couldStudyIndexData.value.length, "添加里面就");
     } else {
       couldStudyIndexData.value = couldStudyIndexData.value.filter(
         (word) => !todayStudyVocabulary.value.includes(word)
@@ -377,13 +368,8 @@ async function showVocabularyCard(update) {
 
   let random = Math.floor(Math.random() * couldStudyIndexData.value.length);
 
-  console.log(
-    table.value,
-    "展示卡片",
-    couldStudyIndexData.value.length,
-    random,
-    couldStudyIndexData.value[random]
-  );
+  let tablearr = await table.value.toArray()
+  tablearr = tablearr.find(a => a.id === couldStudyIndexData.value[random])
 
   let vocabularycard = await table.value.get(couldStudyIndexData.value[random]);
   return vocabularycard;
@@ -403,14 +389,12 @@ async function getRangeWords() {
 }
 
 async function initStudyWordComp() {
-  console.log("组合式函数组件");
   // 加载已学习的数据表
   studyTalbe.value = await getDatabaseTable("studied-voca", "++id, n, date");
 
   // 已学习数据
   studyWords.value = await studyTalbe.value.toArray();
   studyWords.value = studyWords.value.map((word) => word.id);
-  console.log(studyWords.value.length, "以学习");
 
   // 全部单词的数据表
   table.value = dbInstance.value.getTable(currentBook.value);
@@ -418,21 +402,17 @@ async function initStudyWordComp() {
   couldStudyIndexData.value = await getCouldStudyIndexData();
 
   if (table.value) {
-    console.log("来啦这列吗");
     vocabularyCardInitData.value = await showVocabularyCard();
   }
-  console.log("来啦这列吗");
 }
 
 async function initTodayStudyWordComp() {
-  console.log("today组件");
   todayStudyWordsTable.value = await getDatabaseTable(
     "today-studied-voca",
     "++id"
   );
   todayStudyWords.value = await todayStudyWordsTable.value.toArray();
 
-  console.log(getDatabaseTable, todayStudyWords, "错误");
   // 看是否是今日学习单词，如果不是，则清空今日单词库
   let isToday = moment().format("YYYY-MM-DD");
   if (todayStudyWords.value.length > 0) {
@@ -443,8 +423,6 @@ async function initTodayStudyWordComp() {
   }
 
   todayStudyWords.value = await todayStudyWordsTable.value.toArray();
-
-  console.log(isToday, todayStudyWords.value.length, "今日学习单词-数据库");
 
   todayStudyWords.value = todayStudyWords.value.map((word) => word.id);
 
@@ -457,7 +435,6 @@ async function initTodayStudyWordComp() {
 // 获取数据表，无则创建表
 async function getDatabaseTable(tableName, tableSchema) {
   if (databaseTableList[tableName]) {
-    console.log("创建过这个表吗？", tableName);
     return databaseTableList[tableName];
   }
   let loadTable = dbInstance.value.getTable(tableName);
@@ -465,7 +442,6 @@ async function getDatabaseTable(tableName, tableSchema) {
     await dbInstance.value.addTable(tableName, tableSchema);
     loadTable = dbInstance.value.getTable(tableName);
   }
-  console.log(loadTable, "加载table");
   databaseTableList[tableName] = loadTable;
   return loadTable;
 }
@@ -483,10 +459,12 @@ function setNotify (msg, type, title) {
 
 
 // 是否设置应用运行的必要数据，这个直接卸载vocab里面，非这里
-function isSetRequiredData() {
+async function isSetRequiredData() {
+  // 这里，不更新下基础信息，会报错（处理的真久）
+  await updateBasicInfo()
+
   let message = "你当前正处于" + studyMode.value + "模式" + '，范围值：' + currentRange.value + '，当前课本：' + currentBook.value
-  // alert(currentRange.value, 1,  currentBook.value, 2,  studyMode.value)
-  if (isInit && currentRange.value && currentBook.value && studyMode.value) {
+  if (currentRange.value && currentBook.value && studyMode.value) {
     setNotify(message, 'success')
     return true;
   }
@@ -500,7 +478,6 @@ function isSetRequiredData() {
 watch(
   () => vocabularyCardInitData.value,
   async (n, o) => {
-    console.log("监听词汇", n);
     if (!n) {
       return false;
     }
@@ -553,11 +530,8 @@ async function putStudiedVocabulary(data) {
     "++id"
   );
   let date = moment().format("YYYY-MM-DD");
-  console.log(table, "table");
 
   let findPutData = await table.get(data.id);
-
-  console.log(findPutData, "put dasta");
 
   let putData = {
     ...findPutData,
