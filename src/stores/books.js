@@ -15,6 +15,8 @@ export const useBookStore = defineStore('book', () => {
 
   let todayStudyVocabulary = ref([])
 
+  let isInit = ref(false)
+
 
   watch(() => dbInstance.value, async (newV, oldV) => {
     let tableList = Object.keys(newV.schema)
@@ -28,6 +30,7 @@ export const useBookStore = defineStore('book', () => {
       studyMode.value = basicInfo?.studyMode??''
       studyCount.value = basicInfo?.studyCount??0
       console.log(basicInfo)
+      isInit.value = true
     }
     console.log(newV.schema, 1, basicTable)
   }, {deep: true})
@@ -117,5 +120,5 @@ export const useBookStore = defineStore('book', () => {
     console.log('更新', showVocabularyItem.value)
   }
 
-  return { todayStudyVocabulary, currentBook, currentRange, showVocabularyItem, studyMode, studyCount, updateStudyCount, dbInstance, books, updateBooks, updateCurrentBook, updateCurrentRange, updateStudyMode, updateShowVocabularyItem, updateDbInstance }
+  return { isInit, todayStudyVocabulary, currentBook, currentRange, showVocabularyItem, studyMode, studyCount, updateStudyCount, dbInstance, books, updateBooks, updateCurrentBook, updateCurrentRange, updateStudyMode, updateShowVocabularyItem, updateDbInstance }
 })

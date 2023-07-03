@@ -248,6 +248,7 @@ let centerDialogVisible = ref(false);
 let fayinList = reactive({});
 
 let {
+  isInit,
   todayStudyVocabulary,
   showVocabularyItem,
   currentBook,
@@ -286,12 +287,7 @@ function moreThanTodayPlan() {
   if (todayStudyVocabulary.value.length >= studyCount.value) {
     // 弹出学习提示框（完成50个）
     // startReviewMode(true)
-    ElNotification({
-      type: "success",
-      title: "恭喜",
-      message: "今日单词计划已完成，将开启复习模式！",
-      position: "bottom-right",
-    });
+    setNotify('今日单词计划已完成，将开启复习模式！', success, '恭喜')
     reviewMode.value = true;
     return true;
   }
@@ -374,12 +370,7 @@ async function showVocabularyCard(update) {
   }
 
   if (couldStudyIndexData.value.length === 0) {
-    ElNotification({
-      type: "error",
-      title: "错误",
-      message: `当前模式${studyMode.value}下，没有能够学习的单词，请切换模式！`,
-      position: "bottom-right",
-    });
+    setNotify(`当前模式${studyMode.value}下，没有能够学习的单词，请切换模式！`)
     drawer.value = true;
     return false;
   }
@@ -479,26 +470,28 @@ async function getDatabaseTable(tableName, tableSchema) {
   return loadTable;
 }
 
-ElNotification({
-  type: "info",
-  title: "提示",
-  message: "你当前正处于" + studyMode.value + "模式",
-  position: "bottom-right",
-});
+function setNotify (msg, type, title) {
+  ElNotification({
+    type: type || "error",
+    title: title || "提示",
+    message: msg,
+    duration: 5000,
+    position: "bottom-right",
+  });
+}
+
+
 
 // 是否设置应用运行的必要数据，这个直接卸载vocab里面，非这里
 function isSetRequiredData() {
+  let message = "你当前正处于" + studyMode.value + "模式" + '，范围值：' + currentRange.value + '，当前课本：' + currentBook.value
   // alert(currentRange.value, 1,  currentBook.value, 2,  studyMode.value)
-  if (currentRange.value && currentBook.value && studyMode.value) {
+  if (isInit && currentRange.value && currentBook.value && studyMode.value) {
+    setNotify(message, 'success')
     return true;
   }
-
-  ElNotification({
-    type: "error",
-    title: "提示",
-    message: "请完成基础设置后再试！",
-    position: "bottom-right",
-  });
+  
+  setNotify(message + ', 请完成基础设置后再试！')
   // 未设置打开弹出
   drawer.value = true;
   return false;
@@ -525,12 +518,7 @@ function startReviewMode(visible) {
 function getFayin(uk) {
   const refuk = fayinList[uk];
   if (!refuk) {
-    ElNotification({
-      type: "error",
-      title: "提示",
-      message: "当前单词没有音源",
-      position: "bottom-right",
-    });
+    setNotify('当前单词没有音源')
     return false;
   }
   refuk.load();
