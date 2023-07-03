@@ -381,20 +381,6 @@ async function showVocabularyCard(update) {
     couldStudyIndexData.value[random]
   );
 
-  ElMessage({
-    dangerouslyUseHTMLString: true,
-    duration: 0,
-    message: `
-      <div>
-        <div>总单词：${table.value.toArray().length}</div>
-        <div>今日学习单词：${todayStudyVocabulary.value.length}</div>
-        <div>总学习单词：${studyWords.value.length}</div>
-        <div>范围单词：${range.value.length}</div>
-        <div>能够学习的单词：${couldStudyIndexData.value.length}</div>
-      </div>
-    `,
-  })
-
   let vocabularycard = await table.value.get(couldStudyIndexData.value[random]);
   return vocabularycard;
 }
@@ -489,17 +475,6 @@ ElNotification({
 
 // 是否设置应用运行的必要数据，这个直接卸载vocab里面，非这里
 function isSetRequiredData() {
-  ElMessage({
-    dangerouslyUseHTMLString: true,
-    duration: 0,
-    message: `
-      <div>
-        <div>当前范围：${currentRange.value}</div>
-        <div>当前book：${currentBook.value}</div>
-        <div>学习模式：${studyMode.value}</div>
-      </div>
-    `,
-  })
   // alert(currentRange.value, 1,  currentBook.value, 2,  studyMode.value)
   if (currentRange.value && currentBook.value && studyMode.value) {
     return true;
