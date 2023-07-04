@@ -354,7 +354,7 @@ async function getBookRangeData() {
     &-handle-list {
       display: inline-flex;
       justify-content: center;
-      width: 100vw;
+      width: 100%;
       padding: 0 10px;
     }
     &-handle2 {
@@ -409,6 +409,13 @@ async function getBookRangeData() {
         color: #666;
       }
     }
+  }
+}
+
+:deep(.el-affix) {
+  width: 100% !important;
+  &>div {
+    width: 100% !important;
   }
 }
 </style>
