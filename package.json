@@ -10,6 +10,7 @@
   "dependencies": {
     "@skillnull/device-js": "^1.1.9",
     "dexie": "^3.2.4",
+    "dom-to-image-more": "^3.1.6",
     "element-plus": "^2.3.6",
     "localforage": "^1.10.0",
     "moment": "^2.29.4",

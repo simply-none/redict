@@ -23,6 +23,7 @@
 
   <h3 class="today-voca-head">
     {{ todayDate }}背诵单词，共计：{{ vocalist.length }}个
+    <el-link @click="lookTodayVocaMore">查看更多...</el-link>
   </h3>
   <el-table :data="vocalist" max-height="250" style="width: 100%" border stripe>
     <el-table-column prop="index" label="序号" width="180">
@@ -78,6 +79,8 @@ import { ref, reactive, onMounted } from "vue";
 import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
 
+import { useRoute, useRouter } from "vue-router";
+
 import moment from "moment";
 
 let todayDate = ref(moment().format("YYYY年M月D日"));
@@ -98,11 +101,19 @@ let rangeNotInBookData = ref([])
 
 let couldDataLen = ref(0)
 
+let router = useRouter()
+
 getVocaList();
 
 getHistoryVocaList();
 
 getBookRangeData();
+
+function lookTodayVocaMore () {
+  router.push({
+    name: 'lookTodayVoca'
+  })
+}
 
 async function getBookRangeData() {
   let bookTable = await dbInstance.value.getTable(currentBook.value);

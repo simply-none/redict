@@ -2,6 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 export const routes = [
   {
+    path: '/look-today-voca',
+    name: 'lookTodayVoca',
+    component: () => import('../views/todayVocabularyList.vue')
+  },
+  {
     path: '/',
     name: 'test',
     component: () => import('../views/vocabulary.vue')
