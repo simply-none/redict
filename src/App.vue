@@ -2,7 +2,7 @@
 import { RouterView } from "vue-router";
 import { ref, reactive, onMounted, onBeforeMount } from "vue";
 
-import { createDB } from "./hooks/database";
+import { createDB } from "./hooks/useDB";
 
 import { useBookStore } from "./stores/books";
 import { storeToRefs } from "pinia";
@@ -15,13 +15,13 @@ console.info('app: setup内')
 
 onBeforeMount(async () => {
   console.info('app: onBeforeMount开始')
-  let db = await createDB("test", {
+  let db = createDB("test", [{
     name: "basic-info",
     schema: "++id, currentBook",
-  });
+  }]);
   DBObj = reactive(db);
   console.log(DBObj);
-  await updateDbInstance(DBObj);
+  updateDbInstance(DBObj);
   console.info('app: onBeforeMount结束')
 });
 

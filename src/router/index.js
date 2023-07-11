@@ -7,9 +7,13 @@ export const routes = [
     component: () => import('../views/todayVocabularyList.vue')
   },
   {
-    path: '/',
+    path: '/test',
     name: 'test',
     component: () => import('../views/vocabulary.vue')
+  },
+  {
+    path: '/',
+    component: () => import('../views/test.vue')
   }
 ]
 

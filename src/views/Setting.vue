@@ -34,6 +34,16 @@
           </template>
           <UploadBook/>
         </el-collapse-item>
+        <el-collapse-item name="22">
+          <template #title>
+            路由跳转<el-icon class="header-icon" title="仅支持json数据">
+              <info-filled />
+            </el-icon>
+          </template>
+          <div v-for="route in routes" :key="route.id" @click="$router.push({name: route.name})">
+            {{ route.path }}
+          </div>
+        </el-collapse-item>
       </el-collapse>
     </div>
   </el-drawer>

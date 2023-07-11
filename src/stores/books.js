@@ -15,6 +15,8 @@ export const useBookStore = defineStore("book", () => {
 
   let todayStudyVocabulary = ref([]);
 
+  let basicData = ref(null)
+
 
   watch(
     () => dbInstance.value,
@@ -39,6 +41,8 @@ export const useBookStore = defineStore("book", () => {
         showVocabularyItem.value = basicInfo?.showVocabularyItem ?? [];
         studyMode.value = basicInfo?.studyMode ?? "";
         studyCount.value = basicInfo?.studyCount ?? 0;
+
+        basicData.value = basicInfo
       }
     },
     { deep: true }
@@ -136,9 +140,12 @@ export const useBookStore = defineStore("book", () => {
     showVocabularyItem.value = basicInfo?.showVocabularyItem ?? [];
     studyMode.value = basicInfo?.studyMode ?? "";
     studyCount.value = basicInfo?.studyCount ?? 0;
+
+    basicData.value = basicInfo
   }
 
   return {
+    basicData,
     updateBasicInfo,
     todayStudyVocabulary,
     currentBook,
