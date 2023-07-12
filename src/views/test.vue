@@ -213,33 +213,11 @@ import { Setting } from "@element-plus/icons-vue";
 import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
 
+import { setNotify } from "../utils/element-plus";
+
 // 今日学习数据
 
 let useBook = useBookStore();
-
-let databaseTableList = reactive({});
-
-// 今日学习数据
-let todayStudyWordsTable = ref();
-let todayStudyWords = ref();
-
-let couldStudyIndexData = ref([]);
-
-// 展示的单词卡片数据
-let vocabularyCardInitData = ref({});
-
-// 获取书本学习的范围数据表
-let range = ref();
-let rangeWords = ref([]);
-
-let table = ref();
-
-// 获取已学习过的单词的数据表
-let studyTalbe = ref();
-
-let studyWords = ref([]);
-
-let reviewMode = ref(false);
 
 let fayinList = reactive({});
 
@@ -253,16 +231,12 @@ let {
   studyCount,
 } = storeToRefs(useBook);
 
-let { updateBasicInfo } = useBook;
-// let { getTable } = useBook
-
 let {
   bookItem,
   fullscreenLoading,
   drawer,
   handleDrawer,
   centerDialogVisible,
-  setNotify,
   getDataTest,
 } = useVoca();
 
@@ -304,7 +278,7 @@ function getFayin(uk) {
       height: calc(100% - 86px);
       overflow: auto;
       border: solid #00a4c1;
-      border-width: 1em 6px 5px;
+      border-width: 5px 2px 2px;
       padding: 6px;
       margin: 10px 20px;
       &::-webkit-scrollbar {
@@ -327,15 +301,14 @@ function getFayin(uk) {
     }
     &-handle {
       text-align: right;
-      color: #ffffff;
+      background-color: #ffffff;
       border-color: #ff9429;
-      background: #ff9429;
-      // background-color: bisque !important;
+      color: #ff9429;
       &:hover {
         box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.12);
-        background-color: #ffffff;
+        color: #ffffff;
         border-color: #ff9429;
-        color: #ff9429;
+        background: #ff9429;
       }
     }
 

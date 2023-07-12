@@ -4,7 +4,7 @@ import { reactive, ref, watch, toRaw, unref } from "vue";
 import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
 
-import isEqualObj from "../utils/isEqualObj";
+import {isEqualObj} from "../utils/common";
 
 /**
  * @description 创建数据库及数据库表

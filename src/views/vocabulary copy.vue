@@ -213,6 +213,9 @@ import { storeToRefs } from "pinia";
 
 import moment from "moment";
 
+import { setNotify } from "../utils/element-plus";
+import { sleep } from '../utils/common'
+
 // 今日学习数据
 
 let useBook = useBookStore();
@@ -463,27 +466,6 @@ async function getDatabaseTable(tableName, tableSchema) {
   databaseTableList[tableName] = loadTable;
   return loadTable;
 }
-
-function sleep (time) {
-  return new Promise((resolve) => {
-    return setTimeout(() => {
-      console.log('休眠中...')
-      resolve()
-    }, time)
-  });
-}
-
-function setNotify (msg, type, title) {
-  ElNotification({
-    type: type || "error",
-    title: title || "提示",
-    message: msg,
-    duration: 5000,
-    position: "bottom-right",
-  });
-}
-
-
 
 // 是否设置应用运行的必要数据，这个直接卸载vocab里面，非这里
 async function isSetRequiredData() {

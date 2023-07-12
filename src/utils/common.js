@@ -1,4 +1,4 @@
-export default function isEqualObj(obj1, obj2) {
+export function isEqualObj(obj1, obj2) {
   var o1 = obj1 instanceof Object;
   var o2 = obj2 instanceof Object;
   // 判断是不是对象
@@ -30,6 +30,15 @@ export default function isEqualObj(obj1, obj2) {
     }
   }
   return true;
+}
+
+export function sleep(time) {
+  return new Promise((resolve) => {
+    return setTimeout(() => {
+      console.log("休眠中...");
+      resolve();
+    }, time);
+  });
 }
 
 function isArray (obj) {
