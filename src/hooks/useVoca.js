@@ -110,7 +110,7 @@ export function useVoca() {
     rangeTable.value = await getDatabaseTable(currentRange.value, "");
 
     // 后续操作...
-    todayStudyWords.value = await getTypeFilterData(todayStudyWordsTable);
+    todayStudyWords.value = await getTypeData(todayStudyWordsTable);
     rangeWords.value = await getTypeFilterData(rangeTable);
     studyWords.value = await getTypeFilterData(studyTalbe);
 
@@ -263,7 +263,10 @@ export function useVoca() {
     // 看是否是今日学习单词，如果不是，则清空今日单词库
     let isToday = getTodayDate();
     let hasNotTodayWords = (todayStudyWords.value || []).some(
-      (word) => word.date !== isToday
+      (word) => {
+        console.log(word, isToday)
+        return word.date !== isToday
+      }
     );
     if (hasNotTodayWords) {
       await todayStudyWordsTable.value.orderBy().delete();
