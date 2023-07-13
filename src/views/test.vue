@@ -175,22 +175,6 @@
 
   <SettingCom :visible="drawer" @handleDrawer="handleDrawer" />
 
-  <el-dialog
-    v-model="centerDialogVisible"
-    :close-on-click-modal="false"
-    title="已完成今日任务"
-    width="30%"
-    align-center
-  >
-    <span>正在开启复习模式，请稍后......</span>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button type="primary" @click="startReviewMode(false)">
-          确认
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
 </template>
 
 <script setup>
@@ -222,9 +206,7 @@ let {
   fullscreenLoading,
   drawer,
   handleDrawer,
-  centerDialogVisible,
   getDataTest,
-  startReviewMode
 } = useVoca();
 
 function getFayin(uk) {

@@ -43,8 +43,6 @@ export function useVoca() {
 
   const fullscreenLoading = ref(true);
 
-  let centerDialogVisible = ref(false);
-
   let {
     todayStudyVocabulary,
     basicData,
@@ -144,8 +142,6 @@ export function useVoca() {
       return true;
     }
     if (todayStudyVocabulary.value.length >= basicData.value.studyCount) {
-      // 弹出学习提示框（完成50个）
-      startReviewMode(true)
       setNotify("今日单词计划已完成，将开启复习模式！", "success", "恭喜");
       reviewMode.value = true;
       return true;
@@ -279,10 +275,6 @@ export function useVoca() {
     return loadTable;
   }
 
-  function startReviewMode(visible) {
-    centerDialogVisible.value = visible;
-  }
-
   async function handleDrawer(payload) {
     drawer.value = payload.drawer;
     if (payload.drawer) {
@@ -334,8 +326,6 @@ export function useVoca() {
     fullscreenLoading,
     drawer,
     handleDrawer,
-    centerDialogVisible,
     getDataTest,
-    startReviewMode,
   };
 }
