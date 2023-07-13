@@ -32,7 +32,7 @@
               <info-filled name="1"/>
             </el-icon>
           </template>
-          <j-device :isCurrent="currentCollapse === '1'"/>
+          <j-device :isCurrent="currentCollapse.includes('1')"/>
         </el-collapse-item>
         <el-collapse-item name="2">
           <template #title>
@@ -77,7 +77,7 @@ import {
 } from "@element-plus/icons-vue";
 
 let activeCollapse = ref(['2', '3', '5', '6'])
-let currentCollapse = ref()
+let currentCollapse = ref([])
 
 let alreadySetBasic = ref(false)
 let validateSymbol = ref(Date.now())
