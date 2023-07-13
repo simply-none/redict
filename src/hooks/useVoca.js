@@ -59,12 +59,10 @@ export function useVoca() {
   watch(
     basicData,
     () => {
-      console.log("进来");
       getData();
     },
     {
       deep: true,
-      // immediate: true
     }
   );
 
@@ -147,7 +145,7 @@ export function useVoca() {
     }
     if (todayStudyVocabulary.value.length >= basicData.value.studyCount) {
       // 弹出学习提示框（完成50个）
-      // startReviewMode(true)
+      startReviewMode(true)
       setNotify("今日单词计划已完成，将开启复习模式！", "success", "恭喜");
       reviewMode.value = true;
       return true;
@@ -257,7 +255,6 @@ export function useVoca() {
     // 看是否是今日学习单词，如果不是，则清空今日单词库
     let isToday = getTodayDate();
     let hasNotTodayWords = (todayStudyWords.value || []).some((word) => {
-      console.log(word, isToday);
       return word.date !== isToday;
     });
     if (hasNotTodayWords) {
@@ -339,5 +336,6 @@ export function useVoca() {
     handleDrawer,
     centerDialogVisible,
     getDataTest,
+    startReviewMode,
   };
 }

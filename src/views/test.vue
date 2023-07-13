@@ -39,11 +39,6 @@
               :ref="(el) => (fayinList[phonetic.t || 'default'] = el)"
             >
               <source :title="phonetic.a" type="audio/mpeg" :src="phonetic.a" />
-              <!-- 如果浏览器不支持，则会呈现下面内容 -->
-              <p>
-                你的浏览器不支持HTML5音频，你可以<a href="audiofile.mp3">下载</a
-                >这个音频文件。
-              </p>
             </audio>
           </template>
         </div>
@@ -175,9 +170,6 @@
           </div></template
         >
       </div>
-      <!-- <div class="right">
-        <pre>{{ bookItem }}</pre>
-      </div> -->
     </div>
   </el-card>
 
@@ -232,6 +224,7 @@ let {
   handleDrawer,
   centerDialogVisible,
   getDataTest,
+  startReviewMode
 } = useVoca();
 
 function getFayin(uk) {
