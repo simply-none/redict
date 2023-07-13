@@ -58,27 +58,39 @@ export function useVoca() {
 
   let bookItem = ref(null);
 
-  watch(() => currentBook.value, async () => {
-    console.log('修改书本')
-    table.value = await getDatabaseTable(currentBook.value, "");
-  })
+  watch(
+    () => currentBook.value,
+    async () => {
+      console.log("修改书本");
+      table.value = await getDatabaseTable(currentBook.value, "");
+    }
+  );
 
-  watch(() => currentRange.value, async () => {
-    console.log('修改范围')
-    rangeTable.value = await getDatabaseTable(currentRange.value, "");
-    rangeWords.value = await getTypeFilterData(rangeTable);
-  })
+  watch(
+    () => currentRange.value,
+    async () => {
+      console.log("修改范围");
+      rangeTable.value = await getDatabaseTable(currentRange.value, "");
+      rangeWords.value = await getTypeFilterData(rangeTable);
+    }
+  );
 
-  onMounted(()=> {
-    getData()
-  })
+  watch(
+    () => basicData.value,
+    () => {
+      getData();
+    },
+    { immediate: true }
+  );
 
   // 改造start
   async function getData() {
+    // 学习过的数据表
+    studyTalbe.value = await getDatabaseTable("studied-voca", "++id, n, date");
     console.log(basicData.value, "测试basicData");
     // fullscreenLoading.value = true;
     let isRequired = isRequiredField(basicData);
-    console.log(isRequired, 'fs')
+    console.log(isRequired, "fs");
     if (!isRequired) {
       setNotify("请完成基础设置后再试");
       drawer.value = true;
@@ -102,8 +114,7 @@ export function useVoca() {
       "today-studied-voca",
       "++id"
     );
-    // 学习过的数据表
-    studyTalbe.value = await getDatabaseTable("studied-voca", "++id, n, date");
+    
     // 总数据表
     table.value = await getDatabaseTable(currentBook.value, "");
     // 范围表
@@ -162,7 +173,6 @@ export function useVoca() {
 
   // 获取能够展示单词卡片的索引
   async function getCouldStudyWords(isInit = false) {
-    
     if (!currentBook.value || !currentRange.value) {
       return [];
     }
@@ -262,12 +272,10 @@ export function useVoca() {
   async function getTodayStudyWords() {
     // 看是否是今日学习单词，如果不是，则清空今日单词库
     let isToday = getTodayDate();
-    let hasNotTodayWords = (todayStudyWords.value || []).some(
-      (word) => {
-        console.log(word, isToday)
-        return word.date !== isToday
-      }
-    );
+    let hasNotTodayWords = (todayStudyWords.value || []).some((word) => {
+      console.log(word, isToday);
+      return word.date !== isToday;
+    });
     if (hasNotTodayWords) {
       await todayStudyWordsTable.value.orderBy().delete();
     }
