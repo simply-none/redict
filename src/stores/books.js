@@ -1,34 +1,43 @@
-import { ref, computed, watch, reactive, toRaw } from "vue";
-import { defineStore } from "pinia";
+import { ref, computed, watch, reactive, toRaw, toRefs } from "vue";
+import { defineStore, storeToRefs } from "pinia";
+import useDBStore from './db'
 
 export const useBookStore = defineStore("book", () => {
-  let books = ref([]);
-  let currentBook = ref("");
-  let currentRange = ref("");
-  let dbInstance = ref({});
+  // let currentBook = ref("");
+  // let currentRange = ref("");
 
-  let studyMode = ref("");
+  // let studyMode = ref("");
 
-  let studyCount = ref(0);
+  // let studyCount = ref(0);
 
-  let showVocabularyItem = ref([]);
+  // let showVocabularyItem = ref([]);
 
   let todayStudyVocabulary = ref([]);
 
-  let basicData = ref(null)
 
+  let basicData = reactive({
+    currentBook: '',
+    currentRange: '',
+    studyMode: '',
+    studyCount: 0,
+    showVocabularyItem: []
+  })
+
+  let useDB = useDBStore()
+  let { schema, dbChanged } = storeToRefs(useDB)
+  let {getTable } = useDB
 
   watch(
-    () => dbInstance.value,
+    () => dbChanged.value,
     async (newV, oldV) => {
-      let newVKeys = Object.keys(newV);
-      if (!newVKeys.length) {
-        return false;
-      }
+      console.log(newV, oldV, Date.now(), '版本变更')
+      
+      console.log(schema, 'console')
 
-      let tableList = Object.keys(newV.schema);
+      let tableList = Object.keys(schema.value);
       let basic = tableList.find((l) => l === "basic-info");
-      let basicTable = newV.getTable(basic);
+      let basicTable = getTable(basic);
+      console.log(tableList, basicTable, 'basicTable')
       if (!basicTable) {
         return false;
       }
@@ -36,131 +45,33 @@ export const useBookStore = defineStore("book", () => {
       if (basicTable) {
         let basicInfo = await basicTable.get(1);
 
-        currentBook.value = basicInfo?.currentBook ?? "";
-        currentRange.value = basicInfo?.currentRange ?? "";
-        showVocabularyItem.value = basicInfo?.showVocabularyItem ?? [];
-        studyMode.value = basicInfo?.studyMode ?? "";
-        studyCount.value = basicInfo?.studyCount ?? 0;
-
-        basicData.value = basicInfo
+        Object.keys(basicInfo).forEach(field => {
+          basicData[field] = toRaw(basicInfo[field])
+        })
+        console.log(basicData)
       }
     },
-    { deep: true }
+    { deep: true, immediate: true }
   );
 
-  function updateDbInstance(newData) {
-    dbInstance.value = reactive(newData);
-  }
-
-  function updateBooks(newData) {
-    books.value = newData;
-  }
-
-  async function updateCurrentBook(newData) {
-    currentBook.value = newData;
-    let tableList = Object.keys(dbInstance.value.schema);
+  async function updateBasicInfo(field, newData) {
+    basicData[field] = newData
+    console.log(basicData)
+    let tableList = Object.keys(schema.value);
     let basic = tableList.find((l) => l === "basic-info");
-    let basicTable = dbInstance.value.getTable(basic);
+    let basicTable = getTable(basic);
     let basicInfo = await basicTable.get(1);
     basicTable.put({
       ...basicInfo,
       id: 1,
-      name: "测试",
-      currentBook: currentBook.value,
+      name: "基础数据",
+      [field]: toRaw(newData)
     });
-  }
-
-  async function updateCurrentRange(newData) {
-    currentRange.value = newData;
-    let tableList = Object.keys(dbInstance.value.schema);
-    let basic = tableList.find((l) => l === "basic-info");
-    let basicTable = dbInstance.value.getTable(basic);
-    let basicInfo = await basicTable.get(1);
-    basicTable.put({
-      ...basicInfo,
-      id: 1,
-      name: "测试",
-      currentRange: currentRange.value,
-    });
-  }
-
-  async function updateStudyCount(newData) {
-    studyCount.value = newData;
-    let tableList = Object.keys(dbInstance.value.schema);
-    let basic = tableList.find((l) => l === "basic-info");
-    let basicTable = dbInstance.value.getTable(basic);
-    let basicInfo = await basicTable.get(1);
-    basicTable.put({
-      ...basicInfo,
-      id: 1,
-      name: "测试",
-      studyCount: studyCount.value,
-    });
-  }
-
-  async function updateStudyMode(newData) {
-    studyMode.value = newData;
-    let tableList = Object.keys(dbInstance.value.schema);
-    let basic = tableList.find((l) => l === "basic-info");
-    let basicTable = dbInstance.value.getTable(basic);
-    let basicInfo = await basicTable.get(1);
-    basicTable.put({
-      ...basicInfo,
-      id: 1,
-      name: "测试",
-      studyMode: studyMode.value,
-    });
-  }
-
-  async function updateShowVocabularyItem(newData) {
-    showVocabularyItem.value = newData;
-    let tableList = Object.keys(dbInstance.value.schema);
-    let basic = tableList.find((l) => l === "basic-info");
-    let basicTable = dbInstance.value.getTable(basic);
-    let basicInfo = await basicTable.get(1);
-    basicTable.put({
-      ...basicInfo,
-      id: 1,
-      name: "测试",
-      showVocabularyItem: toRaw(showVocabularyItem.value),
-    });
-  }
-
-  async function updateBasicInfo(val) {
-    let tableList = Object.keys(dbInstance.value.schema);
-    let basic = tableList.find((l) => l === "basic-info");
-      let basicTable = dbInstance.value.getTable(basic);
-      if (!basicTable) {
-        return false
-      }
-    let basicInfo = await basicTable.get(1);
-
-    currentBook.value = basicInfo?.currentBook ?? "";
-    currentRange.value = basicInfo?.currentRange ?? "";
-    showVocabularyItem.value = basicInfo?.showVocabularyItem ?? [];
-    studyMode.value = basicInfo?.studyMode ?? "";
-    studyCount.value = basicInfo?.studyCount ?? 0;
-
-    basicData.value = basicInfo
   }
 
   return {
     basicData,
     updateBasicInfo,
     todayStudyVocabulary,
-    currentBook,
-    currentRange,
-    showVocabularyItem,
-    studyMode,
-    studyCount,
-    updateStudyCount,
-    dbInstance,
-    books,
-    updateBooks,
-    updateCurrentBook,
-    updateCurrentRange,
-    updateStudyMode,
-    updateShowVocabularyItem,
-    updateDbInstance,
   };
 });

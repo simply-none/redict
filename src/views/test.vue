@@ -48,7 +48,7 @@
           </template>
         </div>
 
-        <template v-if="showVocabularyItem.includes('t')"
+        <template v-if="basicData.showVocabularyItem.includes('t')"
           ><div class="voca-card-voca-type" v-if="bookItem?.t?.length > 0">
             <template
               class="voca-card-voca-type-item"
@@ -62,7 +62,7 @@
           </div></template
         >
 
-        <template v-if="showVocabularyItem.includes('ps')"
+        <template v-if="basicData.showVocabularyItem.includes('ps')"
           ><div class="voca-card-voca-complex" v-if="bookItem?.ps?.length > 0">
             <div>简要解释：</div>
             <div
@@ -77,7 +77,7 @@
           </div></template
         >
 
-        <template v-if="showVocabularyItem.includes('pd')"
+        <template v-if="basicData.showVocabularyItem.includes('pd')"
           ><div class="voca-card-voca-complex" v-if="bookItem?.pd?.length > 0">
             <div>中英双解：</div>
             <div
@@ -95,7 +95,7 @@
           </div></template
         >
 
-        <template v-if="showVocabularyItem.includes('ph')"
+        <template v-if="basicData.showVocabularyItem.includes('ph')"
           ><div class="voca-card-voca-complex" v-if="bookItem?.ph?.length > 0">
             <div>短语：</div>
             <div
@@ -110,7 +110,7 @@
           </div></template
         >
 
-        <template v-if="showVocabularyItem.includes('sy')"
+        <template v-if="basicData.showVocabularyItem.includes('sy')"
           ><div
             class="voca-card-voca-complex"
             v-if="bookItem?.sy?.v?.length > 0"
@@ -134,7 +134,7 @@
           </div></template
         >
 
-        <template v-if="showVocabularyItem.includes('oth')"
+        <template v-if="basicData.showVocabularyItem.includes('oth')"
           ><div class="voca-card-voca-complex" v-if="bookItem?.oth?.length > 0">
             <div>相关词汇：</div>
             <div
@@ -151,7 +151,7 @@
           </div></template
         >
 
-        <template v-if="showVocabularyItem.includes('col')"
+        <template v-if="basicData.showVocabularyItem.includes('col')"
           ><div class="voca-card-voca-complex" v-if="bookItem?.col?.length > 0">
             <div>词语搭配：</div>
             <div
@@ -222,13 +222,7 @@ let useBook = useBookStore();
 let fayinList = reactive({});
 
 let {
-  todayStudyVocabulary,
-  showVocabularyItem,
-  currentBook,
-  currentRange,
-  dbInstance,
-  studyMode,
-  studyCount,
+  basicData,
 } = storeToRefs(useBook);
 
 let {

@@ -10,6 +10,14 @@
           </template>
           <SelectBook :validate="validateSymbol" :alreadySetBasic="alreadySetBasic" @alreadySetBasicHandle="alreadySetBasicHandle"/>
         </el-collapse-item>
+        <el-collapse-item name="6">
+          <template #title>
+            基础数据览表<el-icon class="header-icon">
+              <info-filled/>
+            </el-icon>
+          </template>
+          <BasicTable />
+        </el-collapse-item>
         <el-collapse-item name="5">
           <template #title>
             今日数据<el-icon class="header-icon">
@@ -57,6 +65,7 @@ import JDevice from './Device.vue'
 import UploadBook from './uploadBook.vue'
 import SelectBook from './selectBook.vue'
 import TodayVocabulary from "./todayVocabulary.vue";
+import BasicTable from "./basicTable.vue";
 import { routes } from '../router/index'
 import {
   InfoFilled,
@@ -67,12 +76,7 @@ import {
   User,
 } from "@element-plus/icons-vue";
 
-
-
-import { useBookStore } from "../stores/books";
-import { storeToRefs } from "pinia";
-
-let activeCollapse = ref(['2', '3', '5'])
+let activeCollapse = ref(['2', '3', '5', '6'])
 let currentCollapse = ref()
 
 let alreadySetBasic = ref(false)
@@ -115,12 +119,6 @@ function handleClose (done) {
     drawer: false
   })
 }
-
-let useBook = useBookStore()
-let { currentBook, dbInstance } = storeToRefs(useBook);
-// let { getTable } = useBook
-
-let bookItem = ref()
 </script>
 
 <style scoped>

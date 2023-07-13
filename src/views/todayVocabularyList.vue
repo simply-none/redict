@@ -26,7 +26,7 @@
               </template>
             </div>
 
-            <template v-if="showVocabularyItem.includes('t')"
+            <template v-if="basicData.showVocabularyItem.includes('t')"
               ><div class="voca-card-voca-type" v-if="bookItem?.t?.length > 0">
                 <template
                   v-for="vocatype in bookItem.t"
@@ -39,7 +39,7 @@
               </div></template
             >
 
-            <template v-if="showVocabularyItem.includes('ps')"
+            <template v-if="basicData.showVocabularyItem.includes('ps')"
               ><div
                 class="voca-card-voca-complex"
                 v-if="bookItem?.ps?.length > 0"
@@ -57,7 +57,7 @@
               </div></template
             >
 
-            <template v-if="showVocabularyItem.includes('pd')"
+            <template v-if="basicData.showVocabularyItem.includes('pd')"
               ><div
                 class="voca-card-voca-complex"
                 v-if="bookItem?.pd?.length > 0"
@@ -80,7 +80,7 @@
               </div></template
             >
 
-            <template v-if="showVocabularyItem.includes('ph')"
+            <template v-if="basicData.showVocabularyItem.includes('ph')"
               ><div
                 class="voca-card-voca-complex"
                 v-if="bookItem?.ph?.length > 0"
@@ -98,7 +98,7 @@
               </div></template
             >
 
-            <template v-if="showVocabularyItem.includes('sy')"
+            <template v-if="basicData.showVocabularyItem.includes('sy')"
               ><div
                 class="voca-card-voca-complex"
                 v-if="bookItem?.sy?.v?.length > 0"
@@ -122,7 +122,7 @@
               </div></template
             >
 
-            <template v-if="showVocabularyItem.includes('oth')"
+            <template v-if="basicData.showVocabularyItem.includes('oth')"
               ><div
                 class="voca-card-voca-complex"
                 v-if="bookItem?.oth?.length > 0"
@@ -144,7 +144,7 @@
               </div></template
             >
 
-            <template v-if="showVocabularyItem.includes('col')"
+            <template v-if="basicData.showVocabularyItem.includes('col')"
               ><div
                 class="voca-card-voca-complex"
                 v-if="bookItem?.col?.length > 0"
@@ -209,6 +209,7 @@
 
 <script setup>
 import { useBookStore } from "../stores/books";
+import useDBStore from '../stores/db'
 import { storeToRefs } from "pinia";
 import { ref, reactive, onMounted } from "vue";
 
@@ -218,22 +219,18 @@ import { generateImage } from "../utils/generateFile";
 
 import moment from "moment";
 let useBook = useBookStore();
+let useDB = useDBStore()
 
 let {
-  todayStudyVocabulary,
-  showVocabularyItem,
-  currentBook,
-  currentRange,
-  dbInstance,
-  studyMode,
-  studyCount,
+  basicData,
 } = storeToRefs(useBook);
+let {
+    getTable,
+  } = useDB
 
 let router = useRouter();
 
 let divRef = ref(null);
-
-let todayDate = ref(moment().format("YYYY年M月D日"));
 
 let bookItemList = ref([]);
 
@@ -241,10 +238,6 @@ let vocalist = ref([]);
 let historyVocalist = ref([]);
 let bookData = ref([]);
 let rangeData = ref([]);
-
-let rangeNotInBookData = ref([]);
-
-let couldDataLen = ref(0);
 
 getBookRangeData();
 
@@ -261,14 +254,14 @@ function generateDom() {
 }
 
 async function getBookRangeData() {
-  let bookTable = await dbInstance.value.getTable(currentBook.value);
-  let rangeTable = await dbInstance.value.getTable(currentRange.value);
+  let bookTable = await getTable(basicData.value.currentBook);
+  let rangeTable = await getTable(basicData.value.currentRange);
 
   bookData.value = await bookTable.toArray();
   rangeData.value = await rangeTable.toArray();
 
-  let todayTable = await dbInstance.value.getTable("today-studied-voca");
-  let historyTable = await dbInstance.value.getTable("studied-voca");
+  let todayTable = await getTable("today-studied-voca");
+  let historyTable = await getTable("studied-voca");
 
   vocalist.value = await todayTable.toArray();
 

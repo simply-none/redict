@@ -11,6 +11,7 @@ import {
 import { ElNotification, ElMessage, ElLoading } from "element-plus";
 
 import { useBookStore } from "../stores/books";
+import useDBStore from "../stores/db";
 import { storeToRefs } from "pinia";
 
 import moment from "moment";
@@ -19,6 +20,7 @@ import { setNotify } from "../utils/element-plus";
 
 export function useVoca() {
   let useBook = useBookStore();
+  let useDB = useDBStore();
 
   // 今日学习数据
   let todayStudyWordsTable = ref();
@@ -45,42 +47,25 @@ export function useVoca() {
 
   let {
     todayStudyVocabulary,
-    showVocabularyItem,
-    currentBook,
-    currentRange,
-    dbInstance,
-    studyMode,
-    studyCount,
     basicData,
   } = storeToRefs(useBook);
+
+  let { getTable, addTable } = useDB;
 
   const drawer = ref(false);
 
   let bookItem = ref(null);
 
   watch(
-    () => currentBook.value,
-    async () => {
-      console.log("修改书本");
-      table.value = await getDatabaseTable(currentBook.value, "");
-    }
-  );
-
-  watch(
-    () => currentRange.value,
-    async () => {
-      console.log("修改范围");
-      rangeTable.value = await getDatabaseTable(currentRange.value, "");
-      rangeWords.value = await getTypeFilterData(rangeTable);
-    }
-  );
-
-  watch(
-    () => basicData.value,
+    basicData,
     () => {
+      console.log("进来");
       getData();
     },
-    { immediate: true }
+    {
+      deep: true,
+      // immediate: true
+    }
   );
 
   // 改造start
@@ -99,12 +84,12 @@ export function useVoca() {
     }
     let message =
       "你当前正处于" +
-      studyMode.value +
+      basicData.value.studyMode +
       "模式" +
       "，范围值：" +
-      currentRange.value +
+      basicData.value.currentRange +
       "，当前课本：" +
-      currentBook.value;
+      basicData.value.currentBook;
     setNotify(message, "success");
     console.log(isRequired, "是否含有必须字段");
 
@@ -114,11 +99,11 @@ export function useVoca() {
       "today-studied-voca",
       "++id"
     );
-    
+
     // 总数据表
-    table.value = await getDatabaseTable(currentBook.value, "");
+    table.value = await getDatabaseTable(basicData.value.currentBook, "");
     // 范围表
-    rangeTable.value = await getDatabaseTable(currentRange.value, "");
+    rangeTable.value = await getDatabaseTable(basicData.value.currentRange, "");
 
     // 后续操作...
     todayStudyWords.value = await getTypeData(todayStudyWordsTable);
@@ -144,7 +129,6 @@ export function useVoca() {
     }
     const required = ["currentBook", "currentRange", "studyMode", "studyCount"];
     return required.every((field) => {
-      console.log(obj[field]);
       return obj[field];
     });
   }
@@ -158,10 +142,10 @@ export function useVoca() {
     if (reviewMode.value) {
       return true;
     }
-    if (studyMode.value !== "study") {
+    if (basicData.value.studyMode !== "study") {
       return true;
     }
-    if (todayStudyVocabulary.value.length >= studyCount.value) {
+    if (todayStudyVocabulary.value.length >= basicData.value.studyCount) {
       // 弹出学习提示框（完成50个）
       // startReviewMode(true)
       setNotify("今日单词计划已完成，将开启复习模式！", "success", "恭喜");
@@ -173,24 +157,24 @@ export function useVoca() {
 
   // 获取能够展示单词卡片的索引
   async function getCouldStudyWords(isInit = false) {
-    if (!currentBook.value || !currentRange.value) {
+    if (!basicData.value.currentBook || !basicData.value.currentRange) {
       return [];
     }
 
     let studyWordsData = [];
     // 查看是否是复习过去的单词模式
-    console.log(studyMode.value, "复习模式");
-    if (studyMode.value === "review-past") {
+    console.log(basicData.value.studyMode, "复习模式");
+    if (basicData.value.studyMode === "review-past") {
       studyWordsData = toRaw(studyWords.value);
     }
 
     let moreThanPlan = moreThanTodayPlan();
 
     // 超过今天计划，则自动开启复习模式
-    if (studyMode.value === "study" && moreThanPlan) {
+    if (basicData.value.studyMode === "study" && moreThanPlan) {
       studyWordsData = toRaw(todayStudyVocabulary.value);
     }
-    if (studyMode.value === "study" && !moreThanPlan) {
+    if (basicData.value.studyMode === "study" && !moreThanPlan) {
       // 第一次初始化，则从表中读取
       if (isInit) {
         studyWordsData = await table.value
@@ -220,7 +204,7 @@ export function useVoca() {
 
     if (len === 0) {
       setNotify(
-        `当前模式${studyMode.value}下，没有能够学习的单词，请切换模式！`
+        `当前模式${basicData.value.studyMode}下，没有能够学习的单词，请切换模式！`
       );
       drawer.value = true;
       return false;
@@ -239,11 +223,11 @@ export function useVoca() {
     let moreThanPlan = moreThanTodayPlan();
     let random = 0;
 
-    if (studyMode.value === "study" && !moreThanPlan) {
+    if (basicData.value.studyMode === "study" && !moreThanPlan) {
       random = Math.floor(Math.random() * range);
     }
 
-    if (studyMode.value === "review-past" || moreThanPlan) {
+    if (basicData.value.studyMode === "review-past" || moreThanPlan) {
       let lastVocabulary = bookItem.value?.n;
       let findIndex = couldStudyWordsName.value.findIndex(
         (name) => lastVocabulary === name
@@ -290,10 +274,10 @@ export function useVoca() {
 
   // 获取数据表，无则创建表
   async function getDatabaseTable(tableName, tableSchema) {
-    let loadTable = dbInstance.value.getTable(tableName);
+    let loadTable = getTable(tableName);
     if (!loadTable) {
-      await dbInstance.value.addTable(tableName, tableSchema);
-      loadTable = dbInstance.value.getTable(tableName);
+      await addTable(tableName, tableSchema);
+      loadTable = getTable(tableName);
     }
     return loadTable;
   }
@@ -307,6 +291,12 @@ export function useVoca() {
     if (payload.drawer) {
       return false;
     }
+    if (!basicData.value.currentBook || !basicData.value.currentRange) {
+      return false;
+    }
+    table.value = await getDatabaseTable(basicData.value.currentBook, "");
+    rangeTable.value = await getDatabaseTable(basicData.value.currentRange, "");
+    rangeWords.value = await getTypeFilterData(rangeTable);
     fullscreenLoading.value = true;
     couldStudyWordsName.value = await getCouldStudyWords(true);
 
@@ -334,7 +324,7 @@ export function useVoca() {
       date: date,
       count: findPutData?.count ? findPutData.count + 1 : 1,
     };
-    if (studyMode.value === "study") {
+    if (basicData.value.studyMode === "study") {
       todayStudyVocabulary.value.push(putData.n);
       todayStudyWordsTable.value.put(putData);
     }

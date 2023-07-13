@@ -9,24 +9,20 @@
     class="demo-ruleForm"
   >
     <el-form-item label="学习模式" prop="studyMode">
-      <el-radio-group v-model="ruleForm.studyMode" @change="setStudyMode">
+      <el-radio-group v-model="ruleForm.studyMode" @change="setBasicInfo($event, 'studyMode')">
         <el-radio :label="'review-past'">复习</el-radio>
         <el-radio :label="'study'">学习</el-radio>
       </el-radio-group>
     </el-form-item>
     <el-form-item label="单词学习个数" prop="studyCount">
-      <el-radio-group v-model="ruleForm.studyCount" @change="setStudyCount">
-        <el-radio :label="20" />
-        <el-radio :label="30" />
-        <el-radio :label="40" />
-        <el-radio :label="50" />
-        <el-radio :label="100" />
+      <el-radio-group v-model="ruleForm.studyCount" @change="setBasicInfo($event, 'studyCount')">
+        <el-radio :label="count" v-for="count in studyCounts" :key="count"/>
       </el-radio-group>
     </el-form-item>
-    <el-form-item label="选择书本" prop="book">
+    <el-form-item label="选择书本" prop="currentBook">
       <el-select
-        @change="setCurrentBook"
-        v-model="ruleForm.book"
+        @change="setBasicInfo($event, 'currentBook')"
+        v-model="ruleForm.currentBook"
         clearable
         placeholder="Select"
       >
@@ -38,10 +34,10 @@
         />
       </el-select>
     </el-form-item>
-    <el-form-item label="选择范围" prop="range">
+    <el-form-item label="选择范围" prop="currentRange">
       <el-select
-        @change="setCurrentRange"
-        v-model="ruleForm.range"
+        @change="setBasicInfo($event, 'currentRange')"
+        v-model="ruleForm.currentRange"
         clearable
         placeholder="Select"
       >
@@ -53,8 +49,8 @@
         />
       </el-select>
     </el-form-item>
-    <el-form-item label="单词展示项" prop="showItem">
-      <el-checkbox-group v-model="ruleForm.showItem" @change="setShowItem">
+    <el-form-item label="单词展示项" prop="showVocabularyItem">
+      <el-checkbox-group v-model="ruleForm.showVocabularyItem" @change="setBasicInfo($event, 'showVocabularyItem')">
         <el-checkbox
           :label="item.name"
           border
@@ -70,9 +66,11 @@
 import { ref, reactive, onMounted, toValue, toRaw, watch, computed } from "vue";
 
 import { useBookStore } from "../stores/books";
+import useDBStore from '../stores/db'
 import { storeToRefs } from "pinia";
 
 let useBook = useBookStore();
+let useDB = useDBStore()
 
 let props = defineProps({
   alreadySetBasic: {
@@ -86,30 +84,26 @@ let props = defineProps({
 let emit = defineEmits(['alreadySetBasicHandle'])
 
 let {
-  books,
-  currentBook,
-  showVocabularyItem,
-  currentRange,
-  studyMode,
-  studyCount,
+  basicData,
 } = storeToRefs(useBook);
 let {
-  updateCurrentBook,
-  updateStudyCount,
-  updateStudyMode,
-  updateCurrentRange,
-  updateShowVocabularyItem,
+  updateBasicInfo,
 } = useBook;
+let {
+  schema
+} = storeToRefs(useDB)
 
 let bookList = computed(() => {
-  return Object.keys(books.value).filter((book) => /^book-/.test(book));
+  return Object.keys(schema.value).filter((book) => /^book-/.test(book));
 });
 
 let rangeList = computed(() => {
-  return Object.keys(books.value).filter((book) => /^range-/.test(book));
+  return Object.keys(schema.value).filter((range) => /^range-/.test(range));
 });
 
 const ruleFormRef = ref();
+
+let studyCounts = [10, 15, 20, 30, 50, 100]
 
 let showVocabularyList = [
   {
@@ -145,13 +139,7 @@ let showVocabularyList = [
 // 学习模式是否改变，改变时，需要刷新一下数据
 let studyModeIsChanged = ref(false)
 
-const ruleForm = reactive({
-  book: "",
-  range: "",
-  showItem: [],
-  studyMode: "study",
-  studyCount: 30,
-});
+const ruleForm = reactive(basicData)
 
 watch(() => props.validate, async () => {
   if (!ruleFormRef.value) return
@@ -168,74 +156,10 @@ watch(() => props.validate, async () => {
   })
 })
 
-
-
-// if (!studyMode.value) {
-//   setStudyMode("study");
-// }
-// if (!studyCount.value) {
-//   setStudyCount(30);
-// }
-
-ruleForm.book = computed({
-  get() {
-    return currentBook.value;
-  },
-  set() {},
-});
-
-ruleForm.showItem = computed({
-  get() {
-    return showVocabularyItem.value;
-  },
-  set() {},
-});
-
-ruleForm.range = computed({
-  get() {
-    return currentRange.value;
-  },
-  set() {},
-});
-
-ruleForm.studyMode = computed({
-  get() {
-    return studyMode.value;
-  },
-  set() {},
-});
-
-ruleForm.studyCount = computed({
-  get() {
-    return studyCount.value;
-  },
-  set() {},
-});
-
-function setCurrentBook(val) {
-  console.log(val);
-  updateCurrentBook(val);
-}
-
-function setCurrentRange(val) {
-  console.log(val);
-  updateCurrentRange(val);
-}
-
-function setStudyMode(val) {
-  console.log(val);
+function setBasicInfo (val, field) {
+  console.log(val, field, '更新当前字段')
+  updateBasicInfo(field, val)
   studyModeIsChanged.value = true
-  updateStudyMode(val);
-}
-
-function setStudyCount(val) {
-  console.log(val);
-  updateStudyCount(val);
-}
-
-function setShowItem(val) {
-  console.log(val);
-  updateShowVocabularyItem(val);
 }
 
 const validateBook = (rule, value, callback) => {
@@ -271,13 +195,10 @@ const validateStudyCount = (rule, value, callback) => {
 };
 
 const rules = reactive({
-  book: [{ validator: validateBook, trigger: "blur" }],
-  range: [{ validator: validateRange, trigger: "blur" }],
+  currentBook: [{ validator: validateBook, trigger: "blur" }],
+  currentRange: [{ validator: validateRange, trigger: "blur" }],
   studyMode: [{ validator: validateStudyMode, trigger: "blur" }],
   studyCount: [{ validator: validateStudyCount, trigger: "blur" }],
 });
 
-let data = ref();
-
-onMounted(async () => {});
 </script>

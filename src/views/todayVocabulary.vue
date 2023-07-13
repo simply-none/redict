@@ -1,28 +1,7 @@
 <!-- 展示当日完成的单词列表 -->
 <template>
-  <el-descriptions title="基础数据览表" :column="1" border>
-    <el-descriptions-item label="选择书本">{{
-      currentBook
-    }}</el-descriptions-item>
-    <el-descriptions-item label="书本词汇">{{
-      bookData.length
-    }}</el-descriptions-item>
-    <el-descriptions-item label="选择范围">{{
-      currentRange
-    }}</el-descriptions-item>
-    <el-descriptions-item label="范围词汇">{{
-      rangeData.length
-    }}</el-descriptions-item>
-    <el-descriptions-item label="范围可用词汇">{{
-      couldDataLen
-    }}</el-descriptions-item>
-    <el-descriptions-item label="范围不可用词汇">{{
-      rangeNotInBookData.length
-    }}</el-descriptions-item>
-  </el-descriptions>
-
   <h3 class="today-voca-head">
-    {{ todayDate }}背诵单词，共计：{{ vocalist.length }}个
+    今日（{{ todayDate }}）背诵单词，共计：{{ vocalist.length }}个
     <el-link @click="lookTodayVocaMore">查看更多...</el-link>
   </h3>
   <el-table :data="vocalist" max-height="250" style="width: 100%" border stripe>
@@ -74,61 +53,84 @@
   </el-table>
 </template>
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 
 import { useBookStore } from "../stores/books";
+import useDBStore from "../stores/db";
 import { storeToRefs } from "pinia";
 
 import { useRoute, useRouter } from "vue-router";
 
 import moment from "moment";
 
-let todayDate = ref(moment().format("YYYY年M月D日"));
+let todayDate = ref(moment().format("YYYY-MM-DD"));
 
 let useBook = useBookStore();
+let useDB = useDBStore();
 
-let { dbInstance, currentBook, currentRange } = storeToRefs(useBook);
+let { basicData } = storeToRefs(useBook);
+let { getTable, schema } = useDB;
+console.log(
+  JSON.parse(JSON.stringify(schema)),
+  basicData.value.currentBook,
+  basicData.value.currentRange
+);
 
-let todayTable = dbInstance.value.getTable("today-studied-voca");
-let historyTable = dbInstance.value.getTable("studied-voca");
+let todayTable = getTable("today-studied-voca");
+let historyTable = getTable("studied-voca");
 
 let vocalist = ref([]);
 let historyVocalist = ref([]);
 let bookData = ref([]);
 let rangeData = ref([]);
 
-let rangeNotInBookData = ref([])
+let rangeNotInBookData = ref([]);
 
-let couldDataLen = ref(0)
+let couldDataLen = ref(0);
 
-let router = useRouter()
+let router = useRouter();
 
-getVocaList();
+watch(
+  basicData,
+  () => {
+    getVocaList();
+    getHistoryVocaList();
+    getBookRangeData();
+  },
+  {
+    deep: true,
+    immediate: true,
+  }
+);
 
-getHistoryVocaList();
-
-getBookRangeData();
-
-function lookTodayVocaMore () {
+function lookTodayVocaMore() {
   router.push({
-    name: 'lookTodayVoca'
-  })
+    name: "lookTodayVoca",
+  });
 }
 
 async function getBookRangeData() {
-  let bookTable = await dbInstance.value.getTable(currentBook.value);
-  let rangeTable = await dbInstance.value.getTable(currentRange.value);
+  if (!basicData.value.currentBook || !basicData.value.currentRange) {
+    return false;
+  }
+  let bookTable = await getTable(basicData.value.currentBook);
+  let rangeTable = await getTable(basicData.value.currentRange);
+  console.log(bookTable, rangeTable);
 
   bookData.value = await bookTable.toArray();
   rangeData.value = await rangeTable.toArray();
 
-  console.log(rangeData.value[0])
+  console.log(rangeData.value[0]);
 
-  let tempRange = bookData.value.map(w => w.n.toLowerCase())
-  tempRange = rangeData.value.filter(w => tempRange.includes(w.n.toLowerCase())).map(w => w.n.toLowerCase())
-  console.log(tempRange[0])
-  rangeNotInBookData.value = rangeData.value.filter(w => !tempRange.includes(w.n.toLowerCase()))
-  couldDataLen.value = tempRange.length
+  let tempRange = bookData.value.map((w) => w.n.toLowerCase());
+  tempRange = rangeData.value
+    .filter((w) => tempRange.includes(w.n.toLowerCase()))
+    .map((w) => w.n.toLowerCase());
+  console.log(tempRange[0]);
+  rangeNotInBookData.value = rangeData.value.filter(
+    (w) => !tempRange.includes(w.n.toLowerCase())
+  );
+  couldDataLen.value = tempRange.length;
 }
 
 async function getVocaList() {

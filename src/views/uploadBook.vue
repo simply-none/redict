@@ -41,7 +41,10 @@
       <el-input v-model="ruleForm.tableSchema" autocomplete="off" />
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" :loading="saveLoading" @click="localSaveData(ruleFormRef)"
+      <el-button
+        type="primary"
+        :loading="saveLoading"
+        @click="localSaveData(ruleFormRef)"
         >{{ saveField }}</el-button
       >
       <el-button @click="resetForm(ruleFormRef)">取消</el-button>
@@ -51,44 +54,34 @@
 <script setup>
 import { ElNotification } from "element-plus";
 import { ref, reactive, watch, onMounted, computed, toValue, toRaw } from "vue";
+import { setNotify } from "../utils/element-plus";
+import useDBStore from "../stores/db";
 
-import { useBookStore } from "../stores/books";
-import { storeToRefs } from "pinia";
-
-let useBook = useBookStore();
-let { dbInstance } = storeToRefs(useBook);
+let useDB = useDBStore();
+let { getTable, addTable } = useDB;
 
 const ruleFormRef = ref();
 
-let saveField = ref('等待中')
-let saveLoading = ref(true)
+let saveField = ref("等待中");
+let saveLoading = ref(true);
+
+let tablename = ref("");
+let uploadRef = ref();
 
 const ruleForm = reactive({
   tableName: "",
   tableSchema: "",
   type: "",
   tableInitData: [],
-  age: "",
 });
 
-const checkAge = (rule, value, callback) => {
-  if (!value) {
-    return callback(new Error("Please input the age"));
-  }
-  setTimeout(() => {
-    if (!Number.isInteger(value)) {
-      callback(new Error("Please input digits"));
-    } else {
-      if (value < 18) {
-        callback(new Error("Age must be greater than 18"));
-      } else {
-        callback();
-      }
-    }
-  }, 1000);
-};
+const rules = reactive({
+  type: [{ required: true, trigger: "change", message: "请选择上传类型" }],
+  tableSchema: [{ validator: validateTableSchema, trigger: "blur" }],
+  tableName: [{ validator: validateTableName, trigger: "blur" }],
+});
 
-const validateTableSchema = (rule, value, callback) => {
+function validateTableSchema  (rule, value, callback) {
   if (value === "") {
     callback(new Error("数据库表结构为空"));
     return false;
@@ -105,7 +98,7 @@ const validateTableSchema = (rule, value, callback) => {
     callback(new Error("数据库表结构验证失败"));
   }
 };
-const validateTableName = (rule, value, callback) => {
+function validateTableName (rule, value, callback) {
   if (value === "") {
     callback(new Error("数据库表名为空"));
   } else {
@@ -113,18 +106,13 @@ const validateTableName = (rule, value, callback) => {
   }
 };
 
-const rules = reactive({
-  type: [{ required: true, trigger: "change", message: "请选择上传类型" }],
-  tableSchema: [{ validator: validateTableSchema, trigger: "blur" }],
-  tableName: [{ validator: validateTableName, trigger: "blur" }],
-  age: [{ validator: checkAge, trigger: "blur" }],
-});
 
-const localSaveData = (formEl) => {
+
+function localSaveData (formEl) {
   console.log(ruleForm, "数据");
   if (!formEl) return;
-  saveField.value = '数据处理中'
-  saveLoading.value = true
+  saveField.value = "数据处理中";
+  saveLoading.value = true;
   formEl.validate(async (valid) => {
     if (!valid) {
       console.log("error submit!");
@@ -134,46 +122,31 @@ const localSaveData = (formEl) => {
       await addTable(bookTableName, ruleForm.tableSchema);
 
       putData(bookTableName, toRaw(ruleForm.tableInitData));
-      formEl.resetFields()
-      saveField.value = '等待中'
-      saveLoading.value = true
+      formEl.resetFields();
+      saveField.value = "等待中";
+      saveLoading.value = true;
     }
   });
 };
 
-const resetForm = (formEl) => {
+function resetForm (formEl) {
   if (!formEl) return;
   formEl.resetFields();
 };
 
-let data = ref();
-
-let schema = ref("");
-let tablename = ref("");
-
-onMounted(async () => {});
 
 function handleStart(e) {
   console.log(e);
   if (!ruleForm.type) {
-    ElNotification({
-      title: "警告",
-      message: "请先选择上传文件类型",
-      type: "warning",
-    });
+    setNotify("请先选择上传文件类型", "warning", "警告");
     e.preventDefault();
     return false;
   }
 }
 
-async function addTable(tableName, tableSchema) {
-  // 必须等待表建完之后，才能handleT
-  await dbInstance.value.addTable(tableName, tableSchema);
-}
-
 function putData(tableName, data) {
   let t = tablename.value;
-  let table = dbInstance.value.getTable(tableName);
+  let table = getTable(tableName);
 
   // 若已经有该数据，则清空后上传
   if (table) {
@@ -185,33 +158,20 @@ function putData(tableName, data) {
     table
       .bulkPut(data)
       .then(() => {
-        ElNotification({
-          title: "提示",
-          message: "文件数据已保存！",
-          type: "success",
-        });
+        setNotify("文件数据已保存！", "success");
       })
       .catch((err) => {
-        ElNotification({
-          title: "错误",
-          message: "保存失败，请稍后再试！",
-          type: "error",
-        });
+        setNotify("保存失败，请稍后再试！", "error", "错误");
       });
 }
 
-const uploadRef = ref();
 
 function beforeUpload(uploadfile, uploadfiles) {
   console.log(uploadfile, uploadfiles);
   let tableName = uploadfile?.name ?? "";
   tableName = tableName.split(".")[0];
   if (uploadfile?.raw?.type !== "application/json") {
-    ElNotification({
-      title: "警告",
-      message: "当前上传文件非json格式",
-      type: "warning",
-    });
+    setNotify("当前上传文件非json格式", "warning", "警告");
     return false;
   }
   var reader = new FileReader();
@@ -241,16 +201,12 @@ function beforeUpload(uploadfile, uploadfiles) {
         return true;
       });
       if (validateContent) {
-        ElNotification({
-          title: "警告",
-          message: "内容数据格式错误",
-          type: "warning",
-        });
+        setNotify("内容数据格式错误", "warning", "警告");
         return false;
       }
       // 处理数据
-      saveField.value = '保存'
-      saveLoading.value = false
+      saveField.value = "保存";
+      saveLoading.value = false;
       let schemaItems = "++id, " + Object.keys(schema).join(", ");
       if (ruleForm.type === "range") {
         initData = initData.map((word) => {
@@ -268,15 +224,10 @@ function beforeUpload(uploadfile, uploadfiles) {
         ruleForm.tableName = "book-" + tableName;
       }
     } catch {
-      ElNotification({
-        title: "警告",
-        message: "内容数据格式错误",
-        type: "warning",
-      });
+      setNotify("内容数据格式错误", "warning", "警告");
     }
     console.log();
   };
   return true;
 }
 </script>
-../hooks/database
