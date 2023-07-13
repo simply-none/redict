@@ -1,6 +1,6 @@
 import { ref, computed, watch, reactive, toRaw, toRefs } from "vue";
 import { defineStore, storeToRefs } from "pinia";
-import useDBStore from './db'
+import useDBStore from "./db";
 
 export const useBookStore = defineStore("book", () => {
   // let currentBook = ref("");
@@ -14,49 +14,52 @@ export const useBookStore = defineStore("book", () => {
 
   let todayStudyVocabulary = ref([]);
 
-
   let basicData = reactive({
-    currentBook: '',
-    currentRange: '',
-    studyMode: '',
+    currentBook: "",
+    currentRange: "",
+    studyMode: "",
     studyCount: 0,
-    showVocabularyItem: []
-  })
+    showVocabularyItem: [],
+  });
 
-  let useDB = useDBStore()
-  let { schema, dbChanged } = storeToRefs(useDB)
-  let {getTable } = useDB
+  let useDB = useDBStore();
+  let { schema, dbChanged } = storeToRefs(useDB);
+  let { getTable } = useDB;
 
   watch(
     () => dbChanged.value,
     async (newV, oldV) => {
-      console.log(newV, oldV, Date.now(), '版本变更')
-      
-      console.log(schema, 'console')
+      console.log(newV, oldV, Date.now(), "版本变更");
+
+      console.log(schema, "console");
 
       let tableList = Object.keys(schema.value);
       let basic = tableList.find((l) => l === "basic-info");
       let basicTable = getTable(basic);
-      console.log(tableList, basicTable, 'basicTable')
+      console.log(tableList, basicTable, "basicTable");
       if (!basicTable) {
         return false;
       }
 
-      if (basicTable) {
-        let basicInfo = await basicTable.get(1);
+      let basicInfo = (await basicTable.get(1));
 
-        Object.keys(basicInfo).forEach(field => {
-          basicData[field] = toRaw(basicInfo[field])
-        })
-        console.log(basicData)
+      if (!basicInfo) {
+        basicData.name = '基础数据'
+        return false
       }
+
+
+      Object.keys(basicInfo).forEach((field) => {
+        basicData[field] = toRaw(basicInfo[field]);
+      });
+      console.log(basicData);
     },
     { deep: true, immediate: true }
   );
 
   async function updateBasicInfo(field, newData) {
-    basicData[field] = newData
-    console.log(basicData)
+    basicData[field] = newData;
+    console.log(basicData);
     let tableList = Object.keys(schema.value);
     let basic = tableList.find((l) => l === "basic-info");
     let basicTable = getTable(basic);
@@ -65,7 +68,7 @@ export const useBookStore = defineStore("book", () => {
       ...basicInfo,
       id: 1,
       name: "基础数据",
-      [field]: toRaw(newData)
+      [field]: toRaw(newData),
     });
   }
 

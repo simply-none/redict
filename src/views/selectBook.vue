@@ -139,7 +139,7 @@ let showVocabularyList = [
 // 学习模式是否改变，改变时，需要刷新一下数据
 let studyModeIsChanged = ref(false)
 
-const ruleForm = reactive(basicData)
+const ruleForm = reactive(basicData.value)
 
 watch(() => props.validate, async () => {
   if (!ruleFormRef.value) return
