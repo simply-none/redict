@@ -5,3 +5,8 @@ html, body, #app {
   width: 100%;
   height: 100%;
 }
+
+*::-webkit-scrollbar {
+  /*隐藏滚轮*/
+  display: none;
+}

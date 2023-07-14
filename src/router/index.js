@@ -8,8 +8,8 @@ export const routes = [
   },
   {
     path: '/',
-    name: 'test',
-    component: () => import('../views/test.vue')
+    name: 'wordMainPage',
+    component: () => import('../views/wordMainPage.vue')
   }
 ]
 

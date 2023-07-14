@@ -8,10 +8,9 @@ import {
   watchEffect,
   unref,
 } from "vue";
-import { ElNotification, ElMessage, ElLoading } from "element-plus";
 
 import { useBookStore } from "../stores/books";
-import useDBStore from "../stores/db";
+import useTableStore from '../stores/table'
 import { storeToRefs } from "pinia";
 
 import moment from "moment";
@@ -20,7 +19,10 @@ import { setNotify } from "../utils/element-plus";
 
 export function useVoca() {
   let useBook = useBookStore();
-  let useDB = useDBStore();
+  let {
+    getDBTable,
+    getDBTableData
+  } = useTableStore()
 
   // 今日学习数据
   let todayStudyWordsTable = ref();
@@ -44,11 +46,8 @@ export function useVoca() {
   const fullscreenLoading = ref(true);
 
   let {
-    todayStudyVocabulary,
     basicData,
   } = storeToRefs(useBook);
-
-  let { getTable, addTable } = useDB;
 
   const drawer = ref(false);
 
@@ -67,7 +66,7 @@ export function useVoca() {
   // 改造start
   async function getData() {
     // 学习过的数据表
-    studyTalbe.value = await getDatabaseTable("studied-voca", "++id, n, date");
+    studyTalbe.value = await getDBTable("studied-voca", "++id, n, date");
     console.log(basicData.value, "测试basicData");
     // fullscreenLoading.value = true;
     let isRequired = isRequiredField(basicData);
@@ -91,20 +90,20 @@ export function useVoca() {
 
     // 加载所有相关表
     // 今日数据表
-    todayStudyWordsTable.value = await getDatabaseTable(
+    todayStudyWordsTable.value = await getDBTable(
       "today-studied-voca",
       "++id"
     );
 
     // 总数据表
-    table.value = await getDatabaseTable(basicData.value.currentBook, "");
+    table.value = await getDBTable(basicData.value.currentBook, "");
     // 范围表
-    rangeTable.value = await getDatabaseTable(basicData.value.currentRange, "");
+    rangeTable.value = await getDBTable(basicData.value.currentRange, "");
 
     // 后续操作...
-    todayStudyWords.value = await getTypeData(todayStudyWordsTable);
-    rangeWords.value = await getTypeFilterData(rangeTable);
-    studyWords.value = await getTypeFilterData(studyTalbe);
+    todayStudyWords.value = await getDBTableData(todayStudyWordsTable);
+    rangeWords.value = await getDBTableData(rangeTable, ['n']);
+    studyWords.value = await getDBTableData(studyTalbe, ['n']);
 
     await getTodayStudyWords();
 
@@ -141,7 +140,7 @@ export function useVoca() {
     if (basicData.value.studyMode !== "study") {
       return true;
     }
-    if (todayStudyVocabulary.value.length >= basicData.value.studyCount) {
+    if (todayStudyWords.value.length >= basicData.value.studyCount) {
       setNotify("今日单词计划已完成，将开启复习模式！", "success", "恭喜");
       reviewMode.value = true;
       return true;
@@ -166,7 +165,7 @@ export function useVoca() {
 
     // 超过今天计划，则自动开启复习模式
     if (basicData.value.studyMode === "study" && moreThanPlan) {
-      studyWordsData = toRaw(todayStudyVocabulary.value);
+      studyWordsData = toRaw(todayStudyWords.value);
     }
     if (basicData.value.studyMode === "study" && !moreThanPlan) {
       // 第一次初始化，则从表中读取
@@ -183,7 +182,7 @@ export function useVoca() {
       // 非第一次初始化，直接过滤
       if (!isInit) {
         studyWordsData = couldStudyWordsName.value.filter(
-          (word) => !todayStudyVocabulary.value.includes(word)
+          (word) => !todayStudyWords.value.includes(word)
         );
       }
     }
@@ -205,7 +204,6 @@ export function useVoca() {
     }
 
     let random = generateRandom(len);
-
     // 根据标识在总数据表中获取该标识对应的数据
     let vocabularycard = await table.value.get({
       n: couldStudyWordsName.value[random],
@@ -234,15 +232,6 @@ export function useVoca() {
     return random;
   }
 
-  async function getTypeData(table) {
-    return await table.value.toArray();
-  }
-
-  async function getTypeFilterData(table) {
-    let words = await getTypeData(table);
-    return words.map((word) => word.n);
-  }
-
   function getTodayDate() {
     return moment().format("YYYY-MM-DD");
   }
@@ -257,22 +246,7 @@ export function useVoca() {
       await todayStudyWordsTable.value.orderBy().delete();
     }
 
-    todayStudyWords.value = await getTypeFilterData(todayStudyWordsTable);
-
-    // 将数据库中今日学习单词，合并到当前的状态管理对象中
-    todayStudyVocabulary.value = [
-      ...new Set(todayStudyVocabulary.value.concat(todayStudyWords.value)),
-    ];
-  }
-
-  // 获取数据表，无则创建表
-  async function getDatabaseTable(tableName, tableSchema) {
-    let loadTable = getTable(tableName);
-    if (!loadTable) {
-      await addTable(tableName, tableSchema);
-      loadTable = getTable(tableName);
-    }
-    return loadTable;
+    todayStudyWords.value = await getDBTableData(todayStudyWordsTable, ['n']);
   }
 
   async function handleDrawer(payload) {
@@ -283,9 +257,12 @@ export function useVoca() {
     if (!basicData.value.currentBook || !basicData.value.currentRange) {
       return false;
     }
-    table.value = await getDatabaseTable(basicData.value.currentBook, "");
-    rangeTable.value = await getDatabaseTable(basicData.value.currentRange, "");
-    rangeWords.value = await getTypeFilterData(rangeTable);
+    if (!payload.changed) {
+      return false
+    }
+    table.value = await getDBTable(basicData.value.currentBook, "");
+    rangeTable.value = await getDBTable(basicData.value.currentRange, "");
+    rangeWords.value = await getDBTableData(rangeTable, ['n']);
     fullscreenLoading.value = true;
     couldStudyWordsName.value = await getCouldStudyWords(true);
 
@@ -314,8 +291,8 @@ export function useVoca() {
       count: findPutData?.count ? findPutData.count + 1 : 1,
     };
     if (basicData.value.studyMode === "study") {
-      todayStudyVocabulary.value.push(putData.n);
-      todayStudyWordsTable.value.put(putData);
+      await todayStudyWordsTable.value.put(putData);
+      todayStudyWords.value = await getDBTableData(todayStudyWordsTable, ['n'], true);
     }
 
     studyTalbe.value.put(putData);

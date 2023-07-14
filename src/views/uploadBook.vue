@@ -106,8 +106,6 @@ function validateTableName (rule, value, callback) {
   }
 };
 
-
-
 function localSaveData (formEl) {
   console.log(ruleForm, "数据");
   if (!formEl) return;

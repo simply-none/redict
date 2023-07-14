@@ -1,6 +1,6 @@
 <!-- 展示当日完成的单词列表 -->
 <template>
-  <el-descriptions title="基础数据览表" :column="1" border>
+  <el-descriptions :column="1" border>
     <el-descriptions-item label="选择书本">{{
       basicData.currentBook
     }}</el-descriptions-item>
@@ -48,9 +48,12 @@ watch(
   },
   {
     deep: true,
-    immediate: true,
   }
 );
+
+onMounted(() => {
+  getBookRangeData();
+});
 
 async function getBookRangeData() {
   if (!basicData.value.currentBook || !basicData.value.currentRange) {
@@ -75,7 +78,6 @@ async function getBookRangeData() {
   );
   couldDataLen.value = tempRange.length;
 }
-
 </script>
 <style lang="scss" scoped>
 .today-voca {

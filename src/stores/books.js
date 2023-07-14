@@ -3,22 +3,13 @@ import { defineStore, storeToRefs } from "pinia";
 import useDBStore from "./db";
 
 export const useBookStore = defineStore("book", () => {
-  // let currentBook = ref("");
-  // let currentRange = ref("");
-
-  // let studyMode = ref("");
-
-  // let studyCount = ref(0);
-
-  // let showVocabularyItem = ref([]);
-
-  let todayStudyVocabulary = ref([]);
 
   let basicData = reactive({
     currentBook: "",
     currentRange: "",
     studyMode: "",
     studyCount: 0,
+    showMode: '',
     showVocabularyItem: [],
   });
 
@@ -75,6 +66,5 @@ export const useBookStore = defineStore("book", () => {
   return {
     basicData,
     updateBasicInfo,
-    todayStudyVocabulary,
   };
 });

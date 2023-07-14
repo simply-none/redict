@@ -99,7 +99,7 @@ function alreadySetBasicHandle (val) {
   alreadySetBasic.value = val.isSetBasic
   emit('handleDrawer', {
     drawer: false,
-    studyModeIsChanged: val.studyModeIsChanged
+    changed: val.changed
   })
 }
 

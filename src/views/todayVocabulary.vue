@@ -99,9 +99,14 @@ watch(
   },
   {
     deep: true,
-    immediate: true,
   }
 );
+
+onMounted(() => {
+  getVocaList();
+  getHistoryVocaList();
+  getBookRangeData();
+});
 
 function lookTodayVocaMore() {
   router.push({
