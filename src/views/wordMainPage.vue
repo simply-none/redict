@@ -19,7 +19,7 @@
         ></el-button>
       </div>
     </template>
-    <div class="voca-card-body" @click="getWordItem">
+    <div class="voca-card-body" @dblclick="getWordItem">
       <ConciseWord v-if="basicData?.showMode === 'concise'" :basic-data="basicData" :book-item="bookItem"/>
       <WordCom v-else :basic-data="basicData" :book-item="bookItem"/>
     </div>
@@ -61,7 +61,8 @@ let {
 
 function getWordItem (e) {
   let windowClientY = document.body.clientHeight
-  let hasGet = (windowClientY - e.clientY) < 50
+  let windowClientX = document.body.clientWidth
+  let hasGet = windowClientX < e.clientX * 2
   if (!hasGet) {
     return false
   }
