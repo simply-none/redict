@@ -67,10 +67,10 @@ export function useVoca() {
   async function getData() {
     // 学习过的数据表
     studyTalbe.value = await getDBTable("studied-voca", "++id, n, date");
-    console.log(basicData.value, "测试basicData");
+    
     // fullscreenLoading.value = true;
     let isRequired = isRequiredField(basicData);
-    console.log(isRequired, "fs");
+    
     if (!isRequired) {
       setNotify("请完成基础设置后再试");
       drawer.value = true;
@@ -86,7 +86,7 @@ export function useVoca() {
       "，当前课本：" +
       basicData.value.currentBook;
     setNotify(message, "success");
-    console.log(isRequired, "是否含有必须字段");
+    
 
     // 加载所有相关表
     // 今日数据表
@@ -156,7 +156,7 @@ export function useVoca() {
 
     let studyWordsData = [];
     // 查看是否是复习过去的单词模式
-    console.log(basicData.value.studyMode, "复习模式");
+    
     if (basicData.value.studyMode === "review-past") {
       studyWordsData = toRaw(studyWords.value);
     }

@@ -159,21 +159,21 @@ watch(
     if (!ruleFormRef.value) return;
     await ruleFormRef.value.validate((valid, fields) => {
       if (valid) {
-        console.log("验证通过!");
+        
         emit("alreadySetBasicHandle", {
           isSetBasic: true,
           changed: changed.value,
         });
         changed.value = false;
       } else {
-        console.log("error submit!", fields);
+        
       }
     });
   }
 );
 
 function setBasicInfo(val, field) {
-  console.log(val, field, "更新当前字段");
+  
   updateBasicInfo(field, val);
   let changedField = ["currentBook", "currentRange"];
   if (changedField.includes(field)) {

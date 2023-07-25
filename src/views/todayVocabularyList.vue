@@ -103,7 +103,7 @@ async function getBookRangeData() {
 
   historyVocalist.value = await historyTable.toArray();
 
-  console.log(rangeData.value[0], historyVocalist.value);
+  
 
   let tempRange = vocalist.value.map((w) => w.n.toLowerCase());
   tempRange = bookData.value.filter((w) =>

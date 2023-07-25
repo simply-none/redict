@@ -107,13 +107,13 @@ function validateTableName (rule, value, callback) {
 };
 
 function localSaveData (formEl) {
-  console.log(ruleForm, "数据");
+  
   if (!formEl) return;
   saveField.value = "数据处理中";
   saveLoading.value = true;
   formEl.validate(async (valid) => {
     if (!valid) {
-      console.log("error submit!");
+      
       return false;
     } else {
       let bookTableName = ruleForm.tableName;
@@ -134,7 +134,7 @@ function resetForm (formEl) {
 
 
 function handleStart(e) {
-  console.log(e);
+  
   if (!ruleForm.type) {
     setNotify("请先选择上传文件类型", "warning", "警告");
     e.preventDefault();
@@ -151,7 +151,7 @@ function putData(tableName, data) {
     table.clear();
   }
 
-  console.log(table, tableName, data);
+  
   table &&
     table
       .bulkPut(data)
@@ -165,7 +165,7 @@ function putData(tableName, data) {
 
 
 function beforeUpload(uploadfile, uploadfiles) {
-  console.log(uploadfile, uploadfiles);
+  
   let tableName = uploadfile?.name ?? "";
   tableName = tableName.split(".")[0];
   if (uploadfile?.raw?.type !== "application/json") {
@@ -224,7 +224,7 @@ function beforeUpload(uploadfile, uploadfiles) {
     } catch {
       setNotify("内容数据格式错误", "warning", "警告");
     }
-    console.log();
+    
   };
   return true;
 }

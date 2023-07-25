@@ -61,18 +61,18 @@ async function getBookRangeData() {
   }
   let bookTable = await getTable(basicData.value.currentBook);
   let rangeTable = await getTable(basicData.value.currentRange);
-  console.log(bookTable, rangeTable);
+  
 
   bookData.value = await bookTable.toArray();
   rangeData.value = await rangeTable.toArray();
 
-  console.log(rangeData.value[0]);
+  
 
   let tempRange = bookData.value.map((w) => w.n.toLowerCase());
   tempRange = rangeData.value
     .filter((w) => tempRange.includes(w.n.toLowerCase()))
     .map((w) => w.n.toLowerCase());
-  console.log(tempRange[0]);
+  
   rangeNotInBookData.value = rangeData.value.filter(
     (w) => !tempRange.includes(w.n.toLowerCase())
   );

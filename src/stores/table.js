@@ -17,9 +17,9 @@ export default defineStore("DBTable", () => {
     let unrefTable = unref(table);
     let data = getTableSet(unrefTable.name, "data");
     if (!data || update) {
-      console.log('进来了')
+      
       data = await unrefTable.toArray();
-      console.log(data, 'data')
+      
       updateTableSet("data", unrefTable.name, data);
     }
     return data;

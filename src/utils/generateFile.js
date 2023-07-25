@@ -40,7 +40,7 @@ export function funDownloadByBase64 (domImg, filename) {
 // 生成图片，node为html node节点
 export function generateImage(node, type = 'svg', name) {
   let t = type[0].toUpperCase() + (type.split('')).slice(1).join('').toLowerCase()
-  console.log(t)
+  
   domtoimage['to' + t](node)
     .then(function (dataUrl) {
       const a = document.createElement("a");

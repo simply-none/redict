@@ -104,7 +104,7 @@ function alreadySetBasicHandle (val) {
 }
 
 function setSymbol (val) {
-  console.log(val, typeof val)
+  
   currentCollapse.value = val
 }
 

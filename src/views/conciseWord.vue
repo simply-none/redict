@@ -30,7 +30,7 @@ let explain = computed(() => {
 })
 
 function getExplain (word) {
-  console.log(word, 'ces')
+  
   if (!word) {
     return []
   }

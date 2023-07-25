@@ -20,14 +20,14 @@ export const useBookStore = defineStore("book", () => {
   watch(
     () => dbChanged.value,
     async (newV, oldV) => {
-      console.log(newV, oldV, Date.now(), "版本变更");
+      
 
-      console.log(schema, "console");
+      
 
       let tableList = Object.keys(schema.value);
       let basic = tableList.find((l) => l === "basic-info");
       let basicTable = getTable(basic);
-      console.log(tableList, basicTable, "basicTable");
+      
       if (!basicTable) {
         return false;
       }
@@ -43,14 +43,14 @@ export const useBookStore = defineStore("book", () => {
       Object.keys(basicInfo).forEach((field) => {
         basicData[field] = toRaw(basicInfo[field]);
       });
-      console.log(basicData);
+      
     },
     { deep: true, immediate: true }
   );
 
   async function updateBasicInfo(field, newData) {
     basicData[field] = newData;
-    console.log(basicData);
+    
     let tableList = Object.keys(schema.value);
     let basic = tableList.find((l) => l === "basic-info");
     let basicTable = getTable(basic);

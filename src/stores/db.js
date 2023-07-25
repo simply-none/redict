@@ -69,7 +69,7 @@ export default defineStore("DB", () => {
           });
 
           // 在stores之前是获取不到相关的table的，undefined
-          // console.log(DBInStance.value.test1688135539713, 'q')
+          // 
 
           DBInStance.value.close();
           // 关闭数据库后才能新增表
@@ -79,10 +79,10 @@ export default defineStore("DB", () => {
           DBInStance.value.open();
           dbChanged.value = Date.now()
 
-          // console.log(DBInStance.value.test1688135539713, 'q')
+          // 
         })
         .catch((e) => {
-          console.log(e);
+          
         });
     });
   }

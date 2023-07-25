@@ -35,7 +35,7 @@ export function isEqualObj(obj1, obj2) {
 export function sleep(time) {
   return new Promise((resolve) => {
     return setTimeout(() => {
-      console.log("休眠中...");
+      
       resolve();
     }, time);
   });

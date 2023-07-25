@@ -52,9 +52,9 @@ const iconStyle = computed(() => {
   };
 });
 
-console.log(props.isCurrent, 'is')
+
 watch(() => props.isCurrent, async (n, o) => {
-  console.log(n, o)
+  
   let isDevice = Object.keys(device.value)
   if (isDevice.length > 0) {
     return false
