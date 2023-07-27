@@ -7,7 +7,7 @@
   >
     <template #header>
       <div class="voca-card-head">
-        <span class="voca-card-name">{{ bookItem?.n }}</span>
+        <span class="voca-card-name" contenteditable="true" @blur="getSearchText">{{ bookItem?.n }}</span>
 
         <el-button
           :icon="Setting"
@@ -57,6 +57,7 @@ let {
   drawer,
   handleDrawer,
   getDataTest,
+  getSearchText,
 } = useVoca();
 
 function getWordItem (e) {
@@ -114,12 +115,13 @@ function getWordItem (e) {
     }
 
     &-body {
-      display: flex;
-      flex-flow: row nowrap;
+      // display: flex;
+      // flex-flow: row nowrap;
       height: 100%;
       .left,
       .right {
         width: 100%;
+        height: 100%;
       }
     }
   }

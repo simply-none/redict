@@ -10,7 +10,7 @@ import {
 } from "vue";
 
 import { useBookStore } from "../stores/books";
-import useTableStore from '../stores/table'
+import useTableStore from "../stores/table";
 import { storeToRefs } from "pinia";
 
 import moment from "moment";
@@ -19,10 +19,7 @@ import { setNotify } from "../utils/element-plus";
 
 export function useVoca() {
   let useBook = useBookStore();
-  let {
-    getDBTable,
-    getDBTableData
-  } = useTableStore()
+  let { getDBTable, getDBTableData } = useTableStore();
 
   // 今日学习数据
   let todayStudyWordsTable = ref();
@@ -45,9 +42,7 @@ export function useVoca() {
 
   const fullscreenLoading = ref(true);
 
-  let {
-    basicData,
-  } = storeToRefs(useBook);
+  let { basicData } = storeToRefs(useBook);
 
   const drawer = ref(false);
 
@@ -67,10 +62,10 @@ export function useVoca() {
   async function getData() {
     // 学习过的数据表
     studyTalbe.value = await getDBTable("studied-voca", "++id, n, date");
-    
+
     // fullscreenLoading.value = true;
     let isRequired = isRequiredField(basicData);
-    
+
     if (!isRequired) {
       setNotify("请完成基础设置后再试");
       drawer.value = true;
@@ -86,14 +81,10 @@ export function useVoca() {
       "，当前课本：" +
       basicData.value.currentBook;
     setNotify(message, "success");
-    
 
     // 加载所有相关表
     // 今日数据表
-    todayStudyWordsTable.value = await getDBTable(
-      "today-studied-voca",
-      "++id"
-    );
+    todayStudyWordsTable.value = await getDBTable("today-studied-voca", "++id");
 
     // 总数据表
     table.value = await getDBTable(basicData.value.currentBook, "");
@@ -102,8 +93,8 @@ export function useVoca() {
 
     // 后续操作...
     todayStudyWords.value = await getDBTableData(todayStudyWordsTable);
-    rangeWords.value = await getDBTableData(rangeTable, ['n']);
-    studyWords.value = await getDBTableData(studyTalbe, ['n']);
+    rangeWords.value = await getDBTableData(rangeTable, ["n"]);
+    studyWords.value = await getDBTableData(studyTalbe, ["n"]);
 
     await getTodayStudyWords();
 
@@ -156,7 +147,7 @@ export function useVoca() {
 
     let studyWordsData = [];
     // 查看是否是复习过去的单词模式
-    
+
     if (basicData.value.studyMode === "review-past") {
       studyWordsData = toRaw(studyWords.value);
     }
@@ -246,7 +237,7 @@ export function useVoca() {
       await todayStudyWordsTable.value.orderBy().delete();
     }
 
-    todayStudyWords.value = await getDBTableData(todayStudyWordsTable, ['n']);
+    todayStudyWords.value = await getDBTableData(todayStudyWordsTable, ["n"]);
   }
 
   async function handleDrawer(payload) {
@@ -258,11 +249,11 @@ export function useVoca() {
       return false;
     }
     if (!payload.changed) {
-      return false
+      return false;
     }
     table.value = await getDBTable(basicData.value.currentBook, "");
     rangeTable.value = await getDBTable(basicData.value.currentRange, "");
-    rangeWords.value = await getDBTableData(rangeTable, ['n']);
+    rangeWords.value = await getDBTableData(rangeTable, ["n"]);
     fullscreenLoading.value = true;
     couldStudyWordsName.value = await getCouldStudyWords(true);
 
@@ -278,6 +269,17 @@ export function useVoca() {
     putStudiedVocabulary(toRaw(bookItem.value));
   }
 
+  async function getSearchText(e) {
+    let vocabularycard = await table.value.get({
+      n: e.target.innerText,
+    });
+    if (!vocabularycard) {
+      setNotify("未查询到相关内容");
+      return false;
+    }
+    bookItem.value = vocabularycard;
+  }
+
   async function putStudiedVocabulary(data) {
     let date = getTodayDate();
 
@@ -290,7 +292,11 @@ export function useVoca() {
     };
     if (basicData.value.studyMode === "study") {
       await todayStudyWordsTable.value.bulkPut([putData]);
-      todayStudyWords.value = await getDBTableData(todayStudyWordsTable, ['n'], true);
+      todayStudyWords.value = await getDBTableData(
+        todayStudyWordsTable,
+        ["n"],
+        true
+      );
     }
 
     studyTalbe.value.bulkPut([putData]);
@@ -302,5 +308,6 @@ export function useVoca() {
     drawer,
     handleDrawer,
     getDataTest,
+    getSearchText,
   };
 }
