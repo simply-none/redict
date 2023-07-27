@@ -285,8 +285,6 @@ export function useVoca() {
 
     let putData = {
       ...findPutData,
-      id: data.id,
-      n: data.n,
       date: date,
       count: findPutData?.count ? findPutData.count + 1 : 1,
     };
