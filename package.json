@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
+    "@vitejs/plugin-vue-jsx": "^3.0.1",
     "axios": "^1.4.0",
     "sass": "^1.63.4",
     "unplugin-auto-import": "^0.16.4",
