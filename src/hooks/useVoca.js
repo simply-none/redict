@@ -238,6 +238,15 @@ export function useVoca() {
     }
 
     todayStudyWords.value = await getDBTableData(todayStudyWordsTable, ["n"]);
+    // 下个版本可删除，该代码是解决存储时未存储单词名称的问题 - start
+    let hasNoneable = todayStudyWords.value.some(item => !item)
+    let hasNoneableHistory = studyWords.value.some(item => !item)
+    if (hasNoneable || hasNoneableHistory) {
+      fullscreenLoading.value = false
+      await todayStudyWordsTable.value.orderBy().delete();
+      return false
+    }
+    // 下个版本可删除，该代码是解决存储时未存储单词名称的问题 - end
   }
 
   async function handleDrawer(payload) {
@@ -287,6 +296,7 @@ export function useVoca() {
 
     let putData = {
       ...findPutData,
+      n: findPutData?.n ? findPutData.n : data.n,
       date: date,
       count: findPutData?.count ? findPutData.count + 1 : 1,
     };
