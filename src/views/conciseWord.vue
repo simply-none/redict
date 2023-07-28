@@ -66,6 +66,7 @@ function getExplainSet (totalSet, curSet) {
 
 <style scoped lang="scss">
 .left {
+  user-select: none;
   width: 100%;
   display: flex;
   flex-flow: column nowrap;
