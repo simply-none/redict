@@ -7,7 +7,12 @@
   >
     <template #header>
       <div class="voca-card-head">
-        <span class="voca-card-name" contenteditable="true" @blur="getSearchText">{{ bookItem?.n }}</span>
+        <span
+          class="voca-card-name"
+          contenteditable="true"
+          @blur="getSearchText"
+          >{{ bookItem?.n }}</span
+        >
 
         <el-button
           :icon="Setting"
@@ -20,22 +25,25 @@
       </div>
     </template>
     <div class="voca-card-body" @dblclick="getWordItem">
-      <ConciseWord v-if="basicData?.showMode === 'concise'" :basic-data="basicData" :book-item="bookItem"/>
-      <WordCom v-else :basic-data="basicData" :book-item="bookItem"/>
+      <ConciseWord
+        v-if="basicData?.showMode === 'concise'"
+        :basic-data="basicData"
+        :book-item="bookItem"
+      />
+      <WordCom v-else :basic-data="basicData" :book-item="bookItem" />
     </div>
   </el-card>
 
   <SettingCom :visible="drawer" @handleDrawer="handleDrawer" />
-
 </template>
 
 <script setup>
-import { ref, reactive, watchEffect, watch } from "vue";
+import { ref, reactive, watchEffect, watch, onMounted, onUnmounted } from "vue";
 
 import { useVoca } from "../hooks/useVoca";
 
 import SettingCom from "./Setting.vue";
-import WordCom from './word.vue'
+import WordCom from "./word.vue";
 import ConciseWord from "./conciseWord.vue";
 import { ElNotification, ElMessage, ElLoading } from "element-plus";
 import { Setting } from "@element-plus/icons-vue";
@@ -47,9 +55,7 @@ import { storeToRefs } from "pinia";
 
 let useBook = useBookStore();
 
-let {
-  basicData,
-} = storeToRefs(useBook);
+let { basicData } = storeToRefs(useBook);
 
 let {
   bookItem,
@@ -60,15 +66,29 @@ let {
   getSearchText,
 } = useVoca();
 
-function getWordItem (e) {
-  let windowClientY = document.body.clientHeight
-  let windowClientX = document.body.clientWidth
-  let hasGet = windowClientX < e.clientX * 2
+function getWordItem(e) {
+  let windowClientY = document.body.clientHeight;
+  let windowClientX = document.body.clientWidth;
+  let hasGet = windowClientX < e.clientX * 2;
   if (!hasGet) {
-    return false
+    return false;
   }
-  getDataTest()
+  getDataTest();
 }
+
+function arrowRightGetData(e) {
+  if (e.code === "ArrowRight") {
+    getDataTest();
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("keyup", arrowRightGetData);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keyup", arrowRightGetData);
+});
 </script>
 
 <style scoped lang="scss">
