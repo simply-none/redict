@@ -55,3 +55,20 @@ export function generateImage(node, type = 'svg', name) {
       console.error("oops, something went wrong!", error);
     });
 }
+
+export function funDownloadByJson(filename, data) {
+  // JSON文件里面的内容
+  var content = JSON.stringify(data);
+  // 创建一个a链接dom
+  var dom_a = document.createElement("a");
+  // 设置保存的json文件名称
+  dom_a.download = filename;
+  // 设置文件保存的内容
+  dom_a.href = "data:text/plain;charset=utf-8," + encodeURIComponent(content);
+  // 添加a链接dom
+  document.body.appendChild(dom_a);
+  // 点击触发a链接
+  dom_a.click();
+  // 删除a链接dom
+  document.body.removeChild(dom_a);
+}

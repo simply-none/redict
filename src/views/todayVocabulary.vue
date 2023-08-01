@@ -2,7 +2,7 @@
 <template>
   <h3 class="today-voca-head">
     今日（{{ todayDate }}）背诵单词，共计：{{ vocalist.length }}个
-    <el-link @click="lookTodayVocaMore">查看更多...</el-link>
+    <el-link @click="lookTodayVocaMore" type="primary">查看更多...</el-link>
   </h3>
   <el-table :data="vocalist" max-height="250" style="width: 100%" border stripe>
     <el-table-column prop="index" label="序号" width="180">
@@ -15,7 +15,8 @@
   </el-table>
 
   <h3 class="today-voca-head">
-    历史背诵单词，共计：{{ historyVocalist.length }}个
+    历史背诵单词，共计：{{ historyVocalist.length }}个，
+    <el-link @click="exportData" type="primary">导出数据...</el-link>
   </h3>
   <div style="height: 300px">
     <el-auto-resizer>
@@ -54,7 +55,12 @@
 </template>
 <script setup lang="jsx">
 import { ref, reactive, onMounted, watch } from "vue";
-import { TableV2SortOrder, TableV2FixedDir, ElButton, ElIcon } from "element-plus";
+import {
+  TableV2SortOrder,
+  TableV2FixedDir,
+  ElButton,
+  ElIcon,
+} from "element-plus";
 
 import { useBookStore } from "../stores/books";
 import useDBStore from "../stores/db";
@@ -63,6 +69,8 @@ import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
 import moment from "moment";
+
+import { funDownloadByJson } from '../utils/generateFile'
 
 const sortState = ref({
   n: TableV2SortOrder.ASC,
@@ -177,7 +185,7 @@ function onSort({ key, order }) {
 
 async function delWrod(data, index) {
   await historyTable.where("id").equals(data.id).delete();
-  historyVocalist.value.splice(index, 1)
+  historyVocalist.value.splice(index, 1);
 }
 
 function lookTodayVocaMore() {
@@ -209,6 +217,10 @@ async function getBookRangeData() {
 
 async function getVocaList() {
   vocalist.value = await todayTable.toArray();
+}
+
+function exportData() {
+  funDownloadByJson(Date.now() + ".json", historyVocalist.value)
 }
 
 async function getHistoryVocaList() {

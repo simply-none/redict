@@ -16,6 +16,7 @@ import { storeToRefs } from "pinia";
 import moment from "moment";
 
 import { setNotify } from "../utils/element-plus";
+import { funDownloadByJson } from "../utils/generateFile";
 
 export function useVoca() {
   let useBook = useBookStore();
@@ -132,8 +133,10 @@ export function useVoca() {
       return true;
     }
     if (todayStudyWords.value.length >= basicData.value.studyCount) {
-      setNotify("今日单词计划已完成，将开启复习模式！", "success", "恭喜");
+      setNotify("今日单词计划已完成，已备份数据到本地，将开启复习模式！", "success", "恭喜");
       reviewMode.value = true;
+      let stywords = studyTalbe.value.toArray()
+      funDownloadByJson(Date.now() + '.json', stywords)
       return true;
     }
     return false;
