@@ -1,9 +1,10 @@
 <template>
   <div class="left">
     <!-- 音标 -->
-    <WordPhonetic :book-item="bookItem"/>
 
     <div class="voca-card-voca-explain">
+      <WordPhonetic :book-item="bookItem" class="voca-card-voca-concise-word"/>
+
       <span class="voca-card-voca-explain-item" v-for="(exp, index) in explain" :key="exp + index">
         {{ exp }}
       </span>
@@ -74,7 +75,12 @@ function getExplainSet (totalSet, curSet) {
   align-items: center;
 }
 .voca-card {
+  &-voca-concise-word {
+    width: 100%;
+    text-align: center;
+  }
   &-voca-explain {
+    overflow: auto;
     display: flex;
     flex-flow: row wrap;
     justify-content: center;
