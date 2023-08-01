@@ -133,10 +133,15 @@ export function useVoca() {
       return true;
     }
     if (todayStudyWords.value.length >= basicData.value.studyCount) {
-      setNotify("今日单词计划已完成，已备份数据到本地，将开启复习模式！", "success", "恭喜");
+      setNotify(
+        "今日单词计划已完成，已备份数据到本地，将开启复习模式！",
+        "success",
+        "恭喜"
+      );
       reviewMode.value = true;
-      let stywords = studyTalbe.value.toArray()
-      funDownloadByJson(Date.now() + '.json', stywords)
+      studyTalbe.value.toArray().then((data) => {
+        funDownloadByJson(Date.now() + '.json', data)
+      });
       return true;
     }
     return false;
@@ -242,12 +247,12 @@ export function useVoca() {
 
     todayStudyWords.value = await getDBTableData(todayStudyWordsTable, ["n"]);
     // 下个版本可删除，该代码是解决存储时未存储单词名称的问题 - start
-    let hasNoneable = todayStudyWords.value.some(item => !item)
-    let hasNoneableHistory = studyWords.value.some(item => !item)
+    let hasNoneable = todayStudyWords.value.some((item) => !item);
+    let hasNoneableHistory = studyWords.value.some((item) => !item);
     if (hasNoneable || hasNoneableHistory) {
-      fullscreenLoading.value = false
+      fullscreenLoading.value = false;
       await todayStudyWordsTable.value.orderBy().delete();
-      return false
+      return false;
     }
     // 下个版本可删除，该代码是解决存储时未存储单词名称的问题 - end
   }
