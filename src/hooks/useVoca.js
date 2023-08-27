@@ -291,11 +291,11 @@ export function useVoca() {
       count: findPutData?.count ? findPutData.count + 1 : 1,
     };
     if (basicData.value.studyMode === "study") {
-      await todayStudyWordsTable.value.put(putData);
+      await todayStudyWordsTable.value.bulkPut([putData]);
       todayStudyWords.value = await getDBTableData(todayStudyWordsTable, ['n'], true);
     }
 
-    studyTalbe.value.put(putData);
+    studyTalbe.value.bulkPut([putData]);
   }
 
   return {
