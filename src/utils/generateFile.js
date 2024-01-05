@@ -1,4 +1,5 @@
 import domtoimage from "dom-to-image-more";
+import TurndownService from "turndown";
 
 // 根据内容生成文件：使用blob
 export function funDownloadByBlob (content, filename) {
@@ -65,6 +66,24 @@ export function funDownloadByJson(filename, data) {
   dom_a.download = filename;
   // 设置文件保存的内容
   dom_a.href = "data:text/plain;charset=utf-8," + encodeURIComponent(content);
+  // 添加a链接dom
+  document.body.appendChild(dom_a);
+  // 点击触发a链接
+  dom_a.click();
+  // 删除a链接dom
+  document.body.removeChild(dom_a);
+}
+
+export function funDownloadByHtml2Md (filename, data) {
+
+  var turndownService = new TurndownService()
+  var markdown = turndownService.turndown(data)
+
+  var dom_a = document.createElement("a");
+  // 设置保存的json文件名称
+  dom_a.download = filename;
+  // 设置文件保存的内容
+  dom_a.href = "data:text/plain;charset=utf-8," + encodeURIComponent(markdown);
   // 添加a链接dom
   document.body.appendChild(dom_a);
   // 点击触发a链接

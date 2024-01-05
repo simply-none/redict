@@ -1,60 +1,56 @@
 <!-- 展示当日完成的单词列表 -->
 <template>
-  <h3 class="today-voca-head">
-    今日（{{ todayDate }}）背诵单词，共计：{{ vocalist.length }}个
-    <el-link @click="lookTodayVocaMore" type="primary">查看更多...</el-link>
-  </h3>
-  <el-table :data="vocalist" max-height="250" style="width: 100%" border stripe>
-    <el-table-column prop="index" label="序号" width="180">
-      <template #default="scope">
-        {{ scope.$index + 1 }}
-      </template>
-    </el-table-column>
-    <el-table-column prop="n" label="单词" sortable />
-    <el-table-column prop="count" label="次数" sortable />
-  </el-table>
+  <div v-loading="loading">
+    <h3 class="today-voca-head">
+      今日（{{ todayDate }}）背诵单词，共计：{{ vocalist.length }}个
+      <el-link @click="lookTodayVocaMore" type="primary">查看更多...</el-link>
+    </h3>
+    <el-table
+      :data="vocalist"
+      max-height="250"
+      style="width: 100%"
+      border
+      stripe
+    >
+      <el-table-column prop="index" label="序号" width="180">
+        <template #default="scope">
+          {{ scope.$index + 1 }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="n" label="单词" sortable />
+      <el-table-column prop="count" label="次数" sortable />
+    </el-table>
 
-  <h3 class="today-voca-head">
-    历史背诵单词，共计：{{ historyVocalist.length }}个，
-    <el-link @click="exportData" type="primary">导出数据...</el-link>
-  </h3>
-  <div style="height: 300px">
-    <el-auto-resizer>
-      <template #default="{ height, width }">
-        <el-table-v2
-          ref="tableRef"
-          :columns="columns"
-          :data="historyVocalist"
-          :width="width"
-          :height="height"
-          :cache="10"
-          v-model:sort-state="sortState"
-          @column-sort="onSort"
-        />
-      </template>
-    </el-auto-resizer>
+    <h3 class="today-voca-head">
+      历史背诵单词，共计：{{ historyVocalist.length }}个，
+      <el-link @click="exportData" type="primary">导出数据...</el-link>
+    </h3>
+    <div style="height: 300px">
+      <el-auto-resizer>
+        <template #default="{ height, width }">
+          <el-table-v2
+            ref="tableRef"
+            :columns="columns"
+            :data="historyVocalist"
+            :width="width"
+            :height="height"
+            :cache="10"
+            v-model:sort-state="sortState"
+            @column-sort="onSort"
+          />
+        </template>
+      </el-auto-resizer>
+    </div>
+
+    <h3 class="today-voca-head">
+      非范围单词，共计：{{ rangeNotInBookData.length }}个
+    </h3>
+    <TablePage :data="rangeNotInBookDataPage" :table-len="rangeNotInBookData.length" :items="[{prop: 'n', label: '单词'}]" :tablePageSize="tablePageSize" @getData="(current) => getPageData(rangeNotInBookData, current)"/>
   </div>
-
-  <h3 class="today-voca-head">
-    非范围单词，共计：{{ rangeNotInBookData.length }}个
-  </h3>
-  <el-table
-    :data="rangeNotInBookData"
-    max-height="250"
-    style="width: 100%"
-    border
-    stripe
-  >
-    <el-table-column prop="index" label="序号" width="180">
-      <template #default="scope">
-        {{ scope.$index + 1 }}
-      </template>
-    </el-table-column>
-    <el-table-column prop="n" label="单词" sortable />
-  </el-table>
 </template>
 <script setup lang="jsx">
-import { ref, reactive, onMounted, watch } from "vue";
+import TablePage from '../components/tablePage.vue'
+import { ref, reactive, onMounted, watch, toRaw } from "vue";
 import {
   TableV2SortOrder,
   TableV2FixedDir,
@@ -70,7 +66,9 @@ import { useRoute, useRouter } from "vue-router";
 
 import moment from "moment";
 
-import { funDownloadByJson } from '../utils/generateFile'
+import { funDownloadByJson } from "../utils/generateFile";
+
+import Worker from "../utils/getStoreWebWork.js?worker";
 
 const sortState = ref({
   n: TableV2SortOrder.ASC,
@@ -149,9 +147,23 @@ let rangeData = ref([]);
 
 let rangeNotInBookData = ref([]);
 
+let rangeNotInBookDataPage = ref([]);
+let tablePageSize = ref(100)
+
 let couldDataLen = ref(0);
 
 let router = useRouter();
+
+let loading = ref(true)
+
+let worker = new Worker();
+
+worker.addEventListener("message", (e) => {
+  console.log(e, "监听数据");
+  rangeNotInBookData.value = JSON.parse(e.data).rangeNotInBookData;
+  getPageData(rangeNotInBookData.value, 1)
+  loading.value = false
+});
 
 watch(
   basicData,
@@ -171,6 +183,11 @@ onMounted(() => {
   getBookRangeData();
 });
 
+function getPageData (data, current) {
+  let start = (current - 1) * tablePageSize.value
+  rangeNotInBookDataPage.value = data.slice(start, start + tablePageSize.value)
+}
+
 function onSort({ key, order }) {
   sortState.value[key] = order;
   historyVocalist.value.sort((a, b) => {
@@ -184,8 +201,13 @@ function onSort({ key, order }) {
 }
 
 async function delWrod(data, index) {
-  await historyTable.where("id").equals(data.id).delete();
-  historyVocalist.value.splice(index, 1);
+  historyTable
+    .where("id")
+    .equals(data.id)
+    .delete()
+    .then(() => {
+      historyVocalist.value.splice(index, 1);
+    });
 }
 
 function lookTodayVocaMore() {
@@ -194,37 +216,57 @@ function lookTodayVocaMore() {
   });
 }
 
-async function getBookRangeData() {
+watch(
+  [bookData, rangeData],
+  ([nBookData, nRangeData], [oBookData, oRangeData]) => {
+    if (!nBookData || !nRangeData || !nBookData.length || !nRangeData.length) {
+      return false;
+    }
+
+    console.log({nBookData, nRangeData})
+
+    worker.postMessage({nBookData: toRaw(nBookData), nRangeData: toRaw(nRangeData)})
+    loading.value = true
+  }
+);
+
+async function getBookTable() {
+  let bookTable = getTable(basicData.value.currentBook);
+  bookTable.toArray().then((d) => {
+    bookData.value = d;
+  });
+}
+
+async function getRangeTable() {
+  let rangeTable = getTable(basicData.value.currentRange);
+  rangeTable.toArray().then((d) => {
+    rangeData.value = d;
+  });
+}
+
+function getBookRangeData() {
   if (!basicData.value.currentBook || !basicData.value.currentRange) {
     return false;
   }
-  let bookTable = await getTable(basicData.value.currentBook);
-  let rangeTable = await getTable(basicData.value.currentRange);
 
-  bookData.value = await bookTable.toArray();
-  rangeData.value = await rangeTable.toArray();
-
-  let tempRange = bookData.value.map((w) => w.n.toLowerCase());
-  tempRange = rangeData.value
-    .filter((w) => tempRange.includes(w.n.toLowerCase()))
-    .map((w) => w.n.toLowerCase());
-
-  rangeNotInBookData.value = rangeData.value.filter(
-    (w) => !tempRange.includes(w.n.toLowerCase())
-  );
-  couldDataLen.value = tempRange.length;
+  getBookTable();
+  getRangeTable();
 }
 
 async function getVocaList() {
-  vocalist.value = await todayTable.toArray();
+  todayTable.toArray().then((d) => {
+    vocalist.value = d;
+  });
 }
 
 function exportData() {
-  funDownloadByJson(Date.now() + ".json", historyVocalist.value)
+  funDownloadByJson(Date.now() + ".json", historyVocalist.value);
 }
 
 async function getHistoryVocaList() {
-  historyVocalist.value = await historyTable.toArray();
+  historyTable.toArray().then((d) => {
+    historyVocalist.value = d;
+  });
 }
 </script>
 <style lang="scss" scoped>

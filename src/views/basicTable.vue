@@ -1,6 +1,6 @@
 <!-- 展示当日完成的单词列表 -->
 <template>
-  <el-descriptions :column="1" border>
+  <el-descriptions :column="1" border v-loading="loading">
     <el-descriptions-item label="选择书本">{{
       basicData.currentBook
     }}</el-descriptions-item>
@@ -22,11 +22,13 @@
   </el-descriptions>
 </template>
 <script setup>
-import { ref, reactive, onMounted, watch } from "vue";
+import { ref, reactive, onMounted, watch, toRaw } from "vue";
 
 import { useBookStore } from "../stores/books";
 import useDBStore from "../stores/db";
 import { storeToRefs } from "pinia";
+
+import Worker from "../utils/getStoreWebWork.js?worker";
 
 let useBook = useBookStore();
 let useDB = useDBStore();
@@ -40,6 +42,17 @@ let rangeData = ref([]);
 let rangeNotInBookData = ref([]);
 
 let couldDataLen = ref(0);
+
+let loading = ref(true)
+
+let worker = new Worker()
+
+worker.addEventListener('message', (e) => {
+  let data = JSON.parse(e.data)
+  rangeNotInBookData.value = data.rangeNotInBookData
+  couldDataLen.value = data.couldDataLen
+  loading.value = false
+})
 
 watch(
   basicData,
@@ -55,28 +68,36 @@ onMounted(() => {
   getBookRangeData();
 });
 
+watch([bookData, rangeData], ([nBookData, nRangeData], [oBookData, oRangeData]) => {
+  if (!nBookData || !nRangeData || !nBookData.length || !nRangeData.length) {
+    return false
+  }
+
+  loading.value = true
+  worker.postMessage({nBookData: toRaw(nBookData), nRangeData: toRaw(nRangeData)})
+})
+
+async function getBookTable () {
+  let bookTable = getTable(basicData.value.currentBook);
+  bookTable.toArray().then((d) => {
+    bookData.value = d
+  })
+}
+
+async function getRangeTable () {
+  let rangeTable = getTable(basicData.value.currentRange);
+  rangeTable.toArray().then((d) => {
+    rangeData.value = d
+  })
+}
+
 async function getBookRangeData() {
   if (!basicData.value.currentBook || !basicData.value.currentRange) {
     return false;
   }
-  let bookTable = await getTable(basicData.value.currentBook);
-  let rangeTable = await getTable(basicData.value.currentRange);
-  
 
-  bookData.value = await bookTable.toArray();
-  rangeData.value = await rangeTable.toArray();
-
-  
-
-  let tempRange = bookData.value.map((w) => w.n.toLowerCase());
-  tempRange = rangeData.value
-    .filter((w) => tempRange.includes(w.n.toLowerCase()))
-    .map((w) => w.n.toLowerCase());
-  
-  rangeNotInBookData.value = rangeData.value.filter(
-    (w) => !tempRange.includes(w.n.toLowerCase())
-  );
-  couldDataLen.value = tempRange.length;
+  getBookTable();
+  getRangeTable();
 }
 </script>
 <style lang="scss" scoped>

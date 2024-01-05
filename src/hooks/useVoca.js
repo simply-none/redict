@@ -134,14 +134,14 @@ export function useVoca() {
     }
     if (todayStudyWords.value.length >= basicData.value.studyCount) {
       setNotify(
-        "今日单词计划已完成，已备份数据到本地，将开启复习模式！",
+        "今日单词计划已完成，将开启复习模式！",
         "success",
         "恭喜"
       );
       reviewMode.value = true;
-      studyTalbe.value.toArray().then((data) => {
-        funDownloadByJson(Date.now() + '.json', data)
-      });
+      // studyTalbe.value.toArray().then((data) => {
+      //   funDownloadByJson(Date.now() + '.json', data)
+      // });
       return true;
     }
     return false;
