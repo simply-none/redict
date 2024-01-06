@@ -175,7 +175,7 @@ watch(
 function setBasicInfo(val, field) {
   
   updateBasicInfo(field, val);
-  let changedField = ["currentBook", "currentRange"];
+  let changedField = ["currentBook", "currentRange", "studyMode"];
   if (changedField.includes(field)) {
     changed.value = true;
   }

@@ -115,9 +115,9 @@ function handleClose (done) {
   if (!alreadySetBasic.value) {
     return false
   }
-  emit('handleDrawer', {
-    drawer: false
-  })
+  // emit('handleDrawer', {
+  //   drawer: false
+  // })
 }
 </script>
 

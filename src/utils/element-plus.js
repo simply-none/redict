@@ -1,3 +1,5 @@
+import { ElNotification } from "element-plus";
+
 export function setNotify(msg, type, title) {
   ElNotification({
     type: type || "error",
@@ -6,4 +8,8 @@ export function setNotify(msg, type, title) {
     duration: 5000,
     position: "bottom-right",
   });
+}
+
+export function clearNotify() {
+  ElNotification.closeAll()
 }

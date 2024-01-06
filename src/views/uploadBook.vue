@@ -10,8 +10,8 @@
   >
     <el-form-item label="上传数据类型" prop="type">
       <el-radio-group v-model="ruleForm.type">
-        <el-radio :label="'range'">范围</el-radio>
-        <el-radio :label="'book'">课本</el-radio>
+        <el-radio :label="'range'">单词课本</el-radio>
+        <el-radio :label="'book'">词典源</el-radio>
       </el-radio-group>
     </el-form-item>
     <el-form-item label="选取书本数据" prop="pass">

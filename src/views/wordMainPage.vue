@@ -7,12 +7,15 @@
   >
     <template #header>
       <div class="voca-card-head">
-        <span
-          class="voca-card-name"
-          contenteditable="true"
-          @blur="getSearchText"
-          >{{ bookItem?.n }}</span
-        >
+        <div class="voca-card-name">
+          <span
+            class="voca-card-name--inner"
+            contenteditable="true"
+            @blur="getSearchText($event, bookItem)"
+            >{{ bookItem?.n }}</span
+          >
+            <el-button :icon="RefreshLeft" round plain type="success" v-show="bookItemBeforeSearch" @click="restoreBookItem">还原</el-button>
+        </div>
 
         <el-button
           :icon="Setting"
@@ -20,7 +23,7 @@
           type="primary"
           circle
           class="voca-card-handle"
-          @click="drawer = true"
+          @click="OpenSetting"
         ></el-button>
       </div>
     </template>
@@ -38,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watchEffect, watch, onMounted, onUnmounted } from "vue";
+import { ref, reactive, watchEffect, watch, onMounted, onUnmounted, toRaw } from "vue";
 
 import { useVoca } from "../hooks/useVoca";
 
@@ -46,10 +49,11 @@ import SettingCom from "./Setting.vue";
 import WordCom from "./word.vue";
 import ConciseWord from "./conciseWord.vue";
 import { ElNotification, ElMessage, ElLoading } from "element-plus";
-import { Setting } from "@element-plus/icons-vue";
+import { Setting, RefreshLeft } from "@element-plus/icons-vue";
 
 import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
+import { setNotify } from "../utils/element-plus";
 
 // 今日学习数据
 
@@ -59,6 +63,7 @@ let { basicData } = storeToRefs(useBook);
 
 let {
   bookItem,
+  bookItemBeforeSearch,
   fullscreenLoading,
   drawer,
   handleDrawer,
@@ -66,19 +71,42 @@ let {
   getSearchText,
 } = useVoca();
 
+function OpenSetting () {
+  drawer.value = true
+  bookItemBeforeSearch.value = null
+}
+
+function restoreBookItem () {
+  bookItem.value = toRaw(bookItemBeforeSearch.value)
+  bookItemBeforeSearch.value = null
+
+}
+
 function getWordItem(e) {
+  if (bookItemBeforeSearch.value) {
+    setNotify('点击单词还原按钮后，再去切换单词')
+    return false
+  }
   let windowClientY = document.body.clientHeight;
   let windowClientX = document.body.clientWidth;
   let hasGet = windowClientX < e.clientX * 2;
   if (!hasGet) {
+    getDataTest(false)
     return false;
   }
   getDataTest();
 }
 
 function arrowRightGetData(e) {
+  if (bookItemBeforeSearch.value && ['ArrowRight', 'ArrowLeft'].includes(e.code)) {
+    setNotify('点击单词还原按钮后，再去切换单词')
+    return false
+  }
   if (e.code === "ArrowRight") {
     getDataTest();
+  }
+  if (e.code === "ArrowLeft") {
+    getDataTest(false)
   }
 }
 
@@ -110,6 +138,9 @@ onUnmounted(() => {
     }
     &-name {
       font-size: 2em;
+      display: inline-block;
+    }
+    &-name--inner {
       padding-right: 12px;
       display: inline-block;
       font-weight: 900;
