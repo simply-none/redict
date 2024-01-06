@@ -169,26 +169,6 @@ export function useVoca() {
     moreThanPlan.value = false
   })
 
-  // 今日是否已学习了50个单词，学习了就自动开启复习模式
-  function moreThanTodayPlan() {
-    if (basicData.value.studyMode !== "study") {
-      return true;
-    }
-    if (todayStudyWords.value.length > basicData.value.studyCount) {
-      couldStudyWordNameList.value = toRaw(todayStudyWords.value)
-      setNotify(
-        "今日单词计划已完成，已备份数据到本地，将开启复习模式！",
-        "success",
-        "恭喜"
-      );
-      // studyTable.value.toArray().then((data) => {
-      //   funDownloadByJson(Date.now() + '.json', data)
-      // });
-      return true;
-    }
-    return false;
-  }
-
   // 获取能够展示单词卡片的索引
   async function getCouldStudyWords() {
     let studyWordsData = [];
@@ -307,9 +287,7 @@ export function useVoca() {
   }
 
   async function getDataTest(isForward = true) {
-    if (!moreThanPlan.value) {
-      putStudiedVocabulary(toRaw(bookItem.value));
-    }
+    putStudiedVocabulary(toRaw(bookItem.value));
     showVocabularyCard(isForward).then(d => bookItem.value = d);
     fullscreenLoading.value = false;
   }
@@ -336,24 +314,28 @@ export function useVoca() {
   async function putStudiedVocabulary(data) {
     let date = getTodayDate();
 
-    let findPutData = await studyTable.value.get({ n: data.n });
+    studyTable.value.get({ n: data.n }).then(findPutData => {
+      let putData = {
+        ...findPutData,
+        n: findPutData?.n ? findPutData.n : data.n,
+        date: date,
+        count: findPutData?.count ? findPutData.count + 1 : 1,
+      };
 
-    let putData = {
-      ...findPutData,
-      n: findPutData?.n ? findPutData.n : data.n,
-      date: date,
-      count: findPutData?.count ? findPutData.count + 1 : 1,
-    };
-    if (basicData.value.studyMode === "study") {
-      await todayStudyWordsTable.value.bulkPut([putData]);
-      todayStudyWords.value = await getDBTableData(
-        todayStudyWordsTable,
-        ["n"],
-        true
-      );
-    }
+      if (basicData.value.studyMode === "study") {
+        todayStudyWordsTable.value.bulkPut([putData]);
+      }
 
-    studyTable.value.bulkPut([putData]);
+      if (basicData.value.studyMode === "study" && !moreThanPlan.value) {
+        getDBTableData(
+          todayStudyWordsTable,
+          ["n"],
+          true
+        ).then(d => todayStudyWords.value = d)
+      }
+
+      studyTable.value.bulkPut([putData]);
+    })
   }
 
   return {
