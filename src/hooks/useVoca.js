@@ -30,6 +30,10 @@ function isRequiredField(obj) {
   });
 }
 
+function getTodayDate() {
+  return moment().format("YYYY-MM-DD");
+}
+
 export function useVoca() {
   let useBook = useBookStore();
   let { getDBTable, getDBTableData } = useTableStore();
@@ -55,7 +59,7 @@ export function useVoca() {
 
   let isReloadBookItem = ref(true)
 
-  let moreThanPlan = ref(true)
+  let isMorethanTodayPlan = ref(false)
 
   let { basicData } = storeToRefs(useBook);
 
@@ -66,12 +70,10 @@ export function useVoca() {
   let bookItemBeforeSearch = ref(null)
 
   watch(
-    basicData,
+    [() => basicData.value.currentBook, () => basicData.value.currentRange, () => basicData.value.studyMode, () => basicData.value.studyCount],
     () => {
+      console.log('hhhhh')
       initDataInFirstLoad();
-    },
-    {
-      deep: true,
     }
   );
 
@@ -84,6 +86,8 @@ export function useVoca() {
     // 当数据源表、今日学习数据、历史学习数据、范围数据 均有值时，才会进行计算，否则终止
     if (todayStudyWords.value && studyWords.value && rangeWords.value && table.value) {
       couldStudyWordNameList.value = await getCouldStudyWords()
+      console.log('进来了？', couldStudyWordNameList.value.length)
+
 
       bookItem.value = await showVocabularyCard(true);
       fullscreenLoading.value = false;
@@ -95,6 +99,7 @@ export function useVoca() {
     return getDBFn(...getDBFnArgs).then(data => {
       if (operation === 'setValue') {
         ref.value = data
+        console.log(rangeWords.value?.length, studyWords.value?.length, todayStudyWords.value?.length, '范围，历史，今日')
       }
       return data
     })
@@ -104,15 +109,18 @@ export function useVoca() {
     // 加载所有相关表
     // 学习过的数据表
     getDataFromDB(getDBTable, ["studied-voca", "++id, n, date"], studyTable).then(d => {
+      console.log('学习过的数据表')
       studyTable.value = d
       getDataFromDB(getDBTableData, [studyTable, ["n"]], studyWords, 'setValue')
     })
 
     // 今日数据表
     getDataFromDB(getDBTable, ["today-studied-voca", "++id"], todayStudyWordsTable).then(d => {
+      console.log('今日数据表' , d)
       todayStudyWordsTable.value = d
-      getDBTableData(todayStudyWordsTable).then(d => {
-        getPureTodayStudyWords(d)
+      getDBTableData(todayStudyWordsTable, false, true).then(dd => {
+        console.log(dd, '当前值就')
+        getPureTodayStudyWords(dd)
       })
     })
 
@@ -122,6 +130,7 @@ export function useVoca() {
     // 范围表
     getDataFromDB(getDBTable, [basicData.value.currentRange, ""], rangeTable).then(d => {
       rangeTable.value = d
+      console.log('范围表')
       getDataFromDB(getDBTableData, [rangeTable, ["n"]], rangeWords, 'setValue')
     })
   }
@@ -149,42 +158,59 @@ export function useVoca() {
     getDataFromDBList()
   }
 
-  watchEffect(() => {
-    if (!todayStudyWords.value || !basicData.value) {
+  watch(() => basicData.value.studyMode, (n, o) => {
+    if (!drawer.value) {
       return false
     }
-
-    if (basicData.value.studyMode !== "study") {
-      return moreThanPlan.value = true
+    let moreThanPlan = moreThanPlanFn()
+    if (!moreThanPlan && basicData.value.studyMode === 'study') {
+      couldStudyWordNameList.value = toRaw(studyWords.value)
     }
-    if (todayStudyWords.value.length >= basicData.value.studyCount) {
+  })
+
+  function moreThanPlanFn() {
+    let moreThanPlan = todayStudyWords.value.length >= basicData.value.studyCount
+    console.log(todayStudyWords.value.length , basicData.value.studyCount, '比较，切换count')
+
+    if (basicData.value.studyMode === 'study' && moreThanPlan) {
       couldStudyWordNameList.value = toRaw(todayStudyWords.value)
-      setNotify(
-        "今日单词计划已完成，已备份数据到本地，将开启复习模式！",
+      !isMorethanTodayPlan.value && setNotify(
+        "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
         "success",
         "恭喜"
       );
-      return moreThanPlan.value = true;
+      isMorethanTodayPlan.value = true
     }
-    moreThanPlan.value = false
-  })
+
+    if (!moreThanPlan && basicData.value.studyMode === 'study') {
+      couldStudyWordNameList.value = toRaw(studyWords.value)
+      isMorethanTodayPlan.value = false
+    }
+
+    return moreThanPlan
+  }
 
   // 获取能够展示单词卡片的索引
   async function getCouldStudyWords() {
     let studyWordsData = [];
+    let moreThanPlan = moreThanPlanFn()
+    console.log(basicData.value.studyCount, todayStudyWords.value.length, '总，今')
+    
 
     // 查看是否是复习过去的单词模式
     if (basicData.value.studyMode === "review-past") {
       studyWordsData = toRaw(studyWords.value);
+      console.log('查看是否是复习过去的单词模式')
     }
 
     // 超过今天计划，则自动开启（今日学习）复习模式
-    if (basicData.value.studyMode === "study" && moreThanPlan.value) {
+    if (basicData.value.studyMode === "study" && moreThanPlan) {
       studyWordsData = toRaw(todayStudyWords.value);
+      console.log('超过今天计划，则自动开启（今日学习）复习模式')
     }
 
     // 仅学习模式
-    if (basicData.value.studyMode === "study" && !moreThanPlan.value) {
+    if (basicData.value.studyMode === "study" && !moreThanPlan) {
       studyWordsData = await table.value
         .filter(
           (word) =>
@@ -196,17 +222,16 @@ export function useVoca() {
       studyWordsData = studyWordsData.filter(
         (word) => !todayStudyWords.value.includes(word)
       );
+      console.log('仅学习模式')
     }
+    console.log(studyWordsData.length, '能够学习的单词')
     // 获取过滤后的可学习/复习的单词索引
     return studyWordsData;
   }
 
   // 展示单词卡片
   async function showVocabularyCard(isForward) {
-    let len = couldStudyWordNameList.value.length;
-
-
-    let random = generateRandom(len, isForward);
+    let random = generateRandom(isForward);
     // 根据标识在总数据表中获取该标识对应的数据
     let vocabularycard = await table.value.get({
       n: couldStudyWordNameList.value[random],
@@ -227,14 +252,17 @@ export function useVoca() {
     return vocabularycard;
   }
 
-  function generateRandom(range, isForward) {
+  function generateRandom(isForward) {
     let random = 0;
+    let moreThanPlan = moreThanPlanFn()
+    let range = couldStudyWordNameList.value.length;
+    console.log(couldStudyWordNameList.value.length, moreThanPlan, '生成随机数,是否超过')
 
-    if (basicData.value.studyMode === "study" && !moreThanPlan.value) {
+    if (basicData.value.studyMode === "study" && !moreThanPlan) {
       random = Math.floor(Math.random() * range);
     }
 
-    if (basicData.value.studyMode === "review-past" || moreThanPlan.value) {
+    if (basicData.value.studyMode === "review-past" || moreThanPlan) {
       let lastVocabulary = bookItem.value?.n;
       let findIndex = couldStudyWordNameList.value.findIndex(
         (name) => lastVocabulary === name
@@ -252,9 +280,7 @@ export function useVoca() {
     return random;
   }
 
-  function getTodayDate() {
-    return moment().format("YYYY-MM-DD");
-  }
+
 
   function getPureTodayStudyWords(data) {
     // 看是否是今日学习单词，如果不是，则清空今日单词库
@@ -263,11 +289,12 @@ export function useVoca() {
       return word.date !== isToday;
     });
 
-    todayStudyWords.value = data.map(w => w.n)
     if (hasNotTodayWords) {
       todayStudyWordsTable.value.orderBy().delete().then(() => {
         todayStudyWords.value = []
       })
+    } else {
+      todayStudyWords.value = data.map(w => w.n)
     }
   }
 
@@ -288,6 +315,7 @@ export function useVoca() {
 
   async function getDataTest(isForward = true) {
     putStudiedVocabulary(toRaw(bookItem.value));
+    
     showVocabularyCard(isForward).then(d => bookItem.value = d);
     fullscreenLoading.value = false;
   }
@@ -314,6 +342,20 @@ export function useVoca() {
   async function putStudiedVocabulary(data) {
     let date = getTodayDate();
 
+    let moreThanPlan = moreThanPlanFn()
+    console.log(todayStudyWords.value.includes(data.n))
+
+    // 超过计划，但该单词不包括在内时，不存储
+    if (moreThanPlan && !todayStudyWords.value.includes(data.n)) {
+      return false
+    }
+
+    if (basicData.value.studyMode === 'study' && !moreThanPlan && !todayStudyWords.value.includes(data.n)) {
+      todayStudyWords.value.push(bookItem.value.n)
+      console.log(todayStudyWords.value.length, '到今天')
+    }
+
+    // 此番是防止单词本、课本切换导致数据id不匹配的操作
     studyTable.value.get({ n: data.n }).then(findPutData => {
       let putData = {
         ...findPutData,
@@ -323,15 +365,7 @@ export function useVoca() {
       };
 
       if (basicData.value.studyMode === "study") {
-        todayStudyWordsTable.value.bulkPut([putData]);
-      }
-
-      if (basicData.value.studyMode === "study" && !moreThanPlan.value) {
-        getDBTableData(
-          todayStudyWordsTable,
-          ["n"],
-          true
-        ).then(d => todayStudyWords.value = d)
+        todayStudyWordsTable.value.bulkPut([putData])
       }
 
       studyTable.value.bulkPut([putData]);
