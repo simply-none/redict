@@ -76,7 +76,7 @@ let {
 
 let router = useRouter()
 
-if (router.currentRoute.value.query && router.currentRoute.value.query.reload) {
+if (router && router.currentRoute.value.query && router.currentRoute.value.query.reload) {
   location.href = './'
 }
 

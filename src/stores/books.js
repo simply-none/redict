@@ -13,6 +13,15 @@ export const useBookStore = defineStore("book", () => {
     showVocabularyItem: [],
   });
 
+  let basicDataOrigin = reactive({
+    currentBook: "",
+    currentRange: "",
+    studyMode: "",
+    studyCount: 0,
+    showMode: '',
+    showVocabularyItem: [],
+  });
+
   let useDB = useDBStore();
   let { schema, dbChanged } = storeToRefs(useDB);
   let { getTable } = useDB;
@@ -65,6 +74,7 @@ export const useBookStore = defineStore("book", () => {
 
   return {
     basicData,
+    basicDataOrigin,
     updateBasicInfo,
   };
 });

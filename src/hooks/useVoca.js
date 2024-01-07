@@ -26,6 +26,7 @@ function isRequiredField(obj) {
   }
   const required = ["currentBook", "currentRange", "studyMode", "studyCount"];
   return required.every((field) => {
+    console.log(obj[field], '真')
     return obj[field];
   });
 }
@@ -61,7 +62,7 @@ export function useVoca() {
 
   let isMorethanTodayPlan = ref(false)
 
-  let { basicData } = storeToRefs(useBook);
+  let { basicData, basicDataOrigin } = storeToRefs(useBook);
 
   const drawer = ref(false);
 
@@ -70,6 +71,13 @@ export function useVoca() {
   let bookItemBeforeSearch = ref(null)
 
   let isWordNotInDict = ref(false)
+
+  watchEffect(() => {
+    if (JSON.stringify(basicData.value) === JSON.stringify(basicDataOrigin.value)) {
+      console.log('初始化')
+      initDataInFirstLoad()
+    }
+  })
 
   watch(
     [() => basicData.value.currentBook, () => basicData.value.currentRange, () => basicData.value.studyMode, () => basicData.value.studyCount],
@@ -140,6 +148,7 @@ export function useVoca() {
   async function initDataInFirstLoad() {
     // fullscreenLoading.value = true;
     let isRequired = isRequiredField(basicData);
+    console.log(isRequired, 'sfs')
 
     if (!isRequired) {
       setNotify("请完成基础设置后再试");
