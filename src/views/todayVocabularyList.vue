@@ -78,7 +78,9 @@ let rangeData = ref([]);
 getBookRangeData();
 
 function backToMainPage() {
-  router.push({ name: "wordMainPage" });
+  router.push({ name: "wordMainPage", query: {
+    reload: true
+  } });
 }
 
 function generateDom() {

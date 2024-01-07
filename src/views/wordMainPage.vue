@@ -54,6 +54,7 @@ import { Setting, RefreshLeft } from "@element-plus/icons-vue";
 import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
 import { setNotify } from "../utils/element-plus";
+import { useRouter } from "vue-router";
 
 // 今日学习数据
 
@@ -70,6 +71,12 @@ let {
   getDataTest,
   getSearchText,
 } = useVoca();
+
+let router = useRouter()
+
+if (router.currentRoute.value.query && router.currentRoute.value.query.reload) {
+  location.href = './'
+}
 
 function OpenSetting () {
   drawer.value = true
