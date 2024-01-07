@@ -69,6 +69,8 @@ export function useVoca() {
 
   let bookItemBeforeSearch = ref(null)
 
+  let isWordNotInDict = ref(false)
+
   watch(
     [() => basicData.value.currentBook, () => basicData.value.currentRange, () => basicData.value.studyMode, () => basicData.value.studyCount],
     () => {
@@ -173,7 +175,11 @@ export function useVoca() {
     console.log(todayStudyWords.value.length , basicData.value.studyCount, '比较，切换count')
 
     if (basicData.value.studyMode === 'study' && moreThanPlan) {
-      couldStudyWordNameList.value = toRaw(todayStudyWords.value)
+      if (!isWordNotInDict.value) {
+        couldStudyWordNameList.value = toRaw(todayStudyWords.value)
+      } else {
+        isWordNotInDict.value = false
+      }
       !isMorethanTodayPlan.value && setNotify(
         "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
         "success",
@@ -233,17 +239,20 @@ export function useVoca() {
   async function showVocabularyCard(isForward) {
     let random = generateRandom(isForward);
     // 根据标识在总数据表中获取该标识对应的数据
+    console.log(random, couldStudyWordNameList.value[random], couldStudyWordNameList.value.length, 'randoim')
     let vocabularycard = await table.value.get({
       n: couldStudyWordNameList.value[random],
     });
     if (!vocabularycard) {
       // 当前单词在词典中未找到，将过滤掉所有找不到的单词，重新获取下一个
-      setNotify('由于单词本和词典数据不匹配，正在重新获取能够复习的单词数据...', 'warning')
+      setNotify('由于单词【' + couldStudyWordNameList.value[random]+ '】在词典中找不到，将跳转到下一个单词...', 'warning')
       let d = await table.value.toArray()
       d = d.map(dn => dn.n)
       couldStudyWordNameList.value = couldStudyWordNameList.value.filter(c => {
         return d.includes(c)
       })
+      isWordNotInDict.value = true
+      console.log(couldStudyWordNameList.value.length)
 
       clearNotify()
 

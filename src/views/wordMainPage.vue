@@ -1,6 +1,7 @@
 <template>
   <el-card
     class="voca-card"
+    :class="{ pc: isPC }"
     v-loading.fullscreen.lock="fullscreenLoading"
     element-loading-text="应用正在加载中..."
     element-loading-background="#eee"
@@ -78,6 +79,18 @@ if (router.currentRoute.value.query && router.currentRoute.value.query.reload) {
   location.href = './'
 }
 
+function isPC () {
+  let mobile = ['iphone', 'android']
+  let userAgent = window.navigator.userAgent
+
+  if (userAgent.toLocaleLowerCase(mobile)) {
+    return false
+  }
+  else {
+    return true
+  }
+}
+
 function OpenSetting () {
   drawer.value = true
   bookItemBeforeSearch.value = null
@@ -127,6 +140,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+.pc {
+  max-width: 520px;
+}
 .voca {
   &-card {
     height: 100%;
