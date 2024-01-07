@@ -1,7 +1,7 @@
 <template>
   <el-card
     class="voca-card"
-    :class="{ pc: isPC }"
+    :class="{ pc: isPC() }"
     v-loading.fullscreen.lock="fullscreenLoading"
     element-loading-text="应用正在加载中..."
     element-loading-background="#eee"
@@ -55,6 +55,7 @@ import { Setting, RefreshLeft } from "@element-plus/icons-vue";
 import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
 import { setNotify } from "../utils/element-plus";
+import { isPC } from '../utils/common'
 import { useRouter } from "vue-router";
 
 // 今日学习数据
@@ -77,18 +78,6 @@ let router = useRouter()
 
 if (router.currentRoute.value.query && router.currentRoute.value.query.reload) {
   location.href = './'
-}
-
-function isPC () {
-  let mobile = ['iphone', 'android']
-  let userAgent = window.navigator.userAgent
-
-  if (userAgent.toLocaleLowerCase(mobile)) {
-    return false
-  }
-  else {
-    return true
-  }
 }
 
 function OpenSetting () {
