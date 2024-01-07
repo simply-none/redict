@@ -10,6 +10,22 @@
           </template>
           <SelectBook :validate="validateSymbol" :alreadySetBasic="alreadySetBasic" @alreadySetBasicHandle="alreadySetBasicHandle"/>
         </el-collapse-item>
+        <el-collapse-item name="7">
+          <template #title>
+            课本词典资源下载<el-icon class="header-icon" title="点击链接跳转">
+              <info-filled />
+            </el-icon>
+          </template>
+          <DownloadResourceVue/>
+        </el-collapse-item>
+        <el-collapse-item name="2">
+          <template #title>
+            数据上传<el-icon class="header-icon" title="仅支持json数据">
+              <info-filled />
+            </el-icon>
+          </template>
+          <UploadBook/>
+        </el-collapse-item>
         <el-collapse-item name="6">
           <template #title>
             基础数据览表<el-icon class="header-icon">
@@ -34,14 +50,6 @@
           </template>
           <j-device :isCurrent="currentCollapse.includes('1')"/>
         </el-collapse-item>
-        <el-collapse-item name="2">
-          <template #title>
-            数据上传<el-icon class="header-icon" title="仅支持json数据">
-              <info-filled />
-            </el-icon>
-          </template>
-          <UploadBook/>
-        </el-collapse-item>
         <el-collapse-item name="22">
           <template #title>
             路由跳转<el-icon class="header-icon" title="仅支持json数据">
@@ -63,6 +71,7 @@ import { ElMessageBox, ElDescriptions, ElDescriptionsItem } from "element-plus";
 import {RouterLink} from 'vue-router'
 import JDevice from './Device.vue'
 import UploadBook from './uploadBook.vue'
+import DownloadResourceVue from './downloadResource.vue'
 import SelectBook from './selectBook.vue'
 import TodayVocabulary from "./todayVocabulary.vue";
 import BasicTable from "./basicTable.vue";
@@ -75,6 +84,7 @@ import {
   Tickets,
   User,
 } from "@element-plus/icons-vue";
+import downloadResourceVue from "./downloadResource.vue";
 
 let activeCollapse = ref(['2', '3', '5', '6'])
 let currentCollapse = ref([])
