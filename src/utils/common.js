@@ -44,3 +44,17 @@ export function sleep(time) {
 export function isArray (obj) {
   return Object.prototype.toString.call(obj) === '[object Array]'
 }
+
+export function isPC () {
+  let mobile = ['iphone', 'android', 'harmony', 'mobile']
+  let userAgent = window.navigator.userAgent.toLocaleLowerCase()
+
+  let isMobile = mobile.some(agent => userAgent.includes(mobile))
+
+  if (isMobile) {
+    return false
+  }
+  else {
+    return true
+  }
+}

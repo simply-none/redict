@@ -25,7 +25,7 @@
         <el-radio :label="count" v-for="count in studyCounts" :key="count" />
       </el-radio-group>
     </el-form-item>
-    <el-form-item label="选择书本" prop="currentBook">
+    <el-form-item label="选择词典源" prop="currentBook">
       <el-select
         @change="setBasicInfo($event, 'currentBook')"
         v-model="ruleForm.currentBook"
@@ -40,7 +40,7 @@
         />
       </el-select>
     </el-form-item>
-    <el-form-item label="选择范围" prop="currentRange">
+    <el-form-item label="选择单词课本" prop="currentRange">
       <el-select
         @change="setBasicInfo($event, 'currentRange')"
         v-model="ruleForm.currentRange"
@@ -175,7 +175,7 @@ watch(
 function setBasicInfo(val, field) {
   
   updateBasicInfo(field, val);
-  let changedField = ["currentBook", "currentRange"];
+  let changedField = ["currentBook", "currentRange", "studyMode"];
   if (changedField.includes(field)) {
     changed.value = true;
   }
