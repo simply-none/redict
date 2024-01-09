@@ -44,10 +44,12 @@ export default defineStore("DBTable", () => {
   // 获取数据表，无则创建表
   async function getDBTable(tableName, tableSchema) {
     let loadTable = getTable(tableName);
+    console.log(loadTable, !!loadTable)
     if (!loadTable) {
       await addTable(tableName, tableSchema);
       loadTable = getTable(tableName);
     }
+
     return loadTable;
   }
 

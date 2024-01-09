@@ -1,5 +1,11 @@
 <template>
-  <el-drawer v-model="drawer" title="设置" size="100%" :before-close="handleClose">
+  <el-drawer
+    v-model="drawer"
+    title="设置"
+    size="100%"
+    :before-close="handleClose"
+    class="word-main-page-setting"
+  >
     <div class="demo-collapse">
       <el-collapse v-model="activeCollapse" @change="setSymbol">
         <el-collapse-item name="3">
@@ -8,7 +14,11 @@
               <info-filled />
             </el-icon>
           </template>
-          <SelectBook :validate="validateSymbol" :alreadySetBasic="alreadySetBasic" @alreadySetBasicHandle="alreadySetBasicHandle"/>
+          <SelectBook
+            :validate="validateSymbol"
+            :alreadySetBasic="alreadySetBasic"
+            @alreadySetBasicHandle="alreadySetBasicHandle"
+          />
         </el-collapse-item>
         <el-collapse-item name="7">
           <template #title>
@@ -16,7 +26,7 @@
               <info-filled />
             </el-icon>
           </template>
-          <DownloadResourceVue/>
+          <DownloadResourceVue />
         </el-collapse-item>
         <el-collapse-item name="2">
           <template #title>
@@ -24,12 +34,12 @@
               <info-filled />
             </el-icon>
           </template>
-          <UploadBook/>
+          <UploadBook />
         </el-collapse-item>
         <el-collapse-item name="6">
           <template #title>
             基础数据览表<el-icon class="header-icon">
-              <info-filled/>
+              <info-filled />
             </el-icon>
           </template>
           <BasicTable />
@@ -37,7 +47,7 @@
         <el-collapse-item name="5">
           <template #title>
             今日数据<el-icon class="header-icon">
-              <info-filled/>
+              <info-filled />
             </el-icon>
           </template>
           <TodayVocabulary />
@@ -45,10 +55,10 @@
         <el-collapse-item name="1">
           <template #title>
             设备信息<el-icon class="header-icon">
-              <info-filled name="1"/>
+              <info-filled name="1" />
             </el-icon>
           </template>
-          <j-device :isCurrent="currentCollapse.includes('1')"/>
+          <j-device :isCurrent="currentCollapse.includes('1')" />
         </el-collapse-item>
         <el-collapse-item name="22">
           <template #title>
@@ -56,7 +66,11 @@
               <info-filled />
             </el-icon>
           </template>
-          <div v-for="route in routes" :key="route.id" @click="$router.push({name: route.name})">
+          <div
+            v-for="route in routes"
+            :key="route.id"
+            @click="$router.push({ name: route.name })"
+          >
             {{ route.path }}
           </div>
         </el-collapse-item>
@@ -68,14 +82,14 @@
 <script setup>
 import { reactive, ref, onMounted, computed, toRaw } from "vue";
 import { ElMessageBox, ElDescriptions, ElDescriptionsItem } from "element-plus";
-import {RouterLink} from 'vue-router'
-import JDevice from './Device.vue'
-import UploadBook from './uploadBook.vue'
-import DownloadResourceVue from './downloadResource.vue'
-import SelectBook from './selectBook.vue'
+import { RouterLink } from "vue-router";
+import JDevice from "./Device.vue";
+import UploadBook from "./uploadBook.vue";
+import DownloadResourceVue from "./downloadResource.vue";
+import SelectBook from "./selectBook.vue";
 import TodayVocabulary from "./todayVocabulary.vue";
 import BasicTable from "./basicTable.vue";
-import { routes } from '../router/index'
+import { routes } from "../router/index";
 import {
   InfoFilled,
   Iphone,
@@ -86,44 +100,43 @@ import {
 } from "@element-plus/icons-vue";
 import downloadResourceVue from "./downloadResource.vue";
 
-let activeCollapse = ref(['2', '3', '5', '6'])
-let currentCollapse = ref([])
+let activeCollapse = ref(["2", "3", "5", "6"]);
+let currentCollapse = ref([]);
 
-let alreadySetBasic = ref(false)
-let validateSymbol = ref(Date.now())
+let alreadySetBasic = ref(false);
+let validateSymbol = ref(Date.now());
 
 let props = defineProps({
   visible: {
-    type: Boolean
-  }
-})
+    type: Boolean,
+  },
+});
 
 let drawer = computed({
-  get () {
-    return props.visible
+  get() {
+    return props.visible;
   },
-  set () {}
-})
+  set() {},
+});
 
-function alreadySetBasicHandle (val) {
-  alreadySetBasic.value = val.isSetBasic
-  emit('handleDrawer', {
+function alreadySetBasicHandle(val) {
+  alreadySetBasic.value = val.isSetBasic;
+  emit("handleDrawer", {
     drawer: false,
-    changed: val.changed
-  })
+    changed: val.changed,
+  });
 }
 
-function setSymbol (val) {
-  
-  currentCollapse.value = val
+function setSymbol(val) {
+  currentCollapse.value = val;
 }
 
-let emit = defineEmits(['handleDrawer'])
+let emit = defineEmits(["handleDrawer"]);
 
-function handleClose (done) {
-  validateSymbol.value = Date.now()
+function handleClose(done) {
+  validateSymbol.value = Date.now();
   if (!alreadySetBasic.value) {
-    return false
+    return false;
   }
   // emit('handleDrawer', {
   //   drawer: false
@@ -131,29 +144,42 @@ function handleClose (done) {
 }
 </script>
 
-<style scoped>
-.el-descriptions {
-  margin-top: 20px;
+<style scoped lang="scss">
+:global(.el-drawer.word-main-page-setting) {
+  color: red;
+  
 }
-.cell-item {
-  display: flex;
-  align-items: center;
-}
-.margin-top {
-  margin-top: 20px;
-}
+:global(.el-drawer.word-main-page-setting .el-drawer__header) {
+    margin: 0;
+    padding: 3px var(--el-drawer-padding-primary);
+    background: #f7f7f7;
+  }
 
-.my-label {
-  background: var(--el-color-success-light-9);
-}
-.my-content {
-  background: var(--el-color-danger-light-9);
-}
+  :global(.el-drawer.word-main-page-setting .el-drawer__body) {
+    margin: 0;
+    padding-top: 0px;
+  }
+// .el-descriptions {
+//   margin-top: 20px;
+// }
+// .cell-item {
+//   display: flex;
+//   align-items: center;
+// }
+// .margin-top {
+//   margin-top: 20px;
+// }
 
-.getDataTest {
-  width: 100%;
-  height: 100px;
-  border: 1px solid red;
+// .my-label {
+//   background: var(--el-color-success-light-9);
+// }
+// .my-content {
+//   background: var(--el-color-danger-light-9);
+// }
 
-}
+// .getDataTest {
+//   width: 100%;
+//   height: 100px;
+//   border: 1px solid red;
+// }
 </style>
