@@ -58,6 +58,16 @@ import { setNotify } from "../utils/element-plus";
 import { isPC } from '../utils/common'
 import { useRouter } from "vue-router";
 
+// mounted函数必须在异步调用之前，不然不生效
+onMounted(() => {
+  console.log(new Date())
+  window.addEventListener("keyup", arrowRightGetData);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keyup", arrowRightGetData);
+});
+
 // 今日学习数据
 
 let useBook = useBookStore();
@@ -75,6 +85,8 @@ let {
 } = useVoca();
 
 let router = useRouter()
+
+
 
 if (router && router.currentRoute.value.query && router.currentRoute.value.query.reload) {
   location.href = './'
@@ -107,6 +119,7 @@ function getWordItem(e) {
 }
 
 function arrowRightGetData(e) {
+  console.log(e, 'e')
   if (bookItemBeforeSearch.value && ['ArrowRight', 'ArrowLeft'].includes(e.code)) {
     setNotify('点击单词还原按钮后，再去切换单词')
     return false
@@ -119,13 +132,7 @@ function arrowRightGetData(e) {
   }
 }
 
-onMounted(() => {
-  window.addEventListener("keyup", arrowRightGetData);
-});
 
-onUnmounted(() => {
-  window.removeEventListener("keyup", arrowRightGetData);
-});
 </script>
 
 <style scoped lang="scss">
