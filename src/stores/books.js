@@ -10,7 +10,7 @@ export const useBookStore = defineStore("book", () => {
     studyMode: "",
     studyCount: 0,
     showMode: '',
-    showVocabularyItem: [],
+    showVocabularyItem: ['ps'],
   });
 
   let basicDataOrigin = reactive({

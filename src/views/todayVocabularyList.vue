@@ -202,8 +202,6 @@ let wordType = reactive({
 let { today, history, range, book } = toRefs(wordType);
 let table = ref({});
 
-console.log(today, history, range, book, "哈哈哈");
-
 let selectWordType = ref("today");
 
 let showEntireBook = ref(false);
@@ -234,8 +232,7 @@ let bookItemList = ref([]);
 
 getlocalWordListPageSize();
 
-watch([() => basicData.value.currentBook, () => basicData.value.currentRange], (n, o) => {
-  console.log('来这里几次了', n, o)
+watchEffect(() => {
   if (
     basicData.value.currentBook && 
     basicData.value.currentRange
@@ -244,6 +241,8 @@ watch([() => basicData.value.currentBook, () => basicData.value.currentRange], (
     console.log("初始化", JSON.stringify(basicData.value));
     getDataFromDBList();
   }
+}, {
+  immediate: true
 })
 
 watch(table, () => {

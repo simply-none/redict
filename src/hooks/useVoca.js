@@ -26,7 +26,7 @@ function isRequiredField(obj) {
   }
   const required = ["currentBook", "currentRange", "studyMode", "studyCount"];
   return required.every((field) => {
-    console.log(obj[field], '真')
+    console.log(obj[field], '真', field)
     return obj[field];
   });
 }
@@ -41,20 +41,21 @@ export function useVoca() {
 
   // 今日学习数据
   let todayStudyWordsTable = ref(null);
-  let todayStudyWords = ref(null);
+  let todayStudyWords = ref([]);
 
-  let couldStudyWordNameList = ref(null);
+  let couldStudyWordNameList = ref();
 
   // 获取书本学习的范围数据表
   let rangeTable = ref();
-  let rangeWords = ref(null);
+  let rangeWords = ref();
 
   let table = ref();
+  let dictWords = ref()
 
   // 获取已学习过的单词的数据表
   let studyTable = ref();
 
-  let studyWords = ref(null);
+  let studyWords = ref([]);
 
   const fullscreenLoading = ref(true);
 
@@ -78,6 +79,7 @@ export function useVoca() {
   //     initDataInFirstLoad()
   //   }
   // })
+  initDataInFirstLoad();
 
   watch(
     [() => basicData.value.currentBook, () => basicData.value.currentRange, () => basicData.value.studyMode, () => basicData.value.studyCount],
@@ -94,7 +96,7 @@ export function useVoca() {
       return false
     }
     // 当数据源表、今日学习数据、历史学习数据、范围数据 均有值时，才会进行计算，否则终止
-    if (todayStudyWords.value && studyWords.value && rangeWords.value && table.value) {
+    if (todayStudyWords.value && studyWords.value && rangeWords.value && dictWords.value) {
       couldStudyWordNameList.value = await getCouldStudyWords()
       console.log('进来了？', couldStudyWordNameList.value.length)
 
@@ -121,27 +123,53 @@ export function useVoca() {
     getDataFromDB(getDBTable, ["studied-voca", "++id, n, date"], studyTable).then(d => {
       console.log('学习过的数据表')
       studyTable.value = d
-      getDataFromDB(getDBTableData, [studyTable, ["n"]], studyWords, 'setValue')
+      studyTable.value.orderBy('n').keys().then(dd => {
+        studyWords.value = (dd || []).filter(w => w).map(w => (w || '').toLowerCase())
+        studyWords.value.sort((a, b) => a > b ? 1 : -1)
+        console.log(dd, '学习过的数据表')
+
+      })
+      // getDataFromDB(getDBTableData, [studyTable, ["n"]], studyWords, 'setValue')
     })
 
     // 今日数据表
-    getDataFromDB(getDBTable, ["today-studied-voca", "++id"], todayStudyWordsTable).then(d => {
+    getDataFromDB(getDBTable, ["today-studied-voca", "++id, n"], todayStudyWordsTable).then(d => {
       console.log('今日数据表' , d)
       todayStudyWordsTable.value = d
-      getDBTableData(todayStudyWordsTable, false, true).then(dd => {
-        console.log(dd, '当前值就')
-        getPureTodayStudyWords(dd)
+      todayStudyWordsTable.value.orderBy('n').keys().then(dd => {
+        todayStudyWords.value = (dd || []).filter(w => w).map(w => (w || '').toLowerCase())
+        todayStudyWords.value.sort((a, b) => a > b ? 1 : -1)
+        console.log(dd, '今日数据表')
+
       })
+      // getDBTableData(todayStudyWordsTable, false, true).then(dd => {
+      //   console.log(dd, '当前值就')
+      //   getPureTodayStudyWords(dd)
+      // })
     })
 
     // 总数据表
-    getDataFromDB(getDBTable, [basicData.value.currentBook, ""], table).then(d => table.value = d)
+    getDataFromDB(getDBTable, [basicData.value.currentBook, ""], table).then(d => {
+      table.value = d
+      table.value.orderBy('n').keys().then(dd => {
+        dictWords.value = (dd || []).filter(w => w).map(w => (w || '').toLowerCase())
+        dictWords.value.sort((a, b) => a > b ? 1 : -1)
+        console.log(dictWords.value, '总表')
+
+      })
+    })
 
     // 范围表
     getDataFromDB(getDBTable, [basicData.value.currentRange, ""], rangeTable).then(d => {
       rangeTable.value = d
       console.log('范围表')
-      getDataFromDB(getDBTableData, [rangeTable, ["n"]], rangeWords, 'setValue')
+      rangeTable.value.orderBy('n').keys().then(dd => {
+        rangeWords.value = (dd || []).filter(w => w).map(w => (w || '').toLowerCase())
+        rangeWords.value.sort((a, b) => a > b ? 1 : -1)
+        console.log(rangeWords.value, '范围表')
+
+      })
+      // getDataFromDB(getDBTableData, [rangeTable, ["n"]], rangeWords, 'setValue')
     })
   }
 
@@ -198,12 +226,63 @@ export function useVoca() {
     }
 
     if (!moreThanPlan && basicData.value.studyMode === 'study') {
-      couldStudyWordNameList.value = toRaw(studyWords.value)
+      if (studyWords.value.length) {
+        couldStudyWordNameList.value = toRaw(studyWords.value)
+      }
       isMorethanTodayPlan.value = false
     }
 
     return moreThanPlan
   }
+
+  function delAFromB (nums1, nums2) {
+    nums1.sort((x, y) => x - y);
+    nums2.sort((x, y) => x - y);
+    const length1 = nums1.length, length2 = nums2.length;
+    let index1 = 0, index2 = 0;
+    const intersection = [];
+    while (index1 < length1 && index2 < length2) {
+        const num1 = nums1[index1], num2 = nums2[index2];
+        if (num1 === num2) {
+            // 保证加入元素的唯一性
+            if (!intersection.length || num1 !== intersection[intersection.length - 1]) {
+                intersection.push(num1);
+            }
+            index1++;
+            index2++;
+        } else if (num1 < num2) {
+            index1++;
+        } else {
+            index2++;
+        }
+    }
+    return intersection;
+}
+
+  function filterAFromB (nums1, nums2) {
+    nums1.sort((x, y) => x - y);
+    nums2.sort((x, y) => x - y);
+    const length1 = nums1.length, length2 = nums2.length;
+    let index1 = 0, index2 = 0;
+    const intersection = [];
+    while (index1 < length1 && index2 < length2) {
+        const num1 = nums1[index1], num2 = nums2[index2];
+        if (num1 === num2) {
+            // 保证加入元素的唯一性
+            if (!intersection.length || num1 !== intersection[intersection.length - 1]) {
+                intersection.push(num1);
+            }
+            index1++;
+            index2++;
+        } else if (num1 < num2) {
+            index1++;
+        } else {
+            index2++;
+        }
+    }
+    return intersection;
+}
+
 
   // 获取能够展示单词卡片的索引
   async function getCouldStudyWords() {
@@ -226,18 +305,29 @@ export function useVoca() {
 
     // 仅学习模式
     if (basicData.value.studyMode === "study" && !moreThanPlan) {
-      studyWordsData = await table.value
-        .filter(
-          (word) =>
-            !studyWords.value.includes(word.n) &&
-            rangeWords.value.includes(word.n)
-        )
-        .toArray();
-      studyWordsData = studyWordsData.map((word) => word.n);
+      console.time('xuex1')
+      if (dictWords.value.length > rangeWords.value.length) {
+        studyWordsData = filterAFromB(dictWords.value, rangeWords.value)
+        // studyWordsData = rangeWords.value.filter(n => dictWords.value.includes(n))
+      } else {
+        // studyWordsData = dictWords.value.filter(n => rangeWords.value.includes(n))
+        studyWordsData = filterAFromB(rangeWords.value, dictWords.value)
+      }
+      console.log(studyWordsData, '能够学习的单词n')
+      console.timeEnd('xuex1')
+      console.time('xuex2')
+      studyWordsData = studyWordsData.filter(n => !studyWords.value.includes(n))
+      console.log(studyWordsData, '能够学习的单词n')
+
+      console.timeEnd('xuex2')
+      console.time('xuex3')
+
       studyWordsData = studyWordsData.filter(
         (word) => !todayStudyWords.value.includes(word)
       );
       console.log('仅学习模式')
+      console.timeEnd('xuex3')
+
     }
     console.log(studyWordsData.length, '能够学习的单词')
     // 获取过滤后的可学习/复习的单词索引
