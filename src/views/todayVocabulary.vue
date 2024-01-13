@@ -45,11 +45,17 @@
     <h3 class="today-voca-head">
       非范围单词，共计：{{ rangeNotInBookData.length }}个
     </h3>
-    <TablePage :data="rangeNotInBookDataPage" :table-len="rangeNotInBookData.length" :items="[{prop: 'n', label: '单词'}]" :tablePageSize="tablePageSize" @getData="(current) => getPageData(rangeNotInBookData, current)"/>
+    <TablePage
+      :data="rangeNotInBookDataPage"
+      :table-len="rangeNotInBookData.length"
+      :items="[{ prop: 'n', label: '单词' }]"
+      :tablePageSize="tablePageSize"
+      @getData="(current) => getPageData(rangeNotInBookData, current)"
+    />
   </div>
 </template>
 <script setup lang="jsx">
-import TablePage from '../components/tablePage.vue'
+import TablePage from "../components/tablePage.vue";
 import { ref, reactive, onMounted, watch, toRaw } from "vue";
 import {
   TableV2SortOrder,
@@ -67,8 +73,9 @@ import { useRoute, useRouter } from "vue-router";
 import moment from "moment";
 
 import { funDownloadByJson } from "../utils/generateFile";
+import { delBFromA, filterBFromA } from "../utils/common";
 
-import Worker from "../utils/getStoreWebWork.js?worker";
+// import Worker from "../utils/getStoreWebWork.js?worker";
 
 const sortState = ref({
   n: TableV2SortOrder.ASC,
@@ -148,22 +155,22 @@ let rangeData = ref([]);
 let rangeNotInBookData = ref([]);
 
 let rangeNotInBookDataPage = ref([]);
-let tablePageSize = ref(100)
+let tablePageSize = ref(100);
 
 let couldDataLen = ref(0);
 
 let router = useRouter();
 
-let loading = ref(true)
+let loading = ref(true);
 
-let worker = new Worker();
+// let worker = new Worker();
 
-worker.addEventListener("message", (e) => {
-  console.log(e, "监听数据");
-  rangeNotInBookData.value = JSON.parse(e.data).rangeNotInBookData;
-  getPageData(rangeNotInBookData.value, 1)
-  loading.value = false
-});
+// worker.addEventListener("message", (e) => {
+//   console.log(e, "监听数据");
+//   rangeNotInBookData.value = JSON.parse(e.data).rangeNotInBookData;
+//   getPageData(rangeNotInBookData.value, 1)
+//   loading.value = false
+// });
 
 watch(
   basicData,
@@ -183,9 +190,9 @@ onMounted(() => {
   getBookRangeData();
 });
 
-function getPageData (data, current) {
-  let start = (current - 1) * tablePageSize.value
-  rangeNotInBookDataPage.value = data.slice(start, start + tablePageSize.value)
+function getPageData(data, current) {
+  let start = (current - 1) * tablePageSize.value;
+  rangeNotInBookDataPage.value = data.slice(start, start + tablePageSize.value);
 }
 
 function onSort({ key, order }) {
@@ -223,15 +230,38 @@ watch(
       return false;
     }
 
-    console.log({nBookData, nRangeData})
+    console.log({ nBookData, nRangeData });
+    loading.value = true;
 
-    worker.postMessage({nBookData: toRaw(nBookData), nRangeData: toRaw(nRangeData)})
-    loading.value = true
+    // worker.postMessage({nBookData: toRaw(nBookData), nRangeData: toRaw(nRangeData)})
+
+    let nFromBook = nBookData.map((w) => w.n.toLowerCase());
+    let nFromRange = nRangeData.map((w) => w.n.toLowerCase());
+
+    rangeNotInBookData.value = delBFromA(nFromRange, nFromBook);
+    rangeNotInBookData.value = rangeNotInBookData.value.map((w) => ({ n: w }));
+
+    // nFromBook = nRangeData
+    //   .filter((w) => nFromBook.includes(w.n.toLowerCase()))
+    //   .map((w) => w.n.toLowerCase());
+
+    // let rangeNotInBookData = nRangeData.filter(
+    //   (w) => !nFromBook.includes(w.n.toLowerCase())
+    // );
+
+    // rangeNotInBookData.value = rangeNotInBookData;
+    getPageData(rangeNotInBookData.value, 1);
+
+    loading.value = false;
   }
 );
 
 async function getBookTable() {
   let bookTable = getTable(basicData.value.currentBook);
+  console.log(bookTable, "d");
+  if (!bookTable) {
+    return false;
+  }
   bookTable.toArray().then((d) => {
     bookData.value = d;
   });
@@ -239,6 +269,10 @@ async function getBookTable() {
 
 async function getRangeTable() {
   let rangeTable = getTable(basicData.value.currentRange);
+  console.log(rangeTable, "d");
+  if (!rangeTable) {
+    return false;
+  }
   rangeTable.toArray().then((d) => {
     rangeData.value = d;
   });
@@ -254,6 +288,10 @@ function getBookRangeData() {
 }
 
 async function getVocaList() {
+  console.log(todayTable, "d");
+  if (!todayTable) {
+    return false;
+  }
   todayTable.toArray().then((d) => {
     vocalist.value = d;
   });
@@ -264,6 +302,10 @@ function exportData() {
 }
 
 async function getHistoryVocaList() {
+  console.log(historyTable, "d");
+  if (!historyTable) {
+    return false;
+  }
   historyTable.toArray().then((d) => {
     historyVocalist.value = d;
   });

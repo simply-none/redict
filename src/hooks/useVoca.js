@@ -12,12 +12,14 @@ import {
 
 import { useBookStore } from "../stores/books";
 import useTableStore from "../stores/table";
+import  useDBStore  from '../stores/db'
 import { storeToRefs } from "pinia";
 
 import moment from "moment";
 
 import { clearNotify, setNotify } from "../utils/element-plus";
 import { funDownloadByJson } from "../utils/generateFile";
+import { delBFromA, filterBFromA } from "../utils/common";
 
 function isRequiredField(obj) {
   obj = unref(obj);
@@ -37,6 +39,7 @@ function getTodayDate() {
 
 export function useVoca() {
   let useBook = useBookStore();
+  let useDB = useDBStore()
   let { getDBTable, getDBTableData } = useTableStore();
 
   // 今日学习数据
@@ -64,6 +67,7 @@ export function useVoca() {
   let isMorethanTodayPlan = ref(false)
 
   let { basicData, basicDataOrigin } = storeToRefs(useBook);
+  let { dbChanged, ad } = storeToRefs(useDB)
 
   const drawer = ref(false);
 
@@ -73,21 +77,36 @@ export function useVoca() {
 
   let isWordNotInDict = ref(false)
 
+  console.log(basicData, dbChanged.value,  'basicData')
+
   // watchEffect(() => {
   //   if (JSON.stringify(basicData.value) === JSON.stringify(basicDataOrigin.value)) {
   //     console.log('初始化')
   //     initDataInFirstLoad()
   //   }
   // })
-  initDataInFirstLoad();
-
+  // initDataInFirstLoad();
   watch(
-    [() => basicData.value.currentBook, () => basicData.value.currentRange, () => basicData.value.studyMode, () => basicData.value.studyCount],
-    () => {
+    () => basicData.value.name, () => {
       console.log('hhhhh')
       initDataInFirstLoad();
     }
   );
+
+  watch(
+    [() => basicData.value.currentBook, () => basicData.value.currentRange, () => basicData.value.studyMode, () => basicData.value.studyCount],
+    ([a, b, c, d], [x, y, z, o]) => {
+      console.log('hhhhh', [a, b, c, d], [x, y, z, o])
+      initDataInFirstLoad();
+    }
+  );
+  watch(() => dbChanged.value, (n, o) => {
+    console.log(n, o, 'n o')
+  })
+  watch(() => dbChanged.value, (n, o) => {
+    console.log(n, o, '很疯狂的是')
+    initDataInFirstLoad()
+  })
 
   watchEffect(async () => {
     // 非首次加载，就不进行下列操作
@@ -134,7 +153,7 @@ export function useVoca() {
 
     // 今日数据表
     getDataFromDB(getDBTable, ["today-studied-voca", "++id, n"], todayStudyWordsTable).then(d => {
-      console.log('今日数据表' , d)
+      console.log('今日数据表', d)
       todayStudyWordsTable.value = d
       todayStudyWordsTable.value.orderBy('n').keys().then(dd => {
         todayStudyWords.value = (dd || []).filter(w => w).map(w => (w || '').toLowerCase())
@@ -154,7 +173,7 @@ export function useVoca() {
       table.value.orderBy('n').keys().then(dd => {
         dictWords.value = (dd || []).filter(w => w).map(w => (w || '').toLowerCase())
         dictWords.value.sort((a, b) => a > b ? 1 : -1)
-        console.log(dictWords.value, '总表')
+        console.log(dictWords.value.length, '总表')
 
       })
     })
@@ -166,7 +185,7 @@ export function useVoca() {
       rangeTable.value.orderBy('n').keys().then(dd => {
         rangeWords.value = (dd || []).filter(w => w).map(w => (w || '').toLowerCase())
         rangeWords.value.sort((a, b) => a > b ? 1 : -1)
-        console.log(rangeWords.value, '范围表')
+        console.log(rangeWords.value.length, '范围表')
 
       })
       // getDataFromDB(getDBTableData, [rangeTable, ["n"]], rangeWords, 'setValue')
@@ -209,7 +228,7 @@ export function useVoca() {
 
   function moreThanPlanFn() {
     let moreThanPlan = todayStudyWords.value.length >= basicData.value.studyCount
-    console.log(todayStudyWords.value.length , basicData.value.studyCount, '比较，切换count')
+    console.log(todayStudyWords.value.length, basicData.value.studyCount, '比较，切换count')
 
     if (basicData.value.studyMode === 'study' && moreThanPlan) {
       if (!isWordNotInDict.value) {
@@ -235,61 +254,12 @@ export function useVoca() {
     return moreThanPlan
   }
 
-  function delAFromB (nums1, nums2) {
-    nums1.sort((x, y) => x - y);
-    nums2.sort((x, y) => x - y);
-    const length1 = nums1.length, length2 = nums2.length;
-    let index1 = 0, index2 = 0;
-    const intersection = [];
-    while (index1 < length1 && index2 < length2) {
-        const num1 = nums1[index1], num2 = nums2[index2];
-        if (num1 === num2) {
-            // 保证加入元素的唯一性
-            if (!intersection.length || num1 !== intersection[intersection.length - 1]) {
-                intersection.push(num1);
-            }
-            index1++;
-            index2++;
-        } else if (num1 < num2) {
-            index1++;
-        } else {
-            index2++;
-        }
-    }
-    return intersection;
-}
-
-  function filterAFromB (nums1, nums2) {
-    nums1.sort((x, y) => x - y);
-    nums2.sort((x, y) => x - y);
-    const length1 = nums1.length, length2 = nums2.length;
-    let index1 = 0, index2 = 0;
-    const intersection = [];
-    while (index1 < length1 && index2 < length2) {
-        const num1 = nums1[index1], num2 = nums2[index2];
-        if (num1 === num2) {
-            // 保证加入元素的唯一性
-            if (!intersection.length || num1 !== intersection[intersection.length - 1]) {
-                intersection.push(num1);
-            }
-            index1++;
-            index2++;
-        } else if (num1 < num2) {
-            index1++;
-        } else {
-            index2++;
-        }
-    }
-    return intersection;
-}
-
-
   // 获取能够展示单词卡片的索引
   async function getCouldStudyWords() {
     let studyWordsData = [];
     let moreThanPlan = moreThanPlanFn()
     console.log(basicData.value.studyCount, todayStudyWords.value.length, '总，今')
-    
+
 
     // 查看是否是复习过去的单词模式
     if (basicData.value.studyMode === "review-past") {
@@ -306,28 +276,19 @@ export function useVoca() {
     // 仅学习模式
     if (basicData.value.studyMode === "study" && !moreThanPlan) {
       console.time('xuex1')
-      if (dictWords.value.length > rangeWords.value.length) {
-        studyWordsData = filterAFromB(dictWords.value, rangeWords.value)
-        // studyWordsData = rangeWords.value.filter(n => dictWords.value.includes(n))
-      } else {
-        // studyWordsData = dictWords.value.filter(n => rangeWords.value.includes(n))
-        studyWordsData = filterAFromB(rangeWords.value, dictWords.value)
-      }
-      console.log(studyWordsData, '能够学习的单词n')
+      studyWordsData = filterBFromA(rangeWords.value, dictWords.value)
+      console.log(studyWordsData.length, '能够学习的单词n')
       console.timeEnd('xuex1')
-      console.time('xuex2')
-      studyWordsData = studyWordsData.filter(n => !studyWords.value.includes(n))
-      console.log(studyWordsData, '能够学习的单词n')
 
-      console.timeEnd('xuex2')
-      console.time('xuex3')
-
-      studyWordsData = studyWordsData.filter(
-        (word) => !todayStudyWords.value.includes(word)
-      );
-      console.log('仅学习模式')
-      console.timeEnd('xuex3')
-
+      console.time('xuex22')
+      studyWordsData = delBFromA(studyWordsData, studyWords.value)
+      console.log(studyWordsData.length, '能够学习的单词n22')
+      console.timeEnd('xuex22')
+      
+      console.time('xuex33')
+      studyWordsData = delBFromA(studyWordsData, todayStudyWords.value)
+      console.log('仅学习模式33', studyWordsData.length)
+      console.timeEnd('xuex33')
     }
     console.log(studyWordsData.length, '能够学习的单词')
     // 获取过滤后的可学习/复习的单词索引
@@ -344,7 +305,7 @@ export function useVoca() {
     });
     if (!vocabularycard) {
       // 当前单词在词典中未找到，将过滤掉所有找不到的单词，重新获取下一个
-      setNotify('由于单词【' + couldStudyWordNameList.value[random]+ '】在词典中找不到，将跳转到下一个单词...', 'warning')
+      setNotify('由于单词【' + couldStudyWordNameList.value[random] + '】在词典中找不到，将跳转到下一个单词...', 'warning')
       let d = await table.value.toArray()
       d = d.map(dn => dn.n)
       couldStudyWordNameList.value = couldStudyWordNameList.value.filter(c => {
@@ -423,7 +384,7 @@ export function useVoca() {
 
   async function getDataTest(isForward = true) {
     putStudiedVocabulary(toRaw(bookItem.value));
-    
+
     showVocabularyCard(isForward).then(d => bookItem.value = d);
     fullscreenLoading.value = false;
   }

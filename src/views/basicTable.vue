@@ -28,7 +28,8 @@ import { useBookStore } from "../stores/books";
 import useDBStore from "../stores/db";
 import { storeToRefs } from "pinia";
 
-import Worker from "../utils/getStoreWebWork.js?worker";
+// import Worker from "../utils/getStoreWebWork.js?worker";
+import { delBFromA, filterBFromA } from "../utils/common";
 
 let useBook = useBookStore();
 let useDB = useDBStore();
@@ -45,14 +46,11 @@ let couldDataLen = ref(0);
 
 let loading = ref(true)
 
-let worker = new Worker()
+// let worker = new Worker()
 
-worker.addEventListener('message', (e) => {
-  let data = JSON.parse(e.data)
-  rangeNotInBookData.value = data.rangeNotInBookData
-  couldDataLen.value = data.couldDataLen
-  loading.value = false
-})
+// worker.addEventListener('message', (e) => {
+  
+// })
 
 watch(
   basicData,
@@ -74,20 +72,32 @@ watch([bookData, rangeData], ([nBookData, nRangeData], [oBookData, oRangeData]) 
   }
 
   loading.value = true
-  worker.postMessage({nBookData: toRaw(nBookData), nRangeData: toRaw(nRangeData)})
+  
+  // let nFromBook = nBookData.map((w) => w.n.toLowerCase());
+    // let nFromRange = nRangeData.map((w) => w.n.toLowerCase());
+
+    let couldData = filterBFromA(rangeData.value, bookData.value)
+    couldDataLen.value = couldData.length
+
+    rangeNotInBookData.value = delBFromA(rangeData.value, bookData.value);
+    rangeNotInBookData.value = rangeNotInBookData.value.map((w) => ({ n: w }));
+
+  loading.value = false
 })
 
 async function getBookTable () {
   let bookTable = getTable(basicData.value.currentBook);
   bookTable.toArray().then((d) => {
-    bookData.value = d
+    bookData.value = d.map(w => w.n.toLowerCase())
+    bookData.value = Array.from(new Set(bookData.value))
   })
 }
 
 async function getRangeTable () {
   let rangeTable = getTable(basicData.value.currentRange);
   rangeTable.toArray().then((d) => {
-    rangeData.value = d
+    rangeData.value = d.map(w => w.n.toLowerCase())
+    rangeData.value = Array.from(new Set(rangeData.value))
   })
 }
 

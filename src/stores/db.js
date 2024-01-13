@@ -6,10 +6,23 @@ import { isEqualObj } from "../utils/common";
 
 export default defineStore("DB", () => {
   let DBInStance = ref();
+  let DBName = ref()
   let verno = ref(1);
   let schema = ref({});
 
   let dbChanged = ref(Date.now())
+  let ad = reactive({})
+  console.log(dbChanged.value, '当前')
+
+  function isExistSchema () {
+    console.log('fdaej', DBInStance.value)
+    let DBInStanceTables = DBInStance.value.tables
+    console.log(DBInStanceTables, 'tables')
+    if (DBInStanceTables.length === 0) {
+      return 0
+    }
+    return DBInStanceTables
+  }
 
   /**
    * @description 创建数据库及数据库表
@@ -18,19 +31,25 @@ export default defineStore("DB", () => {
    * @returns
    */
   function createDB(databaseName, initTableStore) {
+    console.log('回来这里吗')
     let dbName = unref(databaseName);
+    DBName.value = dbName
     DBInStance.value = new Dexie(dbName);
     Dexie.exists(dbName).then((exists) => {
       if (!exists) {
         DBInStance.value = new Dexie(dbName);
         if (initTableStore) {
           initTableStore.forEach((table) => {
+            console.log('回来这里吗')
+            // if (table.name === 'basic-info') return false
             schema.value[table.name] = table.schema;
           });
         }
+        console.log('!exists')
         DBInStance.value.version(verno.value).stores(schema.value);
         DBInStance.value.open();
         dbChanged.value = Date.now()
+        console.log(dbChanged.value, '当前')
         return false;
       }
 
@@ -44,6 +63,7 @@ export default defineStore("DB", () => {
             table.schema.indexes.forEach((index) => {
               tableSchema.push(index.src);
             });
+            // if (table.name === 'basic-info') return false
             schema.value[table.name] = tableSchema;
           });
 
@@ -51,6 +71,8 @@ export default defineStore("DB", () => {
 
           if (initTableStore) {
             initTableStore.forEach((table) => {
+              console.log('回来这里吗', table)
+              // if (table.name === 'basic-info') return false
               schema.value[table.name] = table.schema.replace(/\s/g, "").split(",");
             });
           }
@@ -64,6 +86,8 @@ export default defineStore("DB", () => {
             verno.value = verno.value + 1;
           }
 
+          console.log('DBInStance.value.open.then')
+
           Object.keys(schema.value).forEach((name) => {
             schema.value[name] = schema.value[name].join(",");
           });
@@ -73,12 +97,14 @@ export default defineStore("DB", () => {
 
           DBInStance.value.close();
           // 关闭数据库后才能新增表
+          console.log('DBInStance.value.open.then')
           DBInStance.value.version(verno.value).stores(schema.value);
-
+          console.log('RFC_2822',DBInStance.value, 'fd')
           // 打开数据库，后续才能对数据库进行curd
           DBInStance.value.open();
+          console.log('RFC_2822',DBInStance.value, 'fd')
           dbChanged.value = Date.now()
-
+          console.log(dbChanged.value, '当前')
           // 
         })
         .catch((e) => {
@@ -86,8 +112,14 @@ export default defineStore("DB", () => {
         });
     });
   }
+  
+
+  watch(() => dbChanged.value, (n, o) => {
+    console.log(n, o, 'n o')
+  })
 
   function getTable(table) {
+    console.log(DBInStance.value, 'VALUE')
     let tables = Object.keys(schema.value);
     if (!tables.includes(table)) {
       return false;
@@ -96,23 +128,31 @@ export default defineStore("DB", () => {
   }
 
   async function addTable(tableName, tableSchema) {
+    console.log('添加表addTable', tableName, tableSchema)
     verno.value = verno.value + 1;
     await DBInStance.value.close();
 
     schema.value[tableName] = tableSchema;
 
-    DBInStance.value.version(verno.value).stores(schema.value);
+    console.log('fhasef', schema.value, verno.value)
 
-    await DBInStance.value.open();
+
+    DBInStance.value.version(verno.value).stores(schema.value);
+console.log('dfwejlfw')
+    await DBInStance.value.open()
+    ad.ui = 23111
+    
     dbChanged.value = Date.now()
   }
 
   return {
+    ad,
     dbChanged,
     DBInStance,
     createDB,
     getTable,
     schema,
     addTable,
+    isExistSchema
   };
 });
