@@ -44,10 +44,10 @@
       <el-button
         type="primary"
         :loading="saveLoading"
-        @click="localSaveData(ruleFormRef)"
+        @click="localSaveData()"
         >{{ saveField }}</el-button
       >
-      <el-button @click="resetForm(ruleFormRef)">取消</el-button>
+      <el-button @click="resetForm()">取消</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -106,30 +106,27 @@ function validateTableName (rule, value, callback) {
   }
 };
 
-function localSaveData (formEl) {
+function localSaveData () {
   
-  if (!formEl) return;
+  if (!ruleFormRef.value) return;
   saveField.value = "数据处理中";
   saveLoading.value = true;
-  formEl.validate(async (valid) => {
+  ruleFormRef.value.validate(async (valid) => {
     if (!valid) {
-      
       return false;
     } else {
       let bookTableName = ruleForm.tableName;
       await addTable(bookTableName, ruleForm.tableSchema);
 
       putData(bookTableName, toRaw(ruleForm.tableInitData));
-      formEl.resetFields();
-      saveField.value = "等待中";
-      saveLoading.value = true;
+      
     }
   });
 };
 
-function resetForm (formEl) {
-  if (!formEl) return;
-  formEl.resetFields();
+function resetForm () {
+  if (!ruleFormRef.value) return;
+  ruleFormRef.value.resetFields();
 };
 
 
@@ -157,9 +154,15 @@ function putData(tableName, data) {
       .bulkPut(data)
       .then(() => {
         setNotify("文件数据已保存！", "success");
+        ruleFormRef.value.resetFields();
+        saveField.value = "等待中";
+        saveLoading.value = true;
       })
       .catch((err) => {
+        console.log(err)
         setNotify("保存失败，请稍后再试！", "error", "错误");
+        saveField.value = "继续提交";
+        saveLoading.value = false;
       });
 }
 
