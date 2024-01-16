@@ -414,7 +414,7 @@ async function getWordTypedList(type) {
 
   console.log(wordType[type].current, "之前的缓存码");
 
-  let data = await wordType[type].table
+  let data = await wordType[type].table.orderBy('n')
     .offset((wordType[type].current - 1) * pageSize.value)
     .limit(pageSize.value)
     .toArray();

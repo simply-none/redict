@@ -84,6 +84,18 @@ export function useVoca() {
     initDataInFirstLoad();
   });
 
+  watch(() => basicData.value.studyCount, (n, o) => {
+    console.log(n, o, '超过今天计划标记位置：页面初始渲染时、获取单词时、切换单词学习个数时、')
+    // 超过今天计划标记位置：页面初始渲染时、获取单词时、切换单词学习个数时、
+    isMorethanTodayPlan.value = todayStudyWords.value.length >= basicData.value.studyCount;
+    isMorethanTodayPlan.value &&
+      setNotify(
+        "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
+        "success",
+        "恭喜"
+      );
+  })
+
   watchEffect(async () => {
     // 非首次加载，就不进行下列操作
     // 因为单词获取的方式：首次加载获取、点击获取
@@ -97,6 +109,14 @@ export function useVoca() {
       rangeWords.value &&
       dictWords.value
     ) {
+      // 超过今天计划标记位置：页面初始渲染时、获取单词时、切换单词学习个数时、
+      isMorethanTodayPlan.value = todayStudyWords.value.length >= basicData.value.studyCount;
+      isMorethanTodayPlan.value &&
+        setNotify(
+          "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
+          "success",
+          "恭喜"
+        );
       couldStudyWordNameList.value = await getCouldStudyWords();
       console.log("进来了？", couldStudyWordNameList.value.length);
 
@@ -189,20 +209,13 @@ export function useVoca() {
     ).then((d) => {
       console.log("今日数据表", d);
       todayStudyWordsTable.value = d;
+      // 就没有获取某几个属性的对象集合，keys只能获取单个
       todayStudyWordsTable.value
         .orderBy("n")
         .keys()
         .then((dd) => {
-          todayStudyWords.value = (dd || [])
-            .filter((w) => w)
-            .map((w) => (w || "").toLowerCase());
-          todayStudyWords.value.sort((a, b) => (a > b ? 1 : -1));
-          console.log(dd, "今日数据表");
+          getPureTodayStudyWords(dd)
         });
-      getDBTableData(todayStudyWordsTable, false, true).then(dd => {
-        console.log(dd, '当前值就')
-        getPureTodayStudyWords(dd)
-      })
     });
   }
 
@@ -230,57 +243,12 @@ export function useVoca() {
     getDataFromDBList();
   }
 
-  watch(
-    () => basicData.value.studyMode,
-    (n, o) => {
-      if (!drawer.value) {
-        return false;
-      }
-      let moreThanPlan = moreThanPlanFn();
-      if (!moreThanPlan && basicData.value.studyMode === "study") {
-        couldStudyWordNameList.value = toRaw(studyWords.value);
-      }
-    }
-  );
-
-  function moreThanPlanFn() {
-    let moreThanPlan =
-      todayStudyWords.value.length >= basicData.value.studyCount;
-    console.log(
-      todayStudyWords.value.length,
-      basicData.value.studyCount,
-      "比较，切换count"
-    );
-
-    if (basicData.value.studyMode === "study" && moreThanPlan) {
-      if (!isWordNotInDict.value) {
-        couldStudyWordNameList.value = toRaw(todayStudyWords.value);
-      } else {
-        isWordNotInDict.value = false;
-      }
-      !isMorethanTodayPlan.value &&
-        setNotify(
-          "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
-          "success",
-          "恭喜"
-        );
-      isMorethanTodayPlan.value = true;
-    }
-
-    if (!moreThanPlan && basicData.value.studyMode === "study") {
-      if (studyWords.value.length) {
-        couldStudyWordNameList.value = toRaw(studyWords.value);
-      }
-      isMorethanTodayPlan.value = false;
-    }
-
-    return moreThanPlan;
-  }
-
+  // 专一功能原则
   // 获取能够展示单词卡片的索引
+  // 当前函数仅在页面渲染时执行
   async function getCouldStudyWords() {
     let studyWordsData = [];
-    let moreThanPlan = moreThanPlanFn();
+
     console.log(
       basicData.value.studyCount,
       todayStudyWords.value.length,
@@ -294,13 +262,13 @@ export function useVoca() {
     }
 
     // 超过今天计划，则自动开启（今日学习）复习模式
-    if (basicData.value.studyMode === "study" && moreThanPlan) {
+    if (basicData.value.studyMode === "study" && isMorethanTodayPlan.value) {
       studyWordsData = toRaw(todayStudyWords.value);
       console.log("超过今天计划，则自动开启（今日学习）复习模式");
     }
 
     // 仅学习模式
-    if (basicData.value.studyMode === "study" && !moreThanPlan) {
+    if (basicData.value.studyMode === "study" && !isMorethanTodayPlan.value) {
       console.time("xuex1");
       studyWordsData = filterBFromA(rangeWords.value, dictWords.value);
       console.log(studyWordsData.length, "能够学习的单词n");
@@ -343,8 +311,8 @@ export function useVoca() {
       // 当前单词在词典中未找到，将过滤掉所有找不到的单词，重新获取下一个
       setNotify(
         "由于单词【" +
-          couldStudyWordNameList.value[random] +
-          "】在词典中找不到，将跳转到下一个单词...",
+        couldStudyWordNameList.value[random] +
+        "】在词典中找不到，将跳转到下一个单词...",
         "warning"
       );
       let d = await table.value.toArray();
@@ -366,19 +334,19 @@ export function useVoca() {
 
   function generateRandom(isForward) {
     let random = 0;
-    let moreThanPlan = moreThanPlanFn();
+
     let range = couldStudyWordNameList.value.length;
     console.log(
       couldStudyWordNameList.value.length,
-      moreThanPlan,
+      isMorethanTodayPlan.value,
       "生成随机数,是否超过"
     );
 
-    if (basicData.value.studyMode === "study" && !moreThanPlan) {
+    if (basicData.value.studyMode === "study" && !isMorethanTodayPlan.value) {
       random = Math.floor(Math.random() * range);
     }
 
-    if (basicData.value.studyMode === "review-past" || moreThanPlan) {
+    if (basicData.value.studyMode === "review-past" || isMorethanTodayPlan.value) {
       let lastVocabulary = bookItem.value?.n;
       let findIndex = couldStudyWordNameList.value.findIndex(
         (name) => lastVocabulary === name
@@ -411,7 +379,12 @@ export function useVoca() {
           todayStudyWords.value = [];
         });
     } else {
-      todayStudyWords.value = data.map((w) => w.n);
+      let tsWords = (data || [])
+        .filter((w) => w)
+        .map((w) => (w || "").toLowerCase());
+      tsWords.sort((a, b) => (a > b ? 1 : -1));
+      todayStudyWords.value = tsWords
+      console.log(data, "今日数据表");
     }
   }
 
@@ -459,20 +432,27 @@ export function useVoca() {
   async function putStudiedVocabulary(data) {
     let date = getTodayDate();
 
-    let moreThanPlan = moreThanPlanFn();
     console.log(todayStudyWords.value.includes(data.n));
 
     // 超过计划，但该单词不包括在内时，不存储
-    if (moreThanPlan && !todayStudyWords.value.includes(data.n)) {
+    if (isMorethanTodayPlan.value && !todayStudyWords.value.includes(data.n)) {
       return false;
     }
 
     if (
       basicData.value.studyMode === "study" &&
-      !moreThanPlan &&
+      !isMorethanTodayPlan.value &&
       !todayStudyWords.value.includes(data.n)
     ) {
       todayStudyWords.value.push(bookItem.value.n);
+      // 超过今天计划标记位置：页面初始渲染时、获取单词时、切换单词学习个数时、
+      isMorethanTodayPlan.value = todayStudyWords.value.length >= basicData.value.studyCount;
+      isMorethanTodayPlan.value &&
+        setNotify(
+          "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
+          "success",
+          "恭喜"
+        );
       console.log(todayStudyWords.value.length, "到今天");
     }
 
