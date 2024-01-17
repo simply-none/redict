@@ -45,7 +45,7 @@ export default defineStore("DBTable", () => {
   async function getDBTable(tableName, tableSchema) {
     let loadTable = getTable(tableName);
     console.log(loadTable, !!loadTable)
-    if (!loadTable) {
+    if (!loadTable && tableSchema) {
       await addTable(tableName, tableSchema);
       loadTable = getTable(tableName);
     }

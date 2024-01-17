@@ -81,7 +81,7 @@ const rules = reactive({
   tableName: [{ validator: validateTableName, trigger: "blur" }],
 });
 
-function validateTableSchema  (rule, value, callback) {
+function validateTableSchema(rule, value, callback) {
   if (value === "") {
     callback(new Error("数据库表结构为空"));
     return false;
@@ -97,17 +97,16 @@ function validateTableSchema  (rule, value, callback) {
   } catch {
     callback(new Error("数据库表结构验证失败"));
   }
-};
-function validateTableName (rule, value, callback) {
+}
+function validateTableName(rule, value, callback) {
   if (value === "") {
     callback(new Error("数据库表名为空"));
   } else {
     callback();
   }
-};
+}
 
-function localSaveData () {
-  
+function localSaveData() {
   if (!ruleFormRef.value) return;
   saveField.value = "数据处理中";
   saveLoading.value = true;
@@ -119,19 +118,16 @@ function localSaveData () {
       await addTable(bookTableName, ruleForm.tableSchema);
 
       putData(bookTableName, toRaw(ruleForm.tableInitData));
-      
     }
   });
-};
+}
 
-function resetForm () {
+function resetForm() {
   if (!ruleFormRef.value) return;
   ruleFormRef.value.resetFields();
-};
-
+}
 
 function handleStart(e) {
-  
   if (!ruleForm.type) {
     setNotify("请先选择上传文件类型", "warning", "警告");
     e.preventDefault();
@@ -148,7 +144,6 @@ function putData(tableName, data) {
     table.clear();
   }
 
-  
   table &&
     table
       .bulkPut(data)
@@ -159,16 +154,14 @@ function putData(tableName, data) {
         saveLoading.value = true;
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
         setNotify("保存失败，请稍后再试！", "error", "错误");
         saveField.value = "继续提交";
         saveLoading.value = false;
       });
 }
 
-
 function beforeUpload(uploadfile, uploadfiles) {
-  
   let tableName = uploadfile?.name ?? "";
   tableName = tableName.split(".")[0];
   if (uploadfile?.raw?.type !== "application/json") {
@@ -227,7 +220,6 @@ function beforeUpload(uploadfile, uploadfiles) {
     } catch {
       setNotify("内容数据格式错误", "warning", "警告");
     }
-    
   };
   return true;
 }

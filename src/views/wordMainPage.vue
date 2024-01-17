@@ -15,7 +15,15 @@
             @blur="getSearchText($event, bookItem)"
             >{{ bookItem?.n }}</span
           >
-            <el-button :icon="RefreshLeft" round plain type="success" v-show="bookItemBeforeSearch" @click="restoreBookItem">还原</el-button>
+          <el-button
+            :icon="RefreshLeft"
+            round
+            plain
+            type="success"
+            v-show="bookItemBeforeSearch"
+            @click="restoreBookItem"
+            >还原</el-button
+          >
         </div>
 
         <el-button
@@ -42,7 +50,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, watchEffect, watch, onMounted, onUnmounted, toRaw } from "vue";
+import {
+  ref,
+  reactive,
+  watchEffect,
+  watch,
+  onMounted,
+  onUnmounted,
+  toRaw,
+} from "vue";
 
 import { useVoca } from "../hooks/useVoca";
 
@@ -55,12 +71,12 @@ import { Setting, RefreshLeft } from "@element-plus/icons-vue";
 import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
 import { setNotify } from "../utils/element-plus";
-import { isPC } from '../utils/common'
+import { isPC } from "../utils/common";
 import { useRouter } from "vue-router";
 
 // mounted函数必须在异步调用之前，不然不生效
 onMounted(() => {
-  console.log(new Date())
+  console.log(new Date());
   window.addEventListener("keyup", arrowRightGetData);
 });
 
@@ -84,55 +100,57 @@ let {
   getSearchText,
 } = useVoca();
 
-let router = useRouter()
+let router = useRouter();
 
-
-
-if (router && router.currentRoute.value.query && router.currentRoute.value.query.reload) {
-  location.href = './'
+if (
+  router &&
+  router.currentRoute.value.query &&
+  router.currentRoute.value.query.reload
+) {
+  location.href = "./";
 }
 
-function OpenSetting () {
-  drawer.value = true
-  bookItemBeforeSearch.value = null
+function OpenSetting() {
+  drawer.value = true;
+  bookItemBeforeSearch.value = null;
 }
 
-function restoreBookItem () {
-  bookItem.value = toRaw(bookItemBeforeSearch.value)
-  bookItemBeforeSearch.value = null
-
+function restoreBookItem() {
+  bookItem.value = toRaw(bookItemBeforeSearch.value);
+  bookItemBeforeSearch.value = null;
 }
 
 function getWordItem(e) {
   if (bookItemBeforeSearch.value) {
-    setNotify('点击单词还原按钮后，再去切换单词')
-    return false
+    setNotify("点击单词还原按钮后，再去切换单词");
+    return false;
   }
   let windowClientY = document.body.clientHeight;
   let windowClientX = document.body.clientWidth;
   let hasGet = windowClientX < e.clientX * 2;
   if (!hasGet) {
-    getDataTest(false)
+    getDataTest(false);
     return false;
   }
   getDataTest();
 }
 
 function arrowRightGetData(e) {
-  console.log(e, 'e')
-  if (bookItemBeforeSearch.value && ['ArrowRight', 'ArrowLeft'].includes(e.code)) {
-    setNotify('点击单词还原按钮后，再去切换单词')
-    return false
+  console.log(e, "e");
+  if (
+    bookItemBeforeSearch.value &&
+    ["ArrowRight", "ArrowLeft"].includes(e.code)
+  ) {
+    setNotify("点击单词还原按钮后，再去切换单词");
+    return false;
   }
   if (e.code === "ArrowRight") {
     getDataTest();
   }
   if (e.code === "ArrowLeft") {
-    getDataTest(false)
+    getDataTest(false);
   }
 }
-
-
 </script>
 
 <style scoped lang="scss">

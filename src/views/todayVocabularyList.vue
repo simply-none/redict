@@ -389,7 +389,7 @@ function getDataFromDBList() {
     "setValue"
   );
   // 今日数据表
-  getDataFromDB(getDBTable, ["today-studied-voca", "++id"], today, "setValue");
+  getDataFromDB(getDBTable, ["today-studied-voca", "++id, n, date"], today, "setValue");
 
   // 总数据表
   getDataFromDB(

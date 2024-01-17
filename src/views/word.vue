@@ -1,7 +1,7 @@
 <template>
   <div class="left">
     <!-- 音标 -->
-    <WordPhonetic :book-item="bookItem"/>
+    <WordPhonetic :book-item="bookItem" />
 
     <template v-if="basicData.showVocabularyItem.includes('t')"
       ><div class="voca-card-voca-type" v-if="bookItem?.t?.length > 0">
@@ -42,7 +42,7 @@
         >
           <span class="voca-card-voca-complex-type">{{ vocatype.t }}</span
           >:
-          <div v-for="voca in vocatype.p">
+          <div v-for="voca in vocatype.p" :key="voca.id">
             <span>{{ voca.zh }}</span>
             <span>【{{ voca.en }}】</span>
           </div>
@@ -135,12 +135,12 @@ import WordPhonetic from "./wordPhonetic.vue";
 
 defineProps({
   basicData: {
-    type: Object
+    type: Object,
   },
   bookItem: {
-    type: Object
-  }
-})
+    type: Object,
+  },
+});
 </script>
 
 <style scoped lang="scss">

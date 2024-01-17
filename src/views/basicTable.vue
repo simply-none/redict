@@ -28,7 +28,6 @@ import { useBookStore } from "../stores/books";
 import useDBStore from "../stores/db";
 import { storeToRefs } from "pinia";
 
-// import Worker from "../utils/getStoreWebWork.js?worker";
 import { delBFromA, filterBFromA } from "../utils/common";
 
 let useBook = useBookStore();
@@ -44,13 +43,7 @@ let rangeNotInBookData = ref([]);
 
 let couldDataLen = ref(0);
 
-let loading = ref(true)
-
-// let worker = new Worker()
-
-// worker.addEventListener('message', (e) => {
-  
-// })
+let loading = ref(true);
 
 watch(
   basicData,
@@ -66,39 +59,39 @@ onMounted(() => {
   getBookRangeData();
 });
 
-watch([bookData, rangeData], ([nBookData, nRangeData], [oBookData, oRangeData]) => {
-  if (!nBookData || !nRangeData || !nBookData.length || !nRangeData.length) {
-    return false
-  }
+watch(
+  [bookData, rangeData],
+  ([nBookData, nRangeData], [oBookData, oRangeData]) => {
+    if (!nBookData || !nRangeData || !nBookData.length || !nRangeData.length) {
+      return false;
+    }
 
-  loading.value = true
-  
-  // let nFromBook = nBookData.map((w) => w.n.toLowerCase());
-    // let nFromRange = nRangeData.map((w) => w.n.toLowerCase());
+    loading.value = true;
 
-    let couldData = filterBFromA(rangeData.value, bookData.value)
-    couldDataLen.value = couldData.length
+    let couldData = filterBFromA(rangeData.value, bookData.value);
+    couldDataLen.value = couldData.length;
 
     rangeNotInBookData.value = delBFromA(rangeData.value, bookData.value);
     rangeNotInBookData.value = rangeNotInBookData.value.map((w) => ({ n: w }));
 
-  loading.value = false
-})
+    loading.value = false;
+  }
+);
 
-async function getBookTable () {
+async function getBookTable() {
   let bookTable = getTable(basicData.value.currentBook);
   bookTable.toArray().then((d) => {
-    bookData.value = d.map(w => w.n.toLowerCase())
-    bookData.value = Array.from(new Set(bookData.value))
-  })
+    bookData.value = d.map((w) => w.n.toLowerCase());
+    bookData.value = Array.from(new Set(bookData.value));
+  });
 }
 
-async function getRangeTable () {
+async function getRangeTable() {
   let rangeTable = getTable(basicData.value.currentRange);
   rangeTable.toArray().then((d) => {
-    rangeData.value = d.map(w => w.n.toLowerCase())
-    rangeData.value = Array.from(new Set(rangeData.value))
-  })
+    rangeData.value = d.map((w) => w.n.toLowerCase());
+    rangeData.value = Array.from(new Set(rangeData.value));
+  });
 }
 
 async function getBookRangeData() {

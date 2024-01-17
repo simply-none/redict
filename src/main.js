@@ -16,4 +16,15 @@ app.use(router)
 
 app.use(ElementPlus)
 
+// 全局错误处理
+app.config.errorHandler = (err, instance, info) => {
+  alert(info)
+  console.table([{err, instance, info}])
+}
+
+app.config.globalProperties.$globalErrorHandler = (err, instance, info) => {
+  alert(info)
+  console.table([{err, instance, info}])
+}
+
 app.mount('#app')

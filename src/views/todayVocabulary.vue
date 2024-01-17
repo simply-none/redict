@@ -5,47 +5,49 @@
       今日（{{ todayDate }}）背诵单词，共计：{{ vocalist.length }}个
       <el-link @click="lookTodayVocaMore" type="primary">查看更多...</el-link>
     </h3>
-    <el-table
+    <TablePage
+      :showHandle="false"
       :data="vocalist"
-      max-height="250"
-      style="width: 100%"
-      border
-      stripe
-    >
-      <el-table-column prop="index" label="序号" width="180">
-        <template #default="scope">
-          {{ scope.$index + 1 }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="n" label="单词" sortable />
-      <el-table-column prop="count" label="次数" sortable />
-    </el-table>
+      :table-len="vocalist.length"
+      :items="[
+        { prop: 'n', label: '单词' },
+        { prop: 'count', label: '次数' },
+      ]"
+      :tablePageSize="tablePageSize"
+    />
 
     <h3 class="today-voca-head">
       历史背诵单词，共计：{{ historyVocalist.length }}个，
       <el-link @click="exportData" type="primary">导出数据...</el-link>
     </h3>
-    <div style="height: 300px">
-      <el-auto-resizer>
-        <template #default="{ height, width }">
-          <el-table-v2
-            ref="tableRef"
-            :columns="columns"
-            :data="historyVocalist"
-            :width="width"
-            :height="height"
-            :cache="10"
-            v-model:sort-state="sortState"
-            @column-sort="onSort"
-          />
-        </template>
-      </el-auto-resizer>
-    </div>
+    <TablePage
+      :showHandle="true"
+      :data="historyVocalist"
+      :table-len="historyVocalist.length"
+      :items="[
+        { prop: 'n', label: '单词' },
+        { prop: 'count', label: '次数' },
+        { prop: 'date', label: '日期' },
+      ]"
+      :tablePageSize="tablePageSize"
+      @getData="(current) => getPageData(rangeNotInBookData, current)"
+    >
+      <template v-slot:handle="{ data }">
+        <el-button
+          size="small"
+          type="danger"
+          @click="delWrod(data.row, data.$index)"
+        >
+          删除
+        </el-button>
+      </template>
+    </TablePage>
 
     <h3 class="today-voca-head">
       非范围单词，共计：{{ rangeNotInBookData.length }}个
     </h3>
     <TablePage
+      :showHandle="false"
       :data="rangeNotInBookDataPage"
       :table-len="rangeNotInBookData.length"
       :items="[{ prop: 'n', label: '单词' }]"
@@ -74,8 +76,6 @@ import moment from "moment";
 
 import { funDownloadByJson } from "../utils/generateFile";
 import { delBFromA, filterBFromA } from "../utils/common";
-
-// import Worker from "../utils/getStoreWebWork.js?worker";
 
 const sortState = ref({
   n: TableV2SortOrder.ASC,
@@ -126,7 +126,7 @@ let columns = reactive([
           <ElButton
             size="small"
             type="danger"
-            onClick={() => delWrod(data.rowData, data.rowIndex)}
+            onClick={() => delWrod(data, data.rowData, data.rowIndex)}
           >
             删除
           </ElButton>
@@ -157,20 +157,9 @@ let rangeNotInBookData = ref([]);
 let rangeNotInBookDataPage = ref([]);
 let tablePageSize = ref(100);
 
-let couldDataLen = ref(0);
-
 let router = useRouter();
 
 let loading = ref(true);
-
-// let worker = new Worker();
-
-// worker.addEventListener("message", (e) => {
-//   console.log(e, "监听数据");
-//   rangeNotInBookData.value = JSON.parse(e.data).rangeNotInBookData;
-//   getPageData(rangeNotInBookData.value, 1)
-//   loading.value = false
-// });
 
 watch(
   basicData,
@@ -208,6 +197,7 @@ function onSort({ key, order }) {
 }
 
 async function delWrod(data, index) {
+  console.log(data, index, "ces");
   historyTable
     .where("id")
     .equals(data.id)
@@ -233,23 +223,12 @@ watch(
     console.log({ nBookData, nRangeData });
     loading.value = true;
 
-    // worker.postMessage({nBookData: toRaw(nBookData), nRangeData: toRaw(nRangeData)})
-
     let nFromBook = nBookData.map((w) => w.n.toLowerCase());
     let nFromRange = nRangeData.map((w) => w.n.toLowerCase());
 
     rangeNotInBookData.value = delBFromA(nFromRange, nFromBook);
     rangeNotInBookData.value = rangeNotInBookData.value.map((w) => ({ n: w }));
 
-    // nFromBook = nRangeData
-    //   .filter((w) => nFromBook.includes(w.n.toLowerCase()))
-    //   .map((w) => w.n.toLowerCase());
-
-    // let rangeNotInBookData = nRangeData.filter(
-    //   (w) => !nFromBook.includes(w.n.toLowerCase())
-    // );
-
-    // rangeNotInBookData.value = rangeNotInBookData;
     getPageData(rangeNotInBookData.value, 1);
 
     loading.value = false;
