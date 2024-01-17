@@ -2,7 +2,7 @@
   <el-table :data="data" max-height="250" style="width: 100%" border stripe>
     <el-table-column prop="index" label="序号" width="60">
       <template #default="scope">
-        {{ (current - 1) * tablePageSize + scope.$index + 1 }}
+        {{ (current - 1) * tablePageSizeF + scope.$index + 1 }}
       </template>
     </el-table-column>
     <template v-for="item in items" :key="item.prop">
@@ -12,7 +12,7 @@
             v-if="$attrs.linkToBing && item.prop === 'n'"
             target="_blank"
             :href="
-              'https://cn.bing.com/dict/search?q=' + encodeURI(scope.row.n)
+              wordOriginLink + encodeURI(scope.row.n)
             "
           >
             {{ scope.row.n }}
@@ -52,6 +52,11 @@ export default {
 </script>
 <script setup>
 import { ref, reactive, onMounted, watch, toRaw, computed } from "vue";
+import { storeToRefs } from "pinia";
+import { useWordOriginStore } from '../stores/wordOrigin'
+
+let useWordOrigin = useWordOriginStore()
+let { wordOriginLink } = storeToRefs(useWordOrigin)
 
 let props = defineProps({
   data: {

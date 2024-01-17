@@ -78,6 +78,22 @@
         >
       </el-checkbox-group>
     </el-form-item>
+
+    <el-form-item label="单词指向源">
+      <el-select
+        @change="updateWordOriginLink"
+        v-model="wordOriginLink"
+        clearable
+        placeholder="Select"
+      >
+        <el-option
+          v-for="item in wordOriginList"
+          :key="item.link"
+          :label="item.name"
+          :value="item.link"
+        />
+      </el-select>
+    </el-form-item>
   </el-form>
 </template>
 <script setup>
@@ -85,10 +101,12 @@ import { ref, reactive, onMounted, toValue, toRaw, watch, computed } from "vue";
 
 import { useBookStore } from "../stores/books";
 import useDBStore from "../stores/db";
+import { useWordOriginStore } from '../stores/wordOrigin'
 import { storeToRefs } from "pinia";
 
 let useBook = useBookStore();
 let useDB = useDBStore();
+let useWordOrigin = useWordOriginStore()
 
 let props = defineProps({
   alreadySetBasic: {
@@ -104,6 +122,9 @@ let emit = defineEmits(["alreadySetBasicHandle"]);
 let { basicData } = storeToRefs(useBook);
 let { updateBasicInfo } = useBook;
 let { schema } = storeToRefs(useDB);
+
+let { wordOriginLink, wordOriginList } = storeToRefs(useWordOrigin)
+let { updateWordOriginLink } = useWordOrigin
 
 let bookList = computed(() => {
   return Object.keys(schema.value).filter((book) => /^book-/.test(book));
