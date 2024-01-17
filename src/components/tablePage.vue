@@ -6,7 +6,20 @@
       </template>
     </el-table-column>
     <template v-for="item in items" :key="item.prop">
-      <el-table-column :prop="item.prop" :label="item.label" sortable />
+      <el-table-column :prop="item.prop" :label="item.label" sortable>
+        <template #default="scope">
+          <a
+            v-if="$attrs.linkToBing && item.prop === 'n'"
+            target="_blank"
+            :href="
+              'https://cn.bing.com/dict/search?q=' + encodeURI(scope.row.n)
+            "
+          >
+            {{ scope.row.n }}
+          </a>
+          <div v-else>{{ scope.row[item.prop] }}</div>
+        </template>
+      </el-table-column>
     </template>
 
     <el-table-column
@@ -23,11 +36,12 @@
   <el-pagination
     small
     background
-    layout="pager"
+    layout="pager, sizes"
     :total="tableLen"
     class="mt-4"
-    :page-size="tablePageSize"
-    @current-change="onCurrentChange"
+    :page-sizes="[10, 20, 30, 50, 100]"
+    v-model:page-size="tablePageSizeF"
+    v-model:current-page="currentPage"
     :pager-count="5"
   />
 </template>
@@ -37,7 +51,7 @@ export default {
 };
 </script>
 <script setup>
-import { ref, reactive, onMounted, watch, toRaw } from "vue";
+import { ref, reactive, onMounted, watch, toRaw, computed } from "vue";
 
 let props = defineProps({
   data: {
@@ -52,9 +66,25 @@ let props = defineProps({
   },
 });
 
+let tablePageSizeF = ref(props.tablePageSize);
+
+let currentPage = ref(1);
+
 let current = ref(1);
 
 let emit = defineEmits(["getData"]);
+
+watch(currentPage, (n, o) => {
+  console.log("hhh");
+  current.value = n;
+  emit("getData", n, tablePageSizeF.value);
+});
+
+watch(tablePageSizeF, (n, o) => {
+  console.log("hhh");
+  current.value = currentPage.value;
+  emit("getData", currentPage.value, n);
+});
 
 function onCurrentChange(cur) {
   current.value = cur;

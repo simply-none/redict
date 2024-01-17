@@ -7,13 +7,15 @@
     </h3>
     <TablePage
       :showHandle="false"
-      :data="vocalist"
+      :linkToBing="true"
+      :data="vocalistPage"
       :table-len="vocalist.length"
       :items="[
         { prop: 'n', label: '单词' },
         { prop: 'count', label: '次数' },
       ]"
       :tablePageSize="tablePageSize"
+      @getData="getDataForToday"
     />
 
     <h3 class="today-voca-head">
@@ -22,7 +24,8 @@
     </h3>
     <TablePage
       :showHandle="true"
-      :data="historyVocalist"
+      :linkToBing="true"
+      :data="historyVocalistPage"
       :table-len="historyVocalist.length"
       :items="[
         { prop: 'n', label: '单词' },
@@ -30,7 +33,7 @@
         { prop: 'date', label: '日期' },
       ]"
       :tablePageSize="tablePageSize"
-      @getData="(current) => getPageData(rangeNotInBookData, current)"
+      @getData="getDataForHis"
     >
       <template v-slot:handle="{ data }">
         <el-button
@@ -48,11 +51,12 @@
     </h3>
     <TablePage
       :showHandle="false"
+      :linkToBing="true"
       :data="rangeNotInBookDataPage"
       :table-len="rangeNotInBookData.length"
       :items="[{ prop: 'n', label: '单词' }]"
       :tablePageSize="tablePageSize"
-      @getData="(current) => getPageData(rangeNotInBookData, current)"
+      @getData="getDataForNotRange"
     />
   </div>
 </template>
@@ -83,59 +87,6 @@ const sortState = ref({
   count: TableV2SortOrder.ASC,
 });
 
-let columns = reactive([
-  {
-    key: "index",
-    dataKey: "index",
-    width: 100,
-    cellRenderer: ({ rowIndex }) => {
-      return <div>{rowIndex}</div>;
-    },
-    title: "序号",
-  },
-  {
-    key: "n",
-    dataKey: "n",
-    width: 200,
-    title: "单词",
-    sortable: true,
-  },
-  {
-    key: "count",
-    dataKey: "count",
-    width: 100,
-    title: "次数",
-    sortable: true,
-  },
-  {
-    key: "date",
-    dataKey: "date",
-    width: 100,
-    title: "日期",
-    sortable: true,
-  },
-  {
-    key: "del",
-    dataKey: "del",
-    width: 100,
-    title: "操作",
-    fixed: TableV2FixedDir.RIGHT,
-    cellRenderer: (data) => {
-      return (
-        <>
-          <ElButton
-            size="small"
-            type="danger"
-            onClick={() => delWrod(data, data.rowData, data.rowIndex)}
-          >
-            删除
-          </ElButton>
-        </>
-      );
-    },
-  },
-]);
-
 let todayDate = ref(moment().format("YYYY-MM-DD"));
 
 let useBook = useBookStore();
@@ -148,14 +99,16 @@ let todayTable = getTable("today-studied-voca");
 let historyTable = getTable("studied-voca");
 
 let vocalist = ref([]);
+let vocalistPage = ref([]);
 let historyVocalist = ref([]);
+let historyVocalistPage = ref([]);
 let bookData = ref([]);
 let rangeData = ref([]);
 
 let rangeNotInBookData = ref([]);
 
 let rangeNotInBookDataPage = ref([]);
-let tablePageSize = ref(100);
+let tablePageSize = ref(10);
 
 let router = useRouter();
 
@@ -179,9 +132,30 @@ onMounted(() => {
   getBookRangeData();
 });
 
-function getPageData(data, current) {
+function getDataForToday(current, newSize) {
+  vocalistPage.value = getPageData(vocalist.value, current, newSize);
+}
+
+function getDataForHis(current, newSize) {
+  historyVocalistPage.value = getPageData(
+    historyVocalist.value,
+    current,
+    newSize
+  );
+}
+
+function getDataForNotRange(current, newSize) {
+  rangeNotInBookDataPage.value = getPageData(
+    rangeNotInBookData.value,
+    current,
+    newSize
+  );
+}
+
+function getPageData(data, current, newSize) {
+  if (newSize) tablePageSize.value = newSize;
   let start = (current - 1) * tablePageSize.value;
-  rangeNotInBookDataPage.value = data.slice(start, start + tablePageSize.value);
+  return data.slice(start, start + tablePageSize.value);
 }
 
 function onSort({ key, order }) {
@@ -197,7 +171,6 @@ function onSort({ key, order }) {
 }
 
 async function delWrod(data, index) {
-  console.log(data, index, "ces");
   historyTable
     .where("id")
     .equals(data.id)
@@ -229,7 +202,7 @@ watch(
     rangeNotInBookData.value = delBFromA(nFromRange, nFromBook);
     rangeNotInBookData.value = rangeNotInBookData.value.map((w) => ({ n: w }));
 
-    getPageData(rangeNotInBookData.value, 1);
+    rangeNotInBookDataPage.value = getPageData(rangeNotInBookData.value, 1);
 
     loading.value = false;
   }
@@ -237,7 +210,6 @@ watch(
 
 async function getBookTable() {
   let bookTable = getTable(basicData.value.currentBook);
-  console.log(bookTable, "d");
   if (!bookTable) {
     return false;
   }
@@ -248,7 +220,6 @@ async function getBookTable() {
 
 async function getRangeTable() {
   let rangeTable = getTable(basicData.value.currentRange);
-  console.log(rangeTable, "d");
   if (!rangeTable) {
     return false;
   }
@@ -267,12 +238,12 @@ function getBookRangeData() {
 }
 
 async function getVocaList() {
-  console.log(todayTable, "d");
   if (!todayTable) {
     return false;
   }
   todayTable.toArray().then((d) => {
     vocalist.value = d;
+    vocalistPage.value = d;
   });
 }
 
@@ -281,12 +252,12 @@ function exportData() {
 }
 
 async function getHistoryVocaList() {
-  console.log(historyTable, "d");
   if (!historyTable) {
     return false;
   }
   historyTable.toArray().then((d) => {
     historyVocalist.value = d;
+    historyVocalistPage.value = d;
   });
 }
 </script>
