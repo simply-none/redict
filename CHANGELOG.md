@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0-alpha2](https://github.com/simply-none/redict/compare/v1.0.0-alpha1...v1.0.0-alpha2) (2024-01-17)
+
+
+### Features
+
+* 1.0.0alpha版本 ([29f9f88](https://github.com/simply-none/redict/commit/29f9f8894c2103d13dcca36cea7e61d4161715e1))
+* 添加自动生成release的actions ([4a0ec62](https://github.com/simply-none/redict/commit/4a0ec629e646ac98b77001a97a71b0c118c0d4f8))
+
 ## 1.0.0-alpha1 (2024-01-17)
 
 
