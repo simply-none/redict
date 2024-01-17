@@ -1,11 +1,12 @@
 {
   "name": "vue-project",
-  "version": "0.0.0",
+  "version": "1.0.0-alpha1",
   "private": true,
   "scripts": {
     "dev": "vite --force",
     "build": "vite build",
-    "preview": "vite build && vite preview"
+    "preview": "vite build && vite preview",
+    "patch": "standard-version --release-as xxx"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
