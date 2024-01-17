@@ -64,8 +64,6 @@
 import TablePage from "../components/tablePage.vue";
 import { ref, reactive, onMounted, watch, toRaw } from "vue";
 import {
-  TableV2SortOrder,
-  TableV2FixedDir,
   ElButton,
   ElIcon,
 } from "element-plus";
@@ -80,12 +78,6 @@ import moment from "moment";
 
 import { funDownloadByJson } from "../utils/generateFile";
 import { delBFromA, filterBFromA } from "../utils/common";
-
-const sortState = ref({
-  n: TableV2SortOrder.ASC,
-  date: TableV2SortOrder.ASC,
-  count: TableV2SortOrder.ASC,
-});
 
 let todayDate = ref(moment().format("YYYY-MM-DD"));
 
@@ -156,18 +148,6 @@ function getPageData(data, current, newSize) {
   if (newSize) tablePageSize.value = newSize;
   let start = (current - 1) * tablePageSize.value;
   return data.slice(start, start + tablePageSize.value);
-}
-
-function onSort({ key, order }) {
-  sortState.value[key] = order;
-  historyVocalist.value.sort((a, b) => {
-    if (a[key] > b[key]) {
-      return 1;
-    }
-    return -1;
-  });
-  historyVocalist.value =
-    order === "asc" ? historyVocalist.value : historyVocalist.value.reverse();
 }
 
 async function delWrod(data, index) {
@@ -243,7 +223,7 @@ async function getVocaList() {
   }
   todayTable.toArray().then((d) => {
     vocalist.value = d;
-    vocalistPage.value = d;
+    vocalistPage.value = getPageData(vocalist.value, 1)
   });
 }
 
@@ -257,7 +237,7 @@ async function getHistoryVocaList() {
   }
   historyTable.toArray().then((d) => {
     historyVocalist.value = d;
-    historyVocalistPage.value = d;
+    historyVocalistPage.value = getPageData(historyVocalist.value, 1)
   });
 }
 </script>

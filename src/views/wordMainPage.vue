@@ -59,14 +59,14 @@ import {
   onUnmounted,
   toRaw,
 } from "vue";
+import { ElNotification, ElMessage, ElLoading } from "element-plus";
+import { Setting, RefreshLeft } from "@element-plus/icons-vue";
 
 import { useVoca } from "../hooks/useVoca";
 
 import SettingCom from "./Setting.vue";
 import WordCom from "./word.vue";
 import ConciseWord from "./conciseWord.vue";
-import { ElNotification, ElMessage, ElLoading } from "element-plus";
-import { Setting, RefreshLeft } from "@element-plus/icons-vue";
 
 import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";

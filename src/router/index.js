@@ -7,6 +7,11 @@ export const routes = [
     component: () => import('../views/todayVocabularyList.vue')
   },
   {
+    path: '/words-iframe',
+    name: 'wordsIframe',
+    component: () => import('../views/wordsIframe.vue')
+  },
+  {
     path: '/',
     name: 'wordMainPage',
     component: () => import('../views/wordMainPage.vue')
