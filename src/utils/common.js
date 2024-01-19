@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export function isEqualObj(obj1, obj2) {
   var o1 = obj1 instanceof Object;
   var o2 = obj2 instanceof Object;
@@ -118,4 +120,18 @@ export function filterBFromA(A, B) {
     }
   }
   return intersection;
+}
+
+export function getTodayDate() {
+  return moment().format("YYYY-MM-DD");
+}
+
+export function isValueInRequiredFields(obj, required) {
+  if (!obj) {
+    return false;
+  }
+  return required.every((field) => {
+    console.log(obj[field], "真", field);
+    return obj[field];
+  });
 }

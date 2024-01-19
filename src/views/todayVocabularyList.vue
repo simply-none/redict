@@ -151,8 +151,6 @@ import { generateImage } from "../utils/generateFile";
 
 import WordCom from "./word.vue";
 
-import moment from "moment";
-
 import { funDownloadByJson, funDownloadByHtml2Md } from "../utils/generateFile";
 
 import useTableStore from "../stores/table";

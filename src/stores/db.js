@@ -1,6 +1,6 @@
 import { ref, computed, watch, reactive, toRaw, unref } from "vue";
 import { defineStore, storeToRefs } from "pinia";
-import { db } from "../utils/createDB";
+import { db, dexieErrorTag } from "../utils/createDB";
 import { useBookStore } from "./books";
 
 export default defineStore("DB", () => {
@@ -25,7 +25,7 @@ export default defineStore("DB", () => {
     let schema = {};
     // 这段代码的作用是：新增或修改数据库表时，不删除原有的表
     db.tables.forEach(function (table) {
-      console.log(table, "table");
+      // console.log(table, "table");
       let tableSchema = [table.schema.primKey.src];
       table.schema.indexes.forEach((index) => {
         tableSchema.push(index.src);
@@ -41,7 +41,7 @@ export default defineStore("DB", () => {
     if (!tables.includes(table)) {
       return false;
     }
-    console.log(db[table], 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')
+    // console.log(db[table], 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')
     
     return db[table];
   }

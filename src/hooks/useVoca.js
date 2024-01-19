@@ -11,62 +11,37 @@ import {
 } from "vue";
 
 import { useBookStore } from "../stores/books";
-import useTableStore from "../stores/table";
-import useDBStore from "../stores/db";
+import { useWordStore } from "../stores/words";
 import { storeToRefs } from "pinia";
 
-import moment from "moment";
-
 import { clearNotify, setNotify } from "../utils/element-plus";
-import { funDownloadByJson } from "../utils/generateFile";
-import { delBFromA, filterBFromA } from "../utils/common";
-
-function isRequiredField(obj) {
-  obj = unref(obj);
-  if (!obj) {
-    return false;
-  }
-  const required = ["currentBook", "currentRange", "studyMode", "studyCount"];
-  return required.every((field) => {
-    console.log(obj[field], "真", field);
-    return obj[field];
-  });
-}
-
-function getTodayDate() {
-  return moment().format("YYYY-MM-DD");
-}
+import { getTodayDate, isValueInRequiredFields } from "../utils/common";
 
 export function useVoca() {
   let useBook = useBookStore();
-  let useDB = useDBStore();
-  let { getDBTable, getDBTableData } = useTableStore();
-
-  // 今日学习数据
-  let todayStudyWordsTable = ref(null);
-  let todayStudyWords = ref([]);
-
-  let couldStudyWordNameList = ref();
-
-  // 获取书本学习的范围数据表
-  let rangeTable = ref();
-  let rangeWords = ref();
-
-  let table = ref();
-  let dictWords = ref();
-
-  // 获取已学习过的单词的数据表
-  let studyTable = ref();
-
-  let studyWords = ref([]);
+  let useWord = useWordStore();
 
   const fullscreenLoading = ref(true);
 
   let isReloadBookItem = ref(true);
 
-  let isMorethanTodayPlan = ref(false);
-
   let { basicData } = storeToRefs(useBook);
+
+  let {
+    todayWords,
+    historyWords,
+    bookWords,
+    dictWords,
+    willStudyWords,
+    isMorethanTodayPlan,
+  } = storeToRefs(useWord);
+  let {
+    setAllTypedWords,
+    setWillStudyWords,
+    getDataFromTable,
+    bulkPutDataToTable,
+    delWordInWillStudyWords,
+  } = useWord;
 
   const drawer = ref(false);
 
@@ -78,6 +53,8 @@ export function useVoca() {
 
   initDataInFirstLoad();
 
+  setAllTypedWords();
+
   watch(drawer, () => {
     if (drawer.value) {
       return false;
@@ -86,136 +63,35 @@ export function useVoca() {
     initDataInFirstLoad();
   });
 
-  watch(
-    () => basicData.value.studyCount,
-    (n, o) => {
-      console.log(
-        n,
-        o,
-        "超过今天计划标记位置：页面初始渲染时、获取单词时、切换单词学习个数时、"
+  watch(isMorethanTodayPlan, (n, o) => {
+    if (n) {
+      setNotify(
+        "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
+        "success",
+        "恭喜"
       );
-      // 超过今天计划标记位置：页面初始渲染时、获取单词时、切换单词学习个数时、
-      isMorethanTodayPlan.value =
-        todayStudyWords.value.length >= basicData.value.studyCount;
-      isMorethanTodayPlan.value &&
-        setNotify(
-          "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
-          "success",
-          "恭喜"
-        );
-    }
-  );
-
-  watchEffect(async () => {
-    // 非首次加载，就不进行下列操作
-    // 因为单词获取的方式：首次加载获取、点击获取
-    if (!isReloadBookItem.value) {
-      return false;
-    }
-    // 当数据源表、今日学习数据、历史学习数据、范围数据 均有值时，才会进行计算，否则终止
-    if (
-      todayStudyWords.value &&
-      studyWords.value &&
-      rangeWords.value &&
-      dictWords.value
-    ) {
-      // 超过今天计划标记位置：页面初始渲染时、获取单词时、切换单词学习个数时、
-      isMorethanTodayPlan.value =
-        todayStudyWords.value.length >= basicData.value.studyCount;
-      isMorethanTodayPlan.value &&
-        setNotify(
-          "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
-          "success",
-          "恭喜"
-        );
-      couldStudyWordNameList.value = await getCouldStudyWords();
-      console.log("进来了？", couldStudyWordNameList.value.length);
-
-      bookItem.value = await showVocabularyCard(true);
-      fullscreenLoading.value = false;
-      isReloadBookItem.value = false;
     }
   });
 
-  function getTableFromDB(name, tableRef) {
-    return getDBTable(name).then((data) => {
-      tableRef.value = data;
-      return data;
-    });
-  }
-
-  function getDataFromDB(tableRef, dataRef) {
-    let table = unref(tableRef);
-    table
-      .orderBy("n")
-      .keys()
-      .then((dd) => {
-        let data = (dd || [])
-          .filter((w) => w)
-          .map((w) => (w || "").toLowerCase());
-        data.sort((a, b) => (a > b ? 1 : -1));
-        dataRef.value = data;
-        console.log(dataRef.value.length, "getData.............", table);
-      });
-  }
-
-  async function getDataFromDBList() {
-    // 加载所有相关表
-    // 总数据表
-    getTableFromDB(basicData.value.currentBook, table).then((d) => {
-      getDataFromDB(table, dictWords);
-    });
-
-    // 范围表
-    getTableFromDB(basicData.value.currentRange, rangeTable).then((d) => {
-      getDataFromDB(rangeTable, rangeWords);
-    });
-
-    // 学习过的数据表
-    getTableFromDB("studied-voca", studyTable).then((d) => {
-      getDataFromDB(studyTable, studyWords);
-    });
-
-    // 今日数据表
-    getTableFromDB("today-studied-voca", todayStudyWordsTable).then((d) => {
-      // 就没有获取某几个属性的对象集合，keys只能获取单个
-      todayStudyWordsTable.value
-        .orderBy("date")
-        .toArray()
-        .then((dd) => {
-          console.log("今日数据", dd);
-          getPureTodayStudyWords(dd);
-        });
-    });
-  }
-
-  function getPureTodayStudyWords(data) {
-    // 看是否是今日学习单词，如果不是，则清空今日单词库
-    let isToday = getTodayDate();
-    let hasNotTodayWords = (data || []).some((word) => {
-      return word.date !== isToday;
-    });
-
-    if (hasNotTodayWords) {
-      todayStudyWordsTable.value
-        .orderBy()
-        .delete()
-        .then(() => {
-          todayStudyWords.value = [];
-        });
-    } else {
-      let tsWords = (data || [])
-        .filter((w) => w)
-        .map((w) => w.n.toLowerCase() || "");
-      tsWords.sort((a, b) => (a > b ? 1 : -1));
-      todayStudyWords.value = tsWords;
-      console.log(data, "今日数据表", todayStudyWords.value);
+  watch(willStudyWords, async (n, o) => {
+    if (!n) {
+      return false;
     }
-  }
+    if (!isReloadBookItem) {
+      return false;
+    }
+
+    console.log(n?.length, o?.length, "将要学习");
+    console.log("进来了？", n.length, willStudyWords.value.length);
+
+    bookItem.value = await showVocabularyCard(true);
+    fullscreenLoading.value = false;
+    isReloadBookItem.value = false;
+  });
 
   async function initDataInFirstLoad() {
-    // fullscreenLoading.value = true;
-    let isRequired = isRequiredField(basicData);
+    const required = ["currentBook", "currentRange", "studyMode", "studyCount"];
+    let isRequired = isValueInRequiredFields(unref(basicData), required);
     console.log(isRequired, "sfs");
 
     if (!isRequired) {
@@ -233,54 +109,6 @@ export function useVoca() {
       "，当前课本：" +
       basicData.value.currentBook;
     setNotify(message, "success");
-
-    getDataFromDBList();
-  }
-
-  // 专一功能原则
-  // 获取能够展示单词卡片的索引
-  // 当前函数仅在页面渲染时执行
-  async function getCouldStudyWords() {
-    let studyWordsData = [];
-
-    console.log(
-      basicData.value.studyCount,
-      todayStudyWords.value.length,
-      "总，今"
-    );
-
-    // 查看是否是复习过去的单词模式
-    if (basicData.value.studyMode === "review-past") {
-      studyWordsData = toRaw(studyWords.value);
-      console.log("查看是否是复习过去的单词模式");
-    }
-
-    // 超过今天计划，则自动开启（今日学习）复习模式
-    if (basicData.value.studyMode === "study" && isMorethanTodayPlan.value) {
-      studyWordsData = toRaw(todayStudyWords.value);
-      console.log("超过今天计划，则自动开启（今日学习）复习模式");
-    }
-
-    // 仅学习模式
-    if (basicData.value.studyMode === "study" && !isMorethanTodayPlan.value) {
-      console.time("xuex1");
-      studyWordsData = filterBFromA(rangeWords.value, dictWords.value);
-      console.log(studyWordsData.length, "能够学习的单词n");
-      console.timeEnd("xuex1");
-
-      console.time("xuex22");
-      studyWordsData = delBFromA(studyWordsData, studyWords.value);
-      console.log(studyWordsData.length, "能够学习的单词n22");
-      console.timeEnd("xuex22");
-
-      console.time("xuex33");
-      studyWordsData = delBFromA(studyWordsData, todayStudyWords.value);
-      console.log("仅学习模式33", studyWordsData.length);
-      console.timeEnd("xuex33");
-    }
-    console.log(studyWordsData.length, "能够学习的单词");
-    // 获取过滤后的可学习/复习的单词索引
-    return studyWordsData;
   }
 
   // 展示单词卡片
@@ -289,35 +117,33 @@ export function useVoca() {
     // 根据标识在总数据表中获取该标识对应的数据
     console.log(
       random,
-      couldStudyWordNameList.value[random],
-      couldStudyWordNameList.value.length,
+      willStudyWords.value[random],
+      willStudyWords.value.length,
       "randoim"
     );
-    if (!couldStudyWordNameList.value[random]) {
+    if (!willStudyWords.value[random]) {
       drawer.value = true;
       return true;
     }
 
-    let vocabularycard = await table.value.get({
-      n: couldStudyWordNameList.value[random],
+    let vocabularycard = await getDataFromTable("dict", {
+      n: willStudyWords.value[random],
     });
     if (!vocabularycard) {
       // 当前单词在词典中未找到，将过滤掉所有找不到的单词，重新获取下一个
       setNotify(
         "由于单词【" +
-          couldStudyWordNameList.value[random] +
+          willStudyWords.value[random] +
           "】在词典中找不到，将跳转到下一个单词...",
         "warning"
       );
-      let d = await table.value.toArray();
+      let d = dictWords;
       d = d.map((dn) => dn.n);
-      couldStudyWordNameList.value = couldStudyWordNameList.value.filter(
-        (c) => {
-          return d.includes(c);
-        }
-      );
+      willStudyWords.value = willStudyWords.value.filter((c) => {
+        return d.includes(c);
+      });
       isWordNotInDict.value = true;
-      console.log(couldStudyWordNameList.value.length);
+      console.log(willStudyWords.value.length);
 
       clearNotify();
 
@@ -329,9 +155,9 @@ export function useVoca() {
   function generateRandom(isForward) {
     let random = 0;
 
-    let range = couldStudyWordNameList.value.length;
+    let range = willStudyWords.value.length;
     console.log(
-      couldStudyWordNameList.value.length,
+      willStudyWords.value.length,
       isMorethanTodayPlan.value,
       "生成随机数,是否超过"
     );
@@ -345,7 +171,7 @@ export function useVoca() {
       isMorethanTodayPlan.value
     ) {
       let lastVocabulary = bookItem.value?.n;
-      let findIndex = couldStudyWordNameList.value.findIndex(
+      let findIndex = willStudyWords.value.findIndex(
         (name) => lastVocabulary === name
       );
 
@@ -372,12 +198,12 @@ export function useVoca() {
     if (!payload.changed) {
       return false;
     }
-
-    isReloadBookItem.value = true;
   }
 
   async function getDataTest(isForward = true) {
     putStudiedVocabulary(toRaw(bookItem.value));
+
+    // throw 12;
 
     showVocabularyCard(isForward).then((d) => (bookItem.value = d));
     fullscreenLoading.value = false;
@@ -389,7 +215,7 @@ export function useVoca() {
       return false;
     }
 
-    let vocabularycard = await table.value.get({
+    let vocabularycard = await getDataFromTable("dict", {
       n: e.target.innerText.trim(),
     });
     if (!vocabularycard) {
@@ -405,45 +231,33 @@ export function useVoca() {
   async function putStudiedVocabulary(data) {
     let date = getTodayDate();
 
-    console.log(todayStudyWords.value.includes(data.n));
-
-    // 超过计划，但该单词不包括在内时，不存储
-    if (isMorethanTodayPlan.value && !todayStudyWords.value.includes(data.n)) {
-      return false;
-    }
-
-    if (
-      basicData.value.studyMode === "study" &&
-      !isMorethanTodayPlan.value &&
-      !todayStudyWords.value.includes(data.n)
-    ) {
-      todayStudyWords.value.push(bookItem.value.n);
-      // 超过今天计划标记位置：页面初始渲染时、获取单词时、切换单词学习个数时、
-      isMorethanTodayPlan.value =
-        todayStudyWords.value.length >= basicData.value.studyCount;
-      isMorethanTodayPlan.value &&
-        setNotify(
-          "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
-          "success",
-          "恭喜"
-        );
-      console.log(todayStudyWords.value.length, "到今天");
-    }
+    console.log(
+      isMorethanTodayPlan.value,
+      todayWords.value.includes(data.n),
+      "超过计划，今日是否学过"
+    );
 
     // 此番是防止单词本、课本切换导致数据id不匹配的操作
-    studyTable.value.get({ n: data.n }).then((findPutData) => {
+    getDataFromTable("history", { n: data.n }).then((originData) => {
+      console.log("获取数据", originData);
+      originData = originData || {};
+      console.log("获取数据", originData);
       let putData = {
-        ...findPutData,
-        n: findPutData?.n ? findPutData.n : data.n,
-        date: date,
-        count: findPutData?.count ? findPutData.count + 1 : 1,
+        ...originData,
+        n: originData?.n ? originData.n : data.n,
+        date: originData.date || date,
+        lastDate: date,
+        // 感觉count不能衡量熟悉程度，故用lastDate取代
+        count: originData?.count ? originData.count + 1 : 1,
       };
+      console.log("获取数据", originData);
 
-      if (basicData.value.studyMode === "study") {
-        todayStudyWordsTable.value.bulkPut([putData]);
+      if (basicData.value.studyMode === "study" && !isMorethanTodayPlan.value) {
+        console.log(putData, "hhhh");
+        bulkPutDataToTable("today", [putData]);
       }
 
-      studyTable.value.bulkPut([putData]);
+      bulkPutDataToTable("history", [putData]);
     });
   }
 

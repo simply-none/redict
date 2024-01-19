@@ -53,7 +53,7 @@ export function generateImage(node, type = 'svg', name) {
       document.body.removeChild(a);
     })
     .catch(function (error) {
-      console.error("oops, something went wrong!", error);
+      console.log("oops, something went wrong!", error);
     });
 }
 

@@ -1,7 +1,13 @@
 import Dexie from "dexie";
+import { ref } from 'vue'
 import { removeBasicInfo } from "../stores/books";
+import { useErrorStore } from '../stores/error'
 
 let dbName = "test";
+
+let { addError } = useErrorStore()
+
+export let dexieErrorTag = ref()
 
 // dexie库是全局唯一的实例，所以使用非响应式的常量比较好
 let db = new Dexie(dbName);
@@ -38,7 +44,9 @@ await db
 window.onunhandledrejection = function (event) {
   let { name, message } = event.reason;
   message = message.split(/\s/);
-  console.error(event, "捕获的dexie错误", message);
+  console.log(event, "捕获的dexie错误", message);
+  dexieErrorTag.value = Date.now()
+  addError(event)
   event.preventDefault();
   if (name === "SchemaError") {
     handleSchemaError(message)
