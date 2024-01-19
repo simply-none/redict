@@ -14,6 +14,7 @@ import { defineStore, storeToRefs } from "pinia";
 export const useErrorStore = defineStore("error", () => {
   let errorList = ref();
   let errorListCache = ref([]);
+  let errLastTime = ref()
 
   watch(() => errorList.value, (n, o) => {
     console.log('监听dexie错误', n, o)
@@ -23,6 +24,9 @@ export const useErrorStore = defineStore("error", () => {
   function addError(err) {
     // 防止卡死，限制数量
     if (errorList.value && errorList.value.length >= 50) {
+      return false
+    }
+    if (errLastTime.value && Math.abs(errLastTime.value - Date.now()) < 3000) {
       return false
     }
     err = {
@@ -37,6 +41,7 @@ export const useErrorStore = defineStore("error", () => {
   function clearError() {
     errorList.value = null;
     console.log(errorList.value)
+    errLastTime.value = Date.now()
 
   }
 
