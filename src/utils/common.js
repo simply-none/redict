@@ -51,7 +51,7 @@ export function isPC() {
   let mobile = ['iphone', 'android', 'harmony', 'mobile']
   let userAgent = window.navigator.userAgent.toLocaleLowerCase()
 
-  let isMobile = mobile.some(agent => userAgent.includes(mobile))
+  let isMobile = mobile.some(agent => userAgent.includes(agent))
 
   if (isMobile) {
     return false

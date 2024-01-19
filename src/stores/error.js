@@ -12,7 +12,7 @@ import { defineStore, storeToRefs } from "pinia";
 
 // 本store，用处在于获取、设置基础信息数据
 export const useErrorStore = defineStore("error", () => {
-  let errorList = ref([]);
+  let errorList = ref();
   let errorListCache = ref([]);
 
   watch(() => errorList.value, (n, o) => {
@@ -21,13 +21,23 @@ export const useErrorStore = defineStore("error", () => {
   })
 
   function addError(err) {
-    console.log('hhhhh')
-    errorList.value = errorList.value.concat(err);
-    errorListCache.value = errorList.value.concat(err);
+    // 防止卡死，限制数量
+    if (errorList.value && errorList.value.length >= 50) {
+      return false
+    }
+    err = {
+      msg: err.message,
+      stack: err.stack.toString()
+
+    }
+    errorList.value = (errorList.value || []).concat(err);
+    errorListCache.value = errorListCache.value.concat(err);
   }
 
   function clearError() {
-    errorList.value = [];
+    errorList.value = null;
+    console.log(errorList.value)
+
   }
 
   return {

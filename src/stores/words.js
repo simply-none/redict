@@ -80,7 +80,7 @@ export const useWordStore = defineStore("word", () => {
 
   watch(willStudyWords, (n, o) => {
     if (n) {
-      console.log(willStudyWords.value, 'hhhhhhhhh')
+      console.log(willStudyWords.value?.length, 'hhhhhhhhh')
       stopInitWatch && stopInitWatch();
       isStopInitWatch.value = true;
     }
