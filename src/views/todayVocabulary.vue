@@ -2,14 +2,14 @@
 <template>
   <div v-loading="loading">
     <h3 class="today-voca-head">
-      今日（{{ todayDate }}）背诵单词，共计：{{ todayWords.length }}个
+      今日（{{ todayDate }}）背诵单词，共计：{{ todayWords?.length }}个
       <el-link @click="lookTodayVocaMore" type="primary">查看更多...</el-link>
     </h3>
     <TablePage
       :showHandle="false"
       :linkToBing="true"
       :data="pageTodayWords"
-      :table-len="todayWords.length"
+      :table-len="todayWords?.length"
       :items="[
         { prop: 'n', label: '单词' },
         { prop: 'count', label: '次数' },
@@ -19,14 +19,14 @@
     />
 
     <h3 class="today-voca-head">
-      历史背诵单词，共计：{{ historyWords.length }}个，
+      历史背诵单词，共计：{{ historyWords?.length }}个，
       <el-link @click="exportData" type="primary">导出数据...</el-link>
     </h3>
     <TablePage
       :showHandle="true"
       :linkToBing="true"
       :data="pageHistoryWords"
-      :table-len="historyWords.length"
+      :table-len="historyWords?.length"
       :items="[
         { prop: 'n', label: '单词' },
         { prop: 'count', label: '次数' },
@@ -47,13 +47,13 @@
     </TablePage>
 
     <h3 class="today-voca-head">
-      非范围单词，共计：{{ notStudyWords.length }}个
+      非范围单词，共计：{{ notStudyWords?.length }}个
     </h3>
     <TablePage
       :showHandle="false"
       :linkToBing="true"
       :data="pageNotStudyWords"
-      :table-len="notStudyWords.length"
+      :table-len="notStudyWords?.length"
       :items="[{ prop: 'n', label: '单词' }]"
       :tablePageSize="tablePageSize"
       @getData="getPageNotStudyWords"
@@ -117,7 +117,7 @@ function getPageHistoryWords(current, newSize) {
 function getPageNotStudyWords(current, newSize) {
   if (newSize) tablePageSize.value = newSize;
   let start = (current - 1) * tablePageSize.value;
-  pageNotStudyWords.value =  notStudyWords.value
+  pageNotStudyWords.value =  (notStudyWords.value || [])
     .slice(start, start + tablePageSize.value)
     .map((n) => ({ n }));
 }

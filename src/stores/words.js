@@ -299,7 +299,10 @@ export const useWordStore = defineStore("word", () => {
 
   // 分页获取数据：从table中
   function getPageFromSomeTable(table, offset, limit) {
-    console.log(table.value.name, "getPageFromSomeTable");
+    console.log(table.value?.name, "getPageFromSomeTable");
+    if (!table.value) {
+      return Promise.resolve([])
+    }
     return table.value
       .offset(offset)
       .limit(limit)

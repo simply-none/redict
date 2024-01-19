@@ -5,19 +5,19 @@
       basicData.currentBook
     }}</el-descriptions-item>
     <el-descriptions-item label="书本词汇">{{
-      dictWords.length
+      dictWords?.length
     }}</el-descriptions-item>
     <el-descriptions-item label="选择范围">{{
       basicData.currentRange
     }}</el-descriptions-item>
     <el-descriptions-item label="范围词汇">{{
-      bookWords.length
+      bookWords?.length
     }}</el-descriptions-item>
     <el-descriptions-item label="范围可用词汇">{{
-      willStudyWords.length
+      willStudyWords?.length
     }}</el-descriptions-item>
     <el-descriptions-item label="范围不可用词汇">{{
-      notStudyWords.length
+      notStudyWords?.length
     }}</el-descriptions-item>
   </el-descriptions>
 </template>
