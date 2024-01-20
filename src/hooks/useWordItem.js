@@ -17,7 +17,7 @@ import { storeToRefs } from "pinia";
 import { clearNotify, setNotify } from "../utils/element-plus";
 import { getTodayDate, isValueInRequiredFields } from "../utils/common";
 
-export function useVoca() {
+export function useWordItem() {
   let useBook = useBookStore();
   let useWord = useWordStore();
 

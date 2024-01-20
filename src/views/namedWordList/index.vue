@@ -139,22 +139,21 @@
 </template>
 
 <script setup>
-import { useBookStore } from "../stores/books";
-import useDBStore from "../stores/db";
-import { storeToRefs } from "pinia";
+
 import { ref, toRefs, reactive, onMounted, watch, watchEffect } from "vue";
+import { storeToRefs } from "pinia";
+import { useRoute, useRouter } from "vue-router";
 import { ArrowDown } from "@element-plus/icons-vue";
 
-import { useRoute, useRouter } from "vue-router";
+import WordCom from "../../components/word.vue";
 
-import { generateImage } from "../utils/generateFile";
+import { useBookStore } from "../../stores/books";
+import useDBStore from "../../stores/db";
+import useTableStore from "../../stores/table";
 
-import WordCom from "./word.vue";
-
-import { funDownloadByJson, funDownloadByHtml2Md } from "../utils/generateFile";
-
-import useTableStore from "../stores/table";
-import { setNotify } from "../utils/element-plus";
+import { generateImage } from "../../utils/generateFile";
+import { funDownloadByJson, funDownloadByHtml2Md } from "../../utils/generateFile";
+import { setNotify } from "../../utils/element-plus";
 
 let { getDBTable, getDBTableData } = useTableStore();
 
@@ -239,8 +238,6 @@ watchEffect(() => {
     console.log("初始化", JSON.stringify(basicData.value));
     getDataFromDBList();
   }
-}, {
-  immediate: true
 })
 
 watch(table, () => {

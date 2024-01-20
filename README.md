@@ -36,7 +36,7 @@
 
 ## 核心逻辑
 
-### hooks/useVoca.js
+### hooks/useWordItem.js
 
 定义：该hook是展示单词的主要功能逻辑
 

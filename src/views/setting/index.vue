@@ -1,11 +1,5 @@
 <template>
-  <el-drawer
-    v-model="drawer"
-    title="设置"
-    size="100%"
-    :before-close="handleClose"
-    class="word-main-page-setting"
-  >
+  <el-drawer v-model="drawer" title="设置" size="100%" :before-close="handleClose" class="word-main-page-setting">
     <div class="demo-collapse">
       <el-collapse v-model="activeCollapse" @change="setSymbol">
         <el-collapse-item name="3">
@@ -14,11 +8,8 @@
               <info-filled />
             </el-icon>
           </template>
-          <SelectBook
-            :validate="validateSymbol"
-            :alreadySetBasic="alreadySetBasic"
-            @alreadySetBasicHandle="alreadySetBasicHandle"
-          />
+          <SelectBook :validate="validateSymbol" :alreadySetBasic="alreadySetBasic"
+            @alreadySetBasicHandle="alreadySetBasicHandle" />
         </el-collapse-item>
         <el-collapse-item name="7">
           <template #title>
@@ -42,15 +33,15 @@
               <info-filled />
             </el-icon>
           </template>
-          <BasicTable />
+          <ShowBasicInfo />
         </el-collapse-item>
         <el-collapse-item name="5">
           <template #title>
-            今日数据<el-icon class="header-icon">
+            详情数据览表<el-icon class="header-icon">
               <info-filled />
             </el-icon>
           </template>
-          <TodayVocabulary />
+          <ShowDescInfo />
         </el-collapse-item>
         <el-collapse-item name="1">
           <template #title>
@@ -62,16 +53,12 @@
         </el-collapse-item>
         <el-collapse-item name="22">
           <template #title>
-            路由跳转<el-icon class="header-icon" title="仅支持json数据">
+            应用导航<el-icon class="header-icon" title="">
               <info-filled />
             </el-icon>
           </template>
-          <div
-            v-for="route in routes"
-            :key="route.id"
-            @click="$router.push({ name: route.name })"
-          >
-            {{ route.path }}
+          <div v-for="route in routes" :key="route.id" @click="$router.push({ name: route.name })">
+            <el-link type="primary">{{ route.meta?.title }}</el-link>
           </div>
         </el-collapse-item>
       </el-collapse>
@@ -83,13 +70,6 @@
 import { reactive, ref, onMounted, computed, toRaw } from "vue";
 import { ElMessageBox, ElDescriptions, ElDescriptionsItem } from "element-plus";
 import { RouterLink } from "vue-router";
-import JDevice from "./Device.vue";
-import UploadBook from "./uploadBook.vue";
-import DownloadResourceVue from "./downloadResource.vue";
-import SelectBook from "./selectBook.vue";
-import TodayVocabulary from "./todayVocabulary.vue";
-import BasicTable from "./basicTable.vue";
-import { routes } from "../router/index";
 import {
   InfoFilled,
   Iphone,
@@ -98,7 +78,15 @@ import {
   Tickets,
   User,
 } from "@element-plus/icons-vue";
-import downloadResourceVue from "./downloadResource.vue";
+
+import { routes } from "../../router/index";
+
+import JDevice from "../../components/device.vue";
+import UploadBook from "./uploadBook.vue";
+import DownloadResourceVue from "./downloadResource.vue";
+import SelectBook from "./selectBook.vue";
+import ShowDescInfo from "./showDescInfo.vue";
+import ShowBasicInfo from "./showBasicInfo.vue";
 
 let activeCollapse = ref(["2", "3", "5", "6"]);
 let currentCollapse = ref([]);
@@ -116,7 +104,7 @@ let drawer = computed({
   get() {
     return props.visible;
   },
-  set() {},
+  set() { },
 });
 
 function alreadySetBasicHandle(val) {
@@ -138,48 +126,28 @@ function handleClose(done) {
   if (!alreadySetBasic.value) {
     return false;
   }
-  // emit('handleDrawer', {
-  //   drawer: false
-  // })
 }
 </script>
 
 <style scoped lang="scss">
+:deep(.el-collapse-item__header) {
+  font-size: 1em;
+}
+
 :global(.el-drawer.word-main-page-setting) {
   color: red;
-  
+
 }
+
 :global(.el-drawer.word-main-page-setting .el-drawer__header) {
-    margin: 0;
-    padding: 3px var(--el-drawer-padding-primary);
-    background: #f7f7f7;
-  }
+  margin: 0;
+  padding: 3px var(--el-drawer-padding-primary);
+  background: #f7f7f7;
+}
 
-  :global(.el-drawer.word-main-page-setting .el-drawer__body) {
-    margin: 0;
-    padding-top: 0px;
-  }
-// .el-descriptions {
-//   margin-top: 20px;
-// }
-// .cell-item {
-//   display: flex;
-//   align-items: center;
-// }
-// .margin-top {
-//   margin-top: 20px;
-// }
+:global(.el-drawer.word-main-page-setting .el-drawer__body) {
+  margin: 0;
+  padding-top: 0px;
+}
 
-// .my-label {
-//   background: var(--el-color-success-light-9);
-// }
-// .my-content {
-//   background: var(--el-color-danger-light-9);
-// }
-
-// .getDataTest {
-//   width: 100%;
-//   height: 100px;
-//   border: 1px solid red;
-// }
 </style>

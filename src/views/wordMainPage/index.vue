@@ -61,17 +61,18 @@ import {
 } from "vue";
 import { ElNotification, ElMessage, ElLoading } from "element-plus";
 import { Setting, RefreshLeft } from "@element-plus/icons-vue";
-
-import { useVoca } from "../hooks/useVoca";
-
-import SettingCom from "./Setting.vue";
-import WordCom from "./word.vue";
-import ConciseWord from "./conciseWord.vue";
-
-import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
-import { setNotify } from "../utils/element-plus";
-import { isPC } from "../utils/common";
+
+import { useWordItem } from "../../hooks/useWordItem";
+
+import SettingCom from "../setting/index.vue";
+import WordCom from "../../components/word.vue";
+import ConciseWord from "../../components/conciseWord.vue";
+
+import { useBookStore } from "../../stores/books";
+
+import { setNotify } from "../../utils/element-plus";
+import { isPC } from "../../utils/common";
 
 // mounted函数必须在异步调用之前，不然不生效
 onMounted(() => {
@@ -96,7 +97,7 @@ let {
   handleDrawer,
   getDataTest,
   getSearchText,
-} = useVoca();
+} = useWordItem();
 
 function OpenSetting() {
   drawer.value = true;
@@ -124,7 +125,6 @@ function getWordItem(e) {
 }
 
 function arrowRightGetData(e) {
-  console.log(e, "e");
   if (
     bookItemBeforeSearch.value &&
     ["ArrowRight", "ArrowLeft"].includes(e.code)

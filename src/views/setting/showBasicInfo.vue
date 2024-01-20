@@ -1,31 +1,31 @@
 <!-- 展示当日完成的单词列表 -->
 <template>
   <el-descriptions :column="1" border>
-    <el-descriptions-item label="选择书本">{{
+    <el-descriptions-item label="当前词典">{{
       basicData.currentBook
     }}</el-descriptions-item>
-    <el-descriptions-item label="书本词汇">{{
+    <el-descriptions-item label="词典词汇量">{{
       dictWords?.length
     }}</el-descriptions-item>
-    <el-descriptions-item label="选择范围">{{
+    <el-descriptions-item label="单词本">{{
       basicData.currentRange
     }}</el-descriptions-item>
-    <el-descriptions-item label="范围词汇">{{
+    <el-descriptions-item label="单词个数">{{
       bookWords?.length
     }}</el-descriptions-item>
-    <el-descriptions-item label="范围可用词汇">{{
+    <el-descriptions-item :label="basicData.studyMode + '模式下能够学习的单词'">{{
       willStudyWords?.length
     }}</el-descriptions-item>
-    <el-descriptions-item label="范围不可用词汇">{{
+    <el-descriptions-item label="不在词典中的单词个数">{{
       notStudyWords?.length
     }}</el-descriptions-item>
   </el-descriptions>
 </template>
 <script setup>
-
-import { useBookStore } from "../stores/books";
-import { useWordStore } from "../stores/words";
 import { storeToRefs } from "pinia";
+
+import { useBookStore } from "../../stores/books";
+import { useWordStore } from "../../stores/words";
 
 let useBook = useBookStore();
 let useWord = useWordStore();

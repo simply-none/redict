@@ -5,42 +5,22 @@
       今日（{{ todayDate }}）背诵单词，共计：{{ todayWords?.length }}个
       <el-link @click="lookTodayVocaMore" type="primary">查看更多...</el-link>
     </h3>
-    <TablePage
-      :showHandle="false"
-      :linkToBing="true"
-      :data="pageTodayWords"
-      :table-len="todayWords?.length"
-      :items="[
-        { prop: 'n', label: '单词' },
-        { prop: 'count', label: '次数' },
-      ]"
-      :tablePageSize="tablePageSize"
-      @getData="getPageTodayWords"
-    />
+    <TablePage :showHandle="false" :linkToBing="true" :data="pageTodayWords" :table-len="todayWords?.length" :items="[
+      { prop: 'n', label: '单词' },
+      { prop: 'count', label: '次数' },
+    ]" :tablePageSize="tablePageSize" @getData="getPageTodayWords" />
 
     <h3 class="today-voca-head">
       历史背诵单词，共计：{{ historyWords?.length }}个，
       <el-link @click="exportData" type="primary">导出数据...</el-link>
     </h3>
-    <TablePage
-      :showHandle="true"
-      :linkToBing="true"
-      :data="pageHistoryWords"
-      :table-len="historyWords?.length"
-      :items="[
-        { prop: 'n', label: '单词' },
-        { prop: 'count', label: '次数' },
-        { prop: 'date', label: '日期' },
-      ]"
-      :tablePageSize="tablePageSize"
-      @getData="getPageHistoryWords"
-    >
+    <TablePage :showHandle="true" :linkToBing="true" :data="pageHistoryWords" :table-len="historyWords?.length" :items="[
+      { prop: 'n', label: '单词' },
+      { prop: 'count', label: '次数' },
+      { prop: 'date', label: '日期' },
+    ]" :tablePageSize="tablePageSize" @getData="getPageHistoryWords">
       <template v-slot:handle="{ data }">
-        <el-button
-          size="small"
-          type="danger"
-          @click="delWrod(data.row, data.$index)"
-        >
+        <el-button size="small" type="danger" @click="delWrod(data.row, data.$index)">
           删除
         </el-button>
       </template>
@@ -49,30 +29,23 @@
     <h3 class="today-voca-head">
       非范围单词，共计：{{ notStudyWords?.length }}个
     </h3>
-    <TablePage
-      :showHandle="false"
-      :linkToBing="true"
-      :data="pageNotStudyWords"
-      :table-len="notStudyWords?.length"
-      :items="[{ prop: 'n', label: '单词' }]"
-      :tablePageSize="tablePageSize"
-      @getData="getPageNotStudyWords"
-    />
+    <TablePage :showHandle="false" :linkToBing="true" :data="pageNotStudyWords" :table-len="notStudyWords?.length"
+      :items="[{ prop: 'n', label: '单词' }]" :tablePageSize="tablePageSize" @getData="getPageNotStudyWords" />
   </div>
 </template>
 <script setup lang="jsx">
-import TablePage from "../components/tablePage.vue";
+
 import { ref, reactive, onMounted, watch, toRaw } from "vue";
 import { ElButton, ElIcon } from "element-plus";
-
-import { useWordStore } from "../stores/words";
 import { storeToRefs } from "pinia";
-
 import { useRoute, useRouter } from "vue-router";
-
 import moment from "moment";
 
-import { funDownloadByJson } from "../utils/generateFile";
+import TablePage from "../../components/tablePage.vue";
+
+import { useWordStore } from "../../stores/words";
+
+import { funDownloadByJson } from "../../utils/generateFile";
 
 let todayDate = ref(moment().format("YYYY-MM-DD"));
 
@@ -102,13 +75,25 @@ getPageTodayWords(1, 10)
 getPageHistoryWords(1, 10)
 getPageNotStudyWords(1, 10);
 
+function stopInTotalThanCurrent(total, current, pageSize) {
+  let maxCur = Math.ceil(total / pageSize)
+  return current > maxCur
+}
+
 function getPageTodayWords(current, newSize) {
+  if (stopInTotalThanCurrent(todayWords.value?.length, current, newSize)) {
+    return false
+  }
   getPage("today", current, newSize).then((d) => {
     pageTodayWords.value = d;
   });
 }
 
 function getPageHistoryWords(current, newSize) {
+  if (stopInTotalThanCurrent(historyWords.value?.length, current, newSize)) {
+    return false
+  }
+  console.log(current, newSize, '测试')
   getPage("history", current, newSize).then((d) => {
     pageHistoryWords.value = d;
   });
@@ -117,7 +102,7 @@ function getPageHistoryWords(current, newSize) {
 function getPageNotStudyWords(current, newSize) {
   if (newSize) tablePageSize.value = newSize;
   let start = (current - 1) * tablePageSize.value;
-  pageNotStudyWords.value =  (notStudyWords.value || [])
+  pageNotStudyWords.value = (notStudyWords.value || [])
     .slice(start, start + tablePageSize.value)
     .map((n) => ({ n }));
 }
@@ -138,7 +123,7 @@ async function delWrod(data, index) {
 
 function lookTodayVocaMore() {
   router.push({
-    name: "lookTodayVoca",
+    name: "namedWordList",
   });
 }
 
@@ -150,7 +135,6 @@ function exportData() {
 .today-voca {
   &-head {
     padding: 1em 0;
-    font-weight: 600;
     color: #666;
   }
 }

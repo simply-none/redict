@@ -52,10 +52,12 @@
   </el-form>
 </template>
 <script setup>
-import { ElNotification } from "element-plus";
 import { ref, reactive, watch, onMounted, computed, toValue, toRaw } from "vue";
-import { setNotify } from "../utils/element-plus";
-import useDBStore from "../stores/db";
+import { ElNotification } from "element-plus";
+
+import { setNotify } from "../../utils/element-plus";
+
+import useDBStore from "../../stores/db";
 
 let useDB = useDBStore();
 let { getTable, addTable } = useDB;

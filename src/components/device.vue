@@ -20,8 +20,6 @@
 <script setup>
 import { reactive, ref, onMounted, computed,watch } from "vue";
 import { ElDescriptions, ElDescriptionsItem } from 'element-plus'
-import { useDeviceInfo } from "../hooks/useDeviceInfo";
-
 import {
   InfoFilled,
   Iphone,
@@ -30,6 +28,8 @@ import {
   Tickets,
   User,
 } from "@element-plus/icons-vue";
+
+import { useDeviceInfo } from "../hooks/useDeviceInfo";
 
 let props = defineProps({
   isCurrent: {

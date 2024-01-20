@@ -14,6 +14,7 @@
 
 <script setup>
 import { ref, reactive, watchEffect, watch, computed, unref, toRaw } from "vue";
+
 import WordPhonetic from "./wordPhonetic.vue";
 
 let props = defineProps({

@@ -98,11 +98,11 @@
 </template>
 <script setup>
 import { ref, reactive, onMounted, toValue, toRaw, watch, computed } from "vue";
-
-import { useBookStore } from "../stores/books";
-import useDBStore from "../stores/db";
-import { useWordOriginStore } from '../stores/wordOrigin'
 import { storeToRefs } from "pinia";
+
+import { useBookStore } from "../../stores/books";
+import useDBStore from "../../stores/db";
+import { useWordOriginStore } from '../../stores/wordOrigin'
 
 let useBook = useBookStore();
 let useDB = useDBStore();

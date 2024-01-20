@@ -53,6 +53,7 @@ export default {
 <script setup>
 import { ref, reactive, onMounted, watch, toRaw, computed } from "vue";
 import { storeToRefs } from "pinia";
+
 import { useWordOriginStore } from '../stores/wordOrigin'
 
 let useWordOrigin = useWordOriginStore()

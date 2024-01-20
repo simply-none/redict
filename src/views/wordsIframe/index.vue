@@ -6,7 +6,8 @@
 <script setup>
 import { nextTick, onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { useWordOriginStore } from "../stores/wordOrigin";
+
+import { useWordOriginStore } from "../../stores/wordOrigin";
 
 let props = defineProps({
   word: {

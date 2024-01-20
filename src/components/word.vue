@@ -131,6 +131,7 @@
 
 <script setup>
 import { ref, reactive, watchEffect, watch } from "vue";
+
 import WordPhonetic from "./wordPhonetic.vue";
 
 defineProps({
