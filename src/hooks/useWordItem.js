@@ -65,6 +65,7 @@ export function useWordItem() {
 
   watch(isMorethanTodayPlan, (n, o) => {
     if (n) {
+      console.log(n, o, 'hhhhh')
       setNotify(
         "今日单词计划已完成，已备份数据到本地，将开启今日学习复习模式！",
         "success",

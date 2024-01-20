@@ -43,7 +43,7 @@ console.log(isPC(), 'isPCccc')
 
 let useError = useErrorStore()
 let { errorList } = storeToRefs(useError)
-let { clearError } = useError
+let { clearError, copyError } = useError
 
 let visible = computed(() => !!errorList.value)
 
@@ -57,6 +57,7 @@ watch(errorList, (n, o) => {
 })
 
 function copyErrorInfo() {
+  copyError()
   console.log('复制成功')
 }
 

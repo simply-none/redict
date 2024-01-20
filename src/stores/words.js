@@ -36,7 +36,11 @@ export const useWordStore = defineStore("word", () => {
   let notStudyWords = ref();
 
   let isMorethanTodayPlan = computed(() => {
-    console.log("ismore");
+    console.log("ismore", todayWords.value?.length , basicData.value?.studyCount);
+    if (!basicData.value?.studyCount) {
+      return false
+    }
+    
     return todayWords.value?.length >= basicData.value?.studyCount;
   });
 
@@ -75,8 +79,6 @@ export const useWordStore = defineStore("word", () => {
       setWillStudyWords();
     }
   );
-
-  console.log(stopInitWatch, "111千万");
 
   watch(willStudyWords, (n, o) => {
     if (n) {
@@ -239,6 +241,9 @@ export const useWordStore = defineStore("word", () => {
   // 获取获取database table对象 数据集合 数组
   function getDataFromDB(tableRef, dataRef) {
     let table = unref(tableRef);
+    if (!table) {
+      return false
+    }
     table
       .orderBy("n")
       .keys()
