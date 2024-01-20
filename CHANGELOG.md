@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0-alpha3](https://github.com/simply-none/redict/compare/v1.0.0-alpha2...v1.0.0-alpha3) (2024-01-20)
+
+
+### Features
+
+* 新增通过按钮方式切换单词 ([73243f5](https://github.com/simply-none/redict/commit/73243f5bc6781c3e25bce2f472b07c048ed89732))
+* 新增error展示模块 ([d0ad3f9](https://github.com/simply-none/redict/commit/d0ad3f93de19daac3f30e7aeb440379070949484))
+* 在上一次错误弹窗关闭后3s内不记录新的错误 ([d550607](https://github.com/simply-none/redict/commit/d5506073cd0d967fdcb3dc56a33609e135e96595))
+* 增加错误复制功能 ([5ca9119](https://github.com/simply-none/redict/commit/5ca91192932a11c9a711d1c06a6bfb87260b05e3))
+* **stores/list:** 新增words store，提高读取words的速度 ([9783871](https://github.com/simply-none/redict/commit/9783871ff6008366bc250d1b3f6d1f51344e769d))
+
+
+### Bug Fixes
+
+* 修复控制台error级别报错 ([bd60828](https://github.com/simply-none/redict/commit/bd608289bf0be96743d0440f0dbef14df734135f))
+* 修复由不规范引入router的控制台警告 ([f340c36](https://github.com/simply-none/redict/commit/f340c369a06e3441e6147046fbd1b40f40ba9bed))
+* 修改release github actions ([64c8feb](https://github.com/simply-none/redict/commit/64c8feb9d0402462d2e53d2851aec0f853d64d41))
+* 在切换词典源时，任何学习模式下必须重新获取能够学习的单词 = 范围 in 词典 ([4ec135d](https://github.com/simply-none/redict/commit/4ec135d900dd9412eaa19d62a4ab2586c743d211))
+
 ## [1.0.0-alpha2](https://github.com/simply-none/redict/compare/v1.0.0-alpha1...v1.0.0-alpha2) (2024-01-17)
 
 
