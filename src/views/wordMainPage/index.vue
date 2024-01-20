@@ -1,48 +1,28 @@
 <template>
-  <el-card
-    class="voca-card"
-    :class="{ pc: isPC() }"
-    v-loading.fullscreen.lock="fullscreenLoading"
-    element-loading-text="应用正在加载中..."
-    element-loading-background="#eee"
-  >
+  <el-card class="voca-card" :class="{ pc: isPC() }" v-loading.fullscreen.lock="fullscreenLoading"
+    element-loading-text="应用正在加载中..." element-loading-background="#eee">
     <template #header>
       <div class="voca-card-head">
         <div class="voca-card-name">
-          <span
-            class="voca-card-name--inner"
-            contenteditable="true"
-            @blur="getSearchText($event, bookItem)"
-            >{{ bookItem?.n }}</span
-          >
-          <el-button
-            :icon="RefreshLeft"
-            round
-            plain
-            type="success"
-            v-show="bookItemBeforeSearch"
-            @click="restoreBookItem"
-            >还原</el-button
-          >
+          <span class="voca-card-name--inner" contenteditable="true" @blur="getSearchText($event, bookItem)">{{
+            bookItem?.n }}</span>
+          <el-button :icon="RefreshLeft" round plain type="success" v-show="bookItemBeforeSearch"
+            @click="restoreBookItem">还原</el-button>
         </div>
 
-        <el-button
-          :icon="Setting"
-          plain
-          type="primary"
-          circle
-          class="voca-card-handle"
-          @click="OpenSetting"
-        ></el-button>
+        <el-button :icon="Setting" plain type="primary" circle class="voca-card-handle" @click="OpenSetting"></el-button>
       </div>
     </template>
     <div class="voca-card-body" @dblclick="getWordItem">
-      <ConciseWord
-        v-if="basicData?.showMode === 'concise'"
-        :basic-data="basicData"
-        :book-item="bookItem"
-      />
-      <WordCom v-else :basic-data="basicData" :book-item="bookItem" />
+      <div class="voca-card-item" :class="{ 'toggle-by-btn': basicData.toggleWordWay === 'button' }">
+        <ConciseWord v-if="basicData?.showMode === 'concise'" :basic-data="basicData" :book-item="bookItem" />
+        <WordCom v-else :basic-data="basicData" :book-item="bookItem" />
+      </div>
+      <div v-if="basicData.toggleWordWay === 'button'" class="voca-card-toggle-btn">
+        <el-button @click="getWordItemByBtn('left')">上一个</el-button>
+        <el-button type="primary" plain @click="getWordItemByBtn('right')">下一个</el-button>
+
+      </div>
     </div>
   </el-card>
 
@@ -114,6 +94,9 @@ function getWordItem(e) {
     setNotify("点击单词还原按钮后，再去切换单词");
     return false;
   }
+  if (basicData.value.toggleWordWay === 'button') {
+    return false
+  }
   let windowClientY = document.body.clientHeight;
   let windowClientX = document.body.clientWidth;
   let hasGet = windowClientX < e.clientX * 2;
@@ -122,6 +105,24 @@ function getWordItem(e) {
     return false;
   }
   getDataTest();
+}
+
+function getWordItemByBtn(direction) {
+  if (
+    bookItemBeforeSearch.value
+  ) {
+    setNotify("点击单词还原按钮后，再去切换单词");
+    return false;
+  }
+  if (basicData.value.toggleWordWay !== 'button') {
+    return false
+  }
+  if (direction === "right") {
+    getDataTest();
+  }
+  if (direction === "left") {
+    getDataTest(false);
+  }
 }
 
 function arrowRightGetData(e) {
@@ -145,31 +146,37 @@ function arrowRightGetData(e) {
 .pc {
   max-width: 520px;
 }
+
 .voca {
   &-card {
     height: 100%;
+
     :deep(.el-card__header) {
       background: #ffffff;
       color: #00badb;
       padding: 10px 20px;
     }
+
     :deep(.el-card__body) {
       height: calc(100% - 86px);
       overflow: auto;
       border: solid #00a4c1;
       border-width: 5px 2px 2px;
-      padding: 6px;
+      padding: 0px;
       margin: 10px 20px;
     }
+
     &-name {
       font-size: 2em;
       display: inline-block;
     }
+
     &-name--inner {
       padding-right: 12px;
       display: inline-block;
       font-weight: 900;
     }
+
     &-head {
       display: inline-flex;
       flex-flow: row;
@@ -177,11 +184,13 @@ function arrowRightGetData(e) {
       align-items: center;
       width: 100%;
     }
+
     &-handle {
       text-align: right;
       background-color: #ffffff;
       border-color: #ff9429;
       color: #ff9429;
+
       &:hover {
         box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.12);
         color: #ffffff;
@@ -192,12 +201,53 @@ function arrowRightGetData(e) {
 
     &-body {
       height: 100%;
+      overflow: hidden;
+
       .left,
       .right {
         width: 100%;
         height: 100%;
       }
     }
+
+    &-item {
+      height: 100%;
+      width: 100%;
+      overflow: auto;
+      margin: 6px 0;
+      padding: 0 6px;
+      &.toggle-by-btn {
+        height: calc(100% - 3em - 12px);
+      }
+    }
+
+    &-toggle-btn {
+      height: 3em;
+      width: 100%;
+      display: inline-flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      .el-button {
+        flex: 1;
+        border-radius: unset;
+        height: 100%;
+
+        &:last-child {
+          background: #00badb;
+          color: white;
+          transition: all 0.2s;
+
+          &:hover {
+            background: #b9eff9;
+            color: #00badb;
+          }
+        }
+
+      }
+      .el-button+.el-button {
+        margin-left: 0;
+      }
+    }
   }
-}
-</style>
+}</style>

@@ -7,15 +7,16 @@ let basicInfo = {
   name: "基础数据",
   currentBook: "",
   currentRange: "",
-  studyMode: "",
-  studyCount: 0,
-  showMode: "",
+  studyMode: "study",
+  studyCount: 10,
+  showMode: "concise",
   showVocabularyItem: ["ps"],
+  toggleWordWay: 'button'
 };
 
 let basicInfoKey = 'redict:basic-info'
 
-export function removeBasicInfo () {
+export function removeBasicInfo() {
   localStorage.removeItem(basicInfoKey)
 }
 

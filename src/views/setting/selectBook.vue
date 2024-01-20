@@ -78,6 +78,15 @@
         >
       </el-checkbox-group>
     </el-form-item>
+    <el-form-item label="切换单词方式" prop="toggleWordWay">
+      <el-radio-group
+        v-model="ruleForm.toggleWordWay"
+        @change="setBasicInfo($event, 'toggleWordWay')"
+      >
+        <el-radio :label="'button'">按钮</el-radio>
+        <el-radio :label="'double-click'">双击</el-radio>
+      </el-radio-group>
+    </el-form-item>
 
     <el-form-item label="单词指向源">
       <el-select

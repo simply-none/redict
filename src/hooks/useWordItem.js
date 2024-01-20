@@ -63,7 +63,7 @@ export function useWordItem() {
       return false;
     }
     console.log("进入了这里？");
-    initDataInFirstLoad();
+    initDataInFirstLoad(true);
   });
 
   watch(isMorethanTodayPlan, (n, o) => {
@@ -93,7 +93,7 @@ export function useWordItem() {
     isReloadBookItem.value = false;
   });
 
-  async function initDataInFirstLoad() {
+  async function initDataInFirstLoad(close) {
     const required = ["currentBook", "currentRange", "studyMode", "studyCount"];
     let isRequired = isValueInRequiredFields(unref(basicData), required);
     console.log(isRequired, "sfs");
@@ -112,7 +112,7 @@ export function useWordItem() {
       basicData.value.currentRange +
       "，当前课本：" +
       basicData.value.currentBook;
-    setNotify(message, "success");
+    !close && setNotify(message, "success");
   }
 
   // 展示单词卡片
