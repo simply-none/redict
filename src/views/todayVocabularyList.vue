@@ -307,9 +307,6 @@ function changeWordType(type) {
 function backToMainPage() {
   router.push({
     name: "wordMainPage",
-    query: {
-      reload: true,
-    },
   });
 }
 

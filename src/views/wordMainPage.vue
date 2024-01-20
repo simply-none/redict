@@ -72,11 +72,9 @@ import { useBookStore } from "../stores/books";
 import { storeToRefs } from "pinia";
 import { setNotify } from "../utils/element-plus";
 import { isPC } from "../utils/common";
-import { useRouter } from "vue-router";
 
 // mounted函数必须在异步调用之前，不然不生效
 onMounted(() => {
-  console.log(new Date());
   window.addEventListener("keyup", arrowRightGetData);
 });
 
@@ -99,16 +97,6 @@ let {
   getDataTest,
   getSearchText,
 } = useVoca();
-
-let router = useRouter();
-
-if (
-  router &&
-  router.currentRoute.value.query &&
-  router.currentRoute.value.query.reload
-) {
-  location.href = "./";
-}
 
 function OpenSetting() {
   drawer.value = true;
@@ -203,8 +191,6 @@ function arrowRightGetData(e) {
     }
 
     &-body {
-      // display: flex;
-      // flex-flow: row nowrap;
       height: 100%;
       .left,
       .right {
