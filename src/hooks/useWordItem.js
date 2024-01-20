@@ -9,10 +9,11 @@ import {
   watchEffect,
   unref,
 } from "vue";
+import { storeToRefs } from "pinia";
 
 import { useBookStore } from "../stores/books";
 import { useWordStore } from "../stores/words";
-import { storeToRefs } from "pinia";
+import { useWordOriginStore } from "../stores/wordOrigin";
 
 import { clearNotify, setNotify } from "../utils/element-plus";
 import { getTodayDate, isValueInRequiredFields } from "../utils/common";
@@ -20,6 +21,7 @@ import { getTodayDate, isValueInRequiredFields } from "../utils/common";
 export function useWordItem() {
   let useBook = useBookStore();
   let useWord = useWordStore();
+  let useWordOrigin = useWordOriginStore()
 
   const fullscreenLoading = ref(true);
 
@@ -42,6 +44,7 @@ export function useWordItem() {
     bulkPutDataToTable,
     delWordInWillStudyWords,
   } = useWord;
+  let {wordOriginLink } = storeToRefs(useWordOrigin)
 
   const drawer = ref(false);
 
@@ -138,17 +141,6 @@ export function useWordItem() {
           "】在词典中找不到，将跳转到下一个单词...",
         "warning"
       );
-      let d = dictWords;
-      d = d.map((dn) => dn.n);
-      willStudyWords.value = willStudyWords.value.filter((c) => {
-        return d.includes(c);
-      });
-      isWordNotInDict.value = true;
-      console.log(willStudyWords.value.length);
-
-      clearNotify();
-
-      return await showVocabularyCard(isForward);
     }
     return vocabularycard;
   }
@@ -211,16 +203,21 @@ export function useWordItem() {
   }
 
   async function getSearchText(e, lastVal) {
+    let searchText = e.target.innerText.trim()
     // 防止重复请求
-    if (lastVal.n.trim() === e.target.innerText.trim()) {
+    if (lastVal.n.trim() === searchText) {
       return false;
     }
 
     let vocabularycard = await getDataFromTable("dict", {
-      n: e.target.innerText.trim(),
+      n: searchText,
     });
     if (!vocabularycard) {
-      setNotify("未查询到相关内容");
+      setNotify("未查询到相关内容，2s后将跳转到外部网站查询");
+      setTimeout(() => {
+        open(wordOriginLink.value + searchText, '_blank')
+      }, 1000);
+
       // 复原之前的单词拼写
       bookItem.value = { ...toRaw(lastVal), n: lastVal.n + " " };
       return false;

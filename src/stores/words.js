@@ -152,7 +152,11 @@ export const useWordStore = defineStore("word", () => {
 
   // 设置将要学习的单词：在复习模式
   function setWillStudyWordsInReviewPastMode() {
-    willStudyWords.value = toRaw(historyWords.value);
+    console.time("xuex1");
+    let studyWordsData = filterBFromA(historyWords.value, dictWords.value);
+    console.timeEnd("xuex1");
+
+    willStudyWords.value = studyWordsData;
   }
 
   // 设置将要学习的单词：在学习模式
@@ -182,7 +186,11 @@ export const useWordStore = defineStore("word", () => {
 
   // 设置将要学习的单词：在复习今日单词模式
   function setWillStudyWordsInReviewTodayMode() {
-    willStudyWords.value = toRaw(todayWords.value);
+    console.time("xuex1");
+    let studyWordsData = filterBFromA(todayWords.value, dictWords.value);
+    console.timeEnd("xuex1");
+
+    willStudyWords.value = studyWordsData;
   }
 
   // 总数据表
