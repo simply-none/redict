@@ -1,5 +1,5 @@
 <template>
-  <el-drawer v-model="drawer" title="设置" size="100%" :before-close="handleClose" class="word-main-page-setting">
+  <el-drawer :modal-class="{ 'is-pc': isPC(), 'setting-drawer': true }" v-model="drawer" title="设置" size="100%" :before-close="handleClose" class="word-main-page-setting">
     <div class="demo-collapse">
       <el-collapse v-model="activeCollapse" @change="setSymbol">
         <el-collapse-item name="3">
@@ -88,6 +88,8 @@ import SelectBook from "./selectBook.vue";
 import ShowDescInfo from "./showDescInfo.vue";
 import ShowBasicInfo from "./showBasicInfo.vue";
 
+import { isPC } from "../../utils/common";
+
 let activeCollapse = ref(["2", "3", "5", "6"]);
 let currentCollapse = ref([]);
 
@@ -130,6 +132,9 @@ function handleClose(done) {
 </script>
 
 <style scoped lang="scss">
+:global(.setting-drawer.is-pc) {
+  max-width: 520px;
+}
 :deep(.el-collapse-item__header) {
   font-size: 1em;
 }

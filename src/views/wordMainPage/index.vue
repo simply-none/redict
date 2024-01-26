@@ -26,7 +26,7 @@
     </div>
   </el-card>
 
-  <SettingCom :visible="drawer" @handleDrawer="handleDrawer" />
+  <SettingCom  :class="{ pc: isPC() }" :visible="drawer" @handleDrawer="handleDrawer" />
 </template>
 
 <script setup>

@@ -1,7 +1,7 @@
 <template>
   <div
     class="vocabulary-list"
-    :class="{ simple: simpleStyle }"
+    :class="{ simple: simpleStyle, 'is-pc': isPC() }"
     v-loading.fullscreen.lock="fullscreenLoading"
     element-loading-text="数据正在加载中..."
     element-loading-background="#eee"
@@ -154,6 +154,7 @@ import useTableStore from "../../stores/table";
 import { generateImage } from "../../utils/generateFile";
 import { funDownloadByJson, funDownloadByHtml2Md } from "../../utils/generateFile";
 import { setNotify } from "../../utils/element-plus";
+import { isPC } from "../../utils/common";
 
 let { getDBTable, getDBTableData } = useTableStore();
 
@@ -429,6 +430,11 @@ async function getWordTypedList(type) {
 <style scoped lang="scss">
 
 .vocabulary-list {
+  &.is-pc {
+    max-width: 520px;
+    height: fit-content;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 12px 0px;
+  }
   height: 100%;
 }
 .voca-card {
@@ -534,9 +540,9 @@ async function getWordTypedList(type) {
 }
 
 :deep(.el-affix) {
-  width: 100% !important;
+  width: 100% ;
   & > div {
-    width: 100% !important;
+    width: 100% ;
     background: white;
   }
 }
